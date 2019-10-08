@@ -1,0 +1,38 @@
+const config = {
+  visualUrl: 'http://10.108.211.130:8993', // 需要连接校园网无线
+  addProjectUrl: '/creatProject',
+  getProjectUrl: '/getProjectList',
+  getDataSourceUrl: '/getDataSource',
+  rawDataPreviewUrl: '/rawDataPreview',
+  currentDataPreviewUrl: '/currentDataPreview',
+  getColumnNamesUrl: '/getColumnNames',
+  getColumnNameWithNumberTypeUrl: '/getColumnNameWithNumberType',
+  fullTableStatisticsUrl: '/fullTableStatistics',
+  scatterPlotUrl: '/scatterPlot',
+  frequencyStatisticsUrl: '/frequencyStatistics',
+  correlationCoefficientUrl: '/correlationCoefficient',
+  saveCurrentTableViewUrl: '/saveViewData',
+  deleteCurrentTableViewUrl: '/deleteViewData',
+  saveCurrentFreViewUrl: '/saveViewData',
+  saveCurrentCorreViewUrl: '/saveViewData',
+  saveCurrentPlotViewUrl: '/saveViewData',
+  getViewByNameUrl: '/getViewData',
+  getAllViewsUrl: '/getColumnNamesAndViews',
+  filterUrl: '/filter',
+  fillNullValueUrl: '/fillNullValue',
+  columnMapUrl: '/columnMap',
+  columnSplitUrl: '/columnSplit',
+  columnsMergeUrl: '/columnsMerge',
+  sortUrl: '/sort',
+  replaceUrl: '/replace',
+  // 以下为特征工程8个功能的URL
+  quantileDiscretizationUrl: '/quantileDiscretization',
+  vectorIndexerUrl: '/vectorIndexer',
+  standardScalerUrl: '/standardScaler',
+  pcaUrl: '/pca',
+  stringIndexerUrl: '/stringIndexer',
+  polynomialExpansionUrl: '/polynomialExpansion',
+  chiSqSelectorUrl: '/chiSqSelector',
+  oneHotEncoderUrl: '/oneHotEncoder'
+}
+export { config }
