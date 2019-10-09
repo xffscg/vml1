@@ -1,10 +1,15 @@
 <template>
   <div class="cloud-sidebar">
     <div class="mian-bar iconfont">
-      <div class="addProject">
+      <div class="funcItem"><span><i class="el-icon-house"></i><br>主页</span></div>
+      <div class="funcItem"  @click="changeType(2)"><span><i class="el-icon-document"></i><br>数据源</span></div>
+      <div class="funcItem"  @click="changeType(3)"><span><i class="el-icon-folder"></i><br>项目</span></div>
+      <div class="funcItem"><span><i class="el-icon-data-analysis"></i><br>算法</span></div>
+      <div class="funcItem"><span><i class="el-icon-magic-stick"></i><br>模型</span></div>
+      <!-- <div class="addProject">
         <el-button icon="el-icon-check" style="width:90%" type="primary" @click="create(),addProjectVisible = true">新建项目</el-button>
-      </div>
-      <el-menu @open="handleOpen" @close="handleClose" background-color="#545c64" text-color="#fff" unique-opened active-text-color router>
+      </div> -->
+      <!-- <el-menu @open="handleOpen" @close="handleClose" background-color="#545c64" text-color="#fff" unique-opened active-text-color router>
         <template v-for="(item,i) in menuArr">
           <el-submenu :index="i.toString()" :key="i">
             <template slot="title">
@@ -19,7 +24,7 @@
             </template>
           </el-submenu>
         </template>
-      </el-menu>
+      </el-menu> -->
     </div>
     <el-dialog title="新建项目" :visible.sync="addProjectVisible" width="30%" :before-close="dialogClose">
       <div>
@@ -52,6 +57,7 @@ export default {
     return {
       menuArr: [
       ],
+      fType : -1,
       submenuList: [
         {
           submenuTitle: '数据对比视图',
@@ -95,6 +101,9 @@ export default {
 
   },
   methods: {
+    changeType(n){
+      this.$store.commit('changeType', n);
+    },
     handleOpen (key, keyPath) {
     },
     handleClose (key, keyPath) {
@@ -121,19 +130,19 @@ export default {
       this.projectName = ''
       this.dataSource = ''
     },
-    getProject () {
-      this.menuArr = []
-      getProject().then(res => res.data)
-        .then(res => {
-          for (var i = 0; i < res.length; i++) {
-            let mainTitle = { mainTitle: res[i].name, submenuList: this.submenuList }
-            this.menuArr.push(mainTitle)
-          }
-        })
-        .catch(e => {
-          Message.error(e.errors || '接口错误，请重试')
-        })
-    },
+    // getProject () {
+    //   this.menuArr = []
+    //   getProject().then(res => res.data)
+    //     .then(res => {
+    //       for (var i = 0; i < res.length; i++) {
+    //         let mainTitle = { mainTitle: res[i].name, submenuList: this.submenuList }
+    //         this.menuArr.push(mainTitle)
+    //       }
+    //     })
+    //     .catch(e => {
+    //       Message.error(e.errors || '接口错误，请重试')
+    //     })
+    // },
     getDataSource () {
       this.dataSourceList = []
       getDataSource().then(res => res.data)
@@ -164,10 +173,10 @@ export default {
     }
   },
   mounted () {
-    this.getProject()
-    this.getDataSource()
+    // this.getProject()
+    // this.getDataSource()
   }
-}
+};
 </script>
 
 <style>
@@ -180,6 +189,12 @@ export default {
   height: 100%;
   width: 100%;
   background: #545c64;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  justify-content: flex-start;  
+  padding: 20px 0 10px 0;
 }
 .el-menu {
   border-right: none;
@@ -193,5 +208,20 @@ export default {
   display: flex;
   justify-content: center;
   margin-top: 10px;
+}
+.funcItem {
+  width: 95%;
+  height: 80px;
+  padding: 5px;
+  color: white;
+  font-size: 18px;
+  /*text-align: center;*/
+}
+.funcItem:hover {
+  background-color: #76766E; 
+}
+.funcItem:active {
+  width: 90%px;
+  height: 70px; 
 }
 </style>

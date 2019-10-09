@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import CloudHome from '@/page/CloudHome'
+import CloudHome from '@/components/page/CloudHome'
 
 import dataSource from '@/components/dataSource'
 import dataAnalysisView from '@/components/dataAnalysisView'

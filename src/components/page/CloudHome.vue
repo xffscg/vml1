@@ -9,7 +9,7 @@
       </div>
       <div class="layout-right">
         <CloudContainer>
-          <router-view></router-view>
+          <!-- <router-view></router-view> -->
         </CloudContainer>
       </div>
     </div>
@@ -30,7 +30,7 @@ export default {
     CloudSideBar,
     CloudContainer
   }
-}
+};
 </script>
 
 <style lang='scss'>
@@ -46,7 +46,7 @@ export default {
     flex: 1;
     display: flex;
     .layout-left {
-      width: 15%;
+      width: 6%;
     }
     .layout-right {
       position: relative;
