@@ -13,11 +13,20 @@ import * as actions from './action'
 import * as getters from './getter'
 import * as mutations from './mutation'
 
+
+
+// import alg from '@/static/algL.json'
+
+
 Vue.use(Vuex)
 
 const state = {
-	funcType : -1
+	funcType : 1,
+	proList :[],
+	algList : {}
 }
+
+
 
 const store = new Vuex.Store({
 	state,  //全局状态

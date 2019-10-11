@@ -1,10 +1,10 @@
 <template>
   <div class="cloud-sidebar">
     <div class="mian-bar iconfont">
-      <div class="funcItem"><span><i class="el-icon-house"></i><br>主页</span></div>
+      <div class="funcItem" @click="changeType(1)"><span><i class="el-icon-house"></i><br>主页</span></div>
       <div class="funcItem"  @click="changeType(2)"><span><i class="el-icon-document"></i><br>数据源</span></div>
       <div class="funcItem"  @click="changeType(3)"><span><i class="el-icon-folder"></i><br>项目</span></div>
-      <div class="funcItem"><span><i class="el-icon-data-analysis"></i><br>算法</span></div>
+      <div class="funcItem" @click="changeType(4)"><span><i class="el-icon-data-analysis"></i><br>算法</span></div>
       <div class="funcItem"><span><i class="el-icon-magic-stick"></i><br>模型</span></div>
       <!-- <div class="addProject">
         <el-button icon="el-icon-check" style="width:90%" type="primary" @click="create(),addProjectVisible = true">新建项目</el-button>
@@ -51,6 +51,7 @@
 <script>
 import { getProject, getDataSource, addProject } from '@/api/addProject'
 import { Message } from 'element-ui'
+import axios from 'axios'
 
 export default {
   data () {
@@ -102,6 +103,10 @@ export default {
   },
   methods: {
     changeType(n){
+      if(n == 2){
+        console.log(n);
+        this.getProject();
+      }
       this.$store.commit('changeType', n);
     },
     handleOpen (key, keyPath) {
@@ -130,19 +135,25 @@ export default {
       this.projectName = ''
       this.dataSource = ''
     },
-    // getProject () {
-    //   this.menuArr = []
-    //   getProject().then(res => res.data)
-    //     .then(res => {
-    //       for (var i = 0; i < res.length; i++) {
-    //         let mainTitle = { mainTitle: res[i].name, submenuList: this.submenuList }
-    //         this.menuArr.push(mainTitle)
-    //       }
-    //     })
-    //     .catch(e => {
-    //       Message.error(e.errors || '接口错误，请重试')
-    //     })
-    // },
+    getProject () {
+      getProject().then(res => res.data)
+        .then(res => {
+          console.log(res);
+          this.$store.commit('getPro', res);
+        })
+        .catch(e => {
+          Message.error(e.errors || '接口错误，请重试')
+        })
+    },
+    getAlg() {
+      axios.get('./../../static/algL.json').then(res => res.data)
+        .then((res) => {
+          console.log(res);
+          this.$store.commit('getAlg', res.list);
+        }).catch(e => {
+          Message.error(e.errors || '接口错误，请重试')
+        });
+    },
     getDataSource () {
       this.dataSourceList = []
       getDataSource().then(res => res.data)
@@ -175,6 +186,7 @@ export default {
   mounted () {
     // this.getProject()
     // this.getDataSource()
+    this.getAlg();
   }
 };
 </script>
@@ -210,7 +222,7 @@ export default {
   margin-top: 10px;
 }
 .funcItem {
-  width: 95%;
+  width: 90%;
   height: 80px;
   padding: 5px;
   color: white;

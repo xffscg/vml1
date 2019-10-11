@@ -2,38 +2,42 @@
     <div class="cloud-container">
         <!-- <slot></slot> -->
         <div v-show="!notHome">home page</div>
-        <div class="funcGuid" v-show="notHome">
-        	<projectList></projectList>
-        </div>
+        <div class="funcPart"  v-show="notHome">
+        	<div class="funcGuid">
+	        	<projectList v-show = "funcType == 2"></projectList>
+	        	<algList v-show = "funcType == 4"></algList>
+	        </div>
+	        <div class="work"></div>
+	        <div class="config"></div>
+        </div>       
     </div>
 </template>
 
 <script>
 import projectList from '../function/projectList'
+import algList from '../function/algList'
 export default {
 	components: {
-	    projectList
+	    projectList,
+	    algList
 	},
 	data(){
 		return {
-			notHome : false,
-			isHome : true,
+			notHome : false
 		}
 	},
 	computed :{
 		funcType(){
+			console.log(this.$store.state.funcType);
 			return this.$store.state.funcType;
 		}
 	},
 	watch :{
 		funcType(newV, oldV){
-			console.log(newV);
-			if(newV == 1){
-				this.notHome = false;
-				this.isHome = true;
-			}else{
+			if(newV != 1){
 				this.notHome = true;
-				this.isHome = false;
+			}else{
+				this.notHome = false;
 			}
 		}
 	},
@@ -41,9 +45,24 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang='scss'>
 .cloud-container{
     width: 100%;
     /* height: 200%; */
+    .funcPart {
+		width: 95%;
+		display : flex;
+		.funcGuid {
+			width: 20%;
+		}
+		.work {
+			width : 60%;
+			border : solid 1px black;
+		}
+		.config {
+			width : 20%;
+		}
+
+	}
 }
 </style>
