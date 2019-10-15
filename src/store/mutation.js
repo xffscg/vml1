@@ -6,13 +6,15 @@
  */
 export const changeType = (state, funcType) => {
 	state.funcType = funcType;
-	console.log(state.funcType);
 }
 export const getPro = (state, proN) => {
 	state.proList = deepCopy(proN);
 }
 export const getAlg = (state, alg) => {
 	state.algList = deepCopy(alg);
+}
+export const changeDrag = (state, content) => {
+	state.dragContent = content;
 }
 function deepCopy(oldVal){
     let target = oldVal.constructor === Array?[]:{};

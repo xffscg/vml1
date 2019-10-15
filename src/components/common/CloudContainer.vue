@@ -7,7 +7,9 @@
 	        	<projectList v-show = "funcType == 2"></projectList>
 	        	<algList v-show = "funcType == 4"></algList>
 	        </div>
-	        <div class="work"></div>
+	        <div class="work">
+	        	<diagram></diagram>
+	        </div>
 	        <div class="config"></div>
         </div>       
     </div>
@@ -16,16 +18,20 @@
 <script>
 import projectList from '../function/projectList'
 import algList from '../function/algList'
+import diagram from '../work/diagram'
 export default {
 	components: {
 	    projectList,
-	    algList
+	    algList,
+	    diagram
 	},
 	data(){
 		return {
 			notHome : false
 		}
 	},
+	methods:{
+    },
 	computed :{
 		funcType(){
 			console.log(this.$store.state.funcType);
@@ -48,19 +54,20 @@ export default {
 <style lang='scss'>
 .cloud-container{
     width: 100%;
-    /* height: 200%; */
+    height :100%;
     .funcPart {
 		width: 95%;
-		display : flex;
+	    display :flex;
 		.funcGuid {
-			width: 20%;
+			width : 20%;
 		}
 		.work {
-			width : 60%;
+			flex : 1;
 			border : solid 1px black;
+			position :relative;
 		}
 		.config {
-			width : 20%;
+			width :20%;
 		}
 
 	}

@@ -7,17 +7,10 @@
 	              <i :class="item.icon"></i>
 	              <span slot="title">{{ item.name }}</span>
 	            </template>
-	            <!-- <draggable  element="ul" v-model="item.list" :options="{group:{name:'people', pull:'clone', put:false }}" @start="isDragging=true" @end="isDragging=false">
-					<template v-for="(subItem,i) in item.list">
-		              <el-menu-item :key="i">
-		                <span>{{subItem.name}}</span>
-		              </el-menu-item>
-		            </template>
-				</draggable> -->
 	            <template v-for="(subItem,i) in item.list">
-	              <el-menu-item :key="i">
-	                <span>{{subItem.name}}</span>
-	              </el-menu-item>
+	            	<div class="dragItem" :id="subItem.id" draggable="true" @dragstart="drag($event)">
+		                <span>{{subItem.name}}</span>
+		            </div>
 	            </template>
 	          </el-submenu>
 	        </template>
@@ -26,22 +19,31 @@
 </template>
 
 <script>
+import draggable from "vuedraggable";
 import { Message } from 'element-ui'
 export default {
+	components :{
+		draggable
+	},
 	data() {
 		return {
-			algArr : this.$store.state.algList
+			test : false,
 		}
 	},
 	mounted(){
-		for(let item in this.algArr){
-			console.log(this.algArr[item])
-		}
 	},
 	methods :{
+		drag(e){
+			this.$store.commit('changeDrag', e.currentTarget.cloneNode(true));
+		}
 	},
 	computed:{
+		algArr(){
+			return this.$store.state.algList;
+		}
 	},
+	watch :{
+	}
 
 };
 </script>
@@ -51,5 +53,16 @@ export default {
 	width: 100%;
 	height: 100%;
 	background-color: #F9F9F5;
+}
+.dragItem {
+	width: 90%;
+	height: 30px;
+	font-size: 15px;
+	padding: 2px;
+	text-align: center;
+}
+.dragItem:hover {
+	background-color: #F2F2F0;
+	font-size: 16px;
 }
 </style>

@@ -43,6 +43,7 @@ export default {
     height: 50px;
   }
   .layout-container {
+    height:100%;
     flex: 1;
     display: flex;
     .layout-left {

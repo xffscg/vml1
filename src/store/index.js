@@ -23,7 +23,8 @@ Vue.use(Vuex)
 const state = {
 	funcType : 1,
 	proList :[],
-	algList : {}
+	algList : {},
+	dragContent : {}
 }
 
 

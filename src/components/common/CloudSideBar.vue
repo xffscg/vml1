@@ -104,7 +104,6 @@ export default {
   methods: {
     changeType(n){
       if(n == 2){
-        console.log(n);
         this.getProject();
       }
       this.$store.commit('changeType', n);
