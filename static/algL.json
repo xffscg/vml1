@@ -2,19 +2,19 @@
 	"list" : [{
 		"name" : "数据探索",
 		"list" : [{
-			"id" : "ex1",
+			"id" : "exp1",
 			"name" : "全表统计",
 			"para" : []
 		},{
-			"id" : "ex2",
+			"id" : "exp2",
 			"name" : "频率统计",
 			"para" : []
 		},{
-			"id" : "ex3",
+			"id" : "exp3",
 			"name" : "相关系数",
 			"para" : []
 		},{
-			"id" : "ex4",
+			"id" : "exp4",
 			"name" : "散点图",
 			"para" : []
 		}]

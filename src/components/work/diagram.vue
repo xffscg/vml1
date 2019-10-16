@@ -1,15 +1,21 @@
 <template>
-	<div id="diagram" @drop="drop($event)" @dragover.prevent="dragover($event)"></div>
+	<div id="diagram" @drop="drop($event)" @dragover.prevent="dragover($event)">
+   <RightMenu v-show="showMenu"></RightMenu> 
+  </div>
 </template>
 
 <script>
-import $ from 'jquery'
 import {jsPlumb} from 'jsplumb'
+import RightMenu from './rightMenu'
 export default {
   name: 'diagram',
+  components : {
+    RightMenu
+  },
   data(){
   	return {
   		plumb:null,
+      showMenu : false,
       // 将isSource和isTarget设置成true，那么久可以用户在拖动时，自动创建链接。
   		defaultConfig : {
         isSource: true,
@@ -39,13 +45,16 @@ export default {
   mounted(){
   	this.plumb = jsPlumb.getInstance();
     this.plumb.setContainer('diagram');
-    // this.plumb.importDefaults({
-    //   ConnectionsDetachable: false
-    // })
+    let that = this;
+    $(document).on('click', function(e) {
+        var contentEle= $('RightMenu');
+        if(contentEle!== e.target && contentEle.has(e.target).length === 0) {
+            that.showMenu = false;
+        }
+    });
   },
   methods:{
   	drop(e){
-      console.log(3);
   		let space = document.getElementById('diagram');
   		e.preventDefault(); 
   		this.dragContent.removeAttribute("class");
@@ -55,28 +64,60 @@ export default {
   		this.dragContent.style.height = "30px";
   		this.dragContent.style.border = "solid 1px black";				
   		this.dragContent.style.left = e.offsetX+"px";
-  		this.dragContent.style.top = e.offsetY+"px";         
-      let that = this; 		
-			space.append(this.dragContent); 
-      //监听元素再次拖拽			
-			document.getElementById(this.dragContent.id).addEventListener("dragstart", function(event) {	    			
-				that.$store.commit('changeDrag', event.currentTarget);
-			}, false);
-      //为元素添加锚点      
-      this.plumb.addEndpoint(this.dragContent.id,{anchor : ['Top']}, this.defaultConfig);
-      this.plumb.addEndpoint(this.dragContent.id,{anchor : ['Bottom']}, this.defaultConfig) ; 
-      this.plumb.draggable(this.dragContent.id);
-  		
+  		this.dragContent.style.top = e.offsetY+"px"; 
+			space.append(this.dragContent);
+      //添加dom事件 
+      this.addElement();
+      this.addJsPlumb();  		
   	},
   	dragover(e){
       e.preventDefault();
   	},
+    addElement(){        
+      let that = this; 
+      //点击配置   
+      this.dragContent.addEventListener("click", function(event) { 
+        console.log("wait config");         
+      }, false);
+      //阻止右键的默认事件
+      this.dragContent.addEventListener("contextmenu", function(event) {          
+        event.preventDefault();
+      }, false);
+      //右键弹出操作菜单
+      this.dragContent.addEventListener("mouseup", function(event) {          
+        if(event.button === 2){
+          let para = {type:event.currentTarget.id,left:event.clientX, top:event.clientY}
+          that.$store.commit("changeMenu", para);
+          that.showMenu = true;
+        }
+      }, false);
+    },
+    addJsPlumb(){
+      this.plumb.addEndpoint(this.dragContent.id,{anchor : ['Top']}, this.defaultConfig);
+      this.plumb.addEndpoint(this.dragContent.id,{anchor : ['Bottom']}, this.defaultConfig) ; 
+      this.plumb.draggable(this.dragContent.id,{containment: 'parent'});
+    },
+    delElement(){
+      let ele = this.$store.state.menuType.type;
+      console.log("ele"+ele);
+      this.plumb.remove(ele);
+    },
 
   },
   computed:{
   	dragContent(){
   		return this.$store.state.dragContent;
-  	}
+  	},
+    menuOp(){
+      return this.$store.state.menuOp;
+    },
+  },
+  watch:{
+    menuOp(newV){
+      if(newV.slice(0,3) == "del"){
+        this.delElement();
+      }
+    }
   }
 };
 </script>
@@ -86,6 +127,6 @@ export default {
 	width:100%;
 	height: 100%;
 	border :solid 1px black;
-	position: absolute;
+	position: relative;
 }
 </style>

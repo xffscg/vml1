@@ -16,6 +16,12 @@ export const getAlg = (state, alg) => {
 export const changeDrag = (state, content) => {
 	state.dragContent = content;
 }
+export const changeMenu = (state, menuType) => {
+  state.menuType = deepCopy(menuType);
+}
+export const changeOp = (state, op) => {
+  state.menuOp = op;
+}
 function deepCopy(oldVal){
     let target = oldVal.constructor === Array?[]:{};
     for(let key in oldVal){

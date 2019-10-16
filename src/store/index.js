@@ -24,7 +24,9 @@ const state = {
 	funcType : 1,
 	proList :[],
 	algList : {},
-	dragContent : {}
+	dragContent : {},
+	menuType : {},
+	menuOp : ""
 }
 
 
