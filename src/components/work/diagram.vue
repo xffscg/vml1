@@ -86,7 +86,9 @@ export default {
       //右键弹出操作菜单
       this.dragContent.addEventListener("mouseup", function(event) {          
         if(event.button === 2){
-          let para = {type:event.currentTarget.id,left:event.clientX, top:event.clientY}
+          let ele = $("#"+event.currentTarget.id);
+          let left = parseInt(ele.css("left").slice(0,-2))+parseInt(ele.css("width").slice(0,-2)) + "px";
+          let para = {type:event.currentTarget.id,left:left, top:ele.css("top")}
           that.$store.commit("changeMenu", para);
           that.showMenu = true;
         }
@@ -99,7 +101,6 @@ export default {
     },
     delElement(){
       let ele = this.$store.state.menuType.type;
-      console.log("ele"+ele);
       this.plumb.remove(ele);
     },
 
@@ -128,5 +129,6 @@ export default {
 	height: 100%;
 	border :solid 1px black;
 	position: relative;
+  overflow-y: auto;
 }
 </style>

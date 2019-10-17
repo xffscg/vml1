@@ -8,9 +8,12 @@
 	        	<algList v-show = "funcType == 4"></algList>
 	        </div>
 	        <div class="work">
-	        	<diagram></diagram>
+	        	<diagram style="height:70%"></diagram>
+	        	<RunLog style="height:30%"></RunLog>
 	        </div>
-	        <div class="config"></div>
+	        <div class="config">
+	        	<Config></Config>
+	        </div>
         </div>       
     </div>
 </template>
@@ -19,11 +22,15 @@
 import projectList from '../function/projectList'
 import algList from '../function/algList'
 import diagram from '../work/diagram'
+import Config from '../work/config'
+import RunLog from '../work/runLog'
 export default {
 	components: {
 	    projectList,
 	    algList,
-	    diagram
+	    diagram,
+	    Config,
+	    RunLog
 	},
 	data(){
 		return {
@@ -56,18 +63,23 @@ export default {
     width: 100%;
     height :100%;
     .funcPart {
-		width: 95%;
+		width: 100%;
+		height:100%;
 	    display :flex;
 		.funcGuid {
-			width : 20%;
+			width : 20%;			
+			height:95%;
 		}
 		.work {
 			flex : 1;
 			border : solid 1px black;
 			position :relative;
+			margin:2%;			
+			height:95%;
 		}
 		.config {
-			width :20%;
+			width :20%;			
+			height:95%;
 		}
 
 	}

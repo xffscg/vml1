@@ -28,8 +28,8 @@ export default {
   	menuType(newV){
   		this.mType = newV.type.slice(4,7);
   		this.mId = newV.type;
-		$('.rightMenu').css('left',newV.clientX);
-		$('.rightMenu').css('right',newV.clientY);
+		$('.rightMenu').css('left',newV.left);
+		$('.rightMenu').css('top',newV.top);
 	},
   },
   methods:{
