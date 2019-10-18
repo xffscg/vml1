@@ -103,8 +103,10 @@ export default {
   },
   methods: {
     changeType(n){
-      if(n == 2){
+      if(n == 3){
         this.getProject();
+      }else if(n == 2){
+        this.getDataSource();
       }
       this.$store.commit('changeType', n);
     },
@@ -157,10 +159,12 @@ export default {
       this.dataSourceList = []
       getDataSource().then(res => res.data)
         .then(res => {
-          for (var i = 0; i < res.length; i++) {
-            let value = { value: res[i].name, id: res[i].id }
-            this.dataSourceList.push(value)
-          }
+          console.log(res);
+          this.$store.commit('getData', res);
+          // for (var i = 0; i < res.length; i++) {
+          //   let value = { value: res[i].name, id: res[i].id }
+          //   this.dataSourceList.push(value)
+          // }
         })
         .catch(e => {
           Message.error(e.errors || '接口错误，请重试')

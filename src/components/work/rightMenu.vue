@@ -1,6 +1,6 @@
 <template>
 	<div class="rightMenu" @click="menuFunc($event)">
-		<div class="menuItem" v-for="(item, i) in menuArr[mType]" :id="i">{{item}}</div>
+		<div class="menuItem" v-for="item in menuArr[mType]" :id="menuItem[item].id">{{menuItem[item].name}}</div>
 	</div>
 </template>
 
@@ -10,10 +10,23 @@ export default {
   name: 'rightMenu',
   data(){
   	return {
+      menuItem : [{
+        id: 0,
+        name : "删除节点"
+      },{
+        id : 1,
+        name : "从当前节点开始运行"
+      },{
+        id : 2,
+        name : "查看数据"
+      },{
+        id : 3,
+        name : "查看结果"
+      }],
   		menuArr : {
-  			alg:["删除节点", "从当前节点开始运行","查看模型"],
-  			dat:["删除节点", "从当前节点开始运行","查看数据"],
-  			pre:["删除节点", "从当前节点开始运行","查看结果"]
+  			alg:[0,1,3],
+  			dat:[0,1,2],
+  			pre:[0,1,2]
   		},
   		mType : "",
   		mId : ""
@@ -36,7 +49,13 @@ export default {
   	menuFunc(e){
   		if(e.target.id == 0){
   			this.$store.commit('changeOp', "del"+this.mId);
-  		}
+  		}else if(e.target.id == 2){
+        if(this.$store.state.menuOp == "data"+this.mId){
+          this.$store.commit('changeShow', true);
+        }else{          
+          this.$store.commit('changeOp', "data"+this.mId);
+        }
+      }
   	},
   },
 };

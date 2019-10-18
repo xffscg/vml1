@@ -10,6 +10,9 @@ export const changeType = (state, funcType) => {
 export const getPro = (state, proN) => {
 	state.proList = deepCopy(proN);
 }
+export const getData = (state, dataN) => {
+  state.dataList = deepCopy(dataN);
+}
 export const getAlg = (state, alg) => {
 	state.algList = deepCopy(alg);
 }
@@ -20,7 +23,12 @@ export const changeMenu = (state, menuType) => {
   state.menuType = deepCopy(menuType);
 }
 export const changeOp = (state, op) => {
+  console.log(op);
   state.menuOp = op;
+}
+export const changeShow = (state, b) => {
+  console.log(b)
+  state.showDetail = b;
 }
 function deepCopy(oldVal){
     let target = oldVal.constructor === Array?[]:{};

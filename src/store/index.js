@@ -23,10 +23,12 @@ Vue.use(Vuex)
 const state = {
 	funcType : 1,
 	proList :[],
+	dataList : [],
 	algList : {},
 	dragContent : {},
 	menuType : {},
-	menuOp : ""
+	menuOp : "",
+	showDetail : false
 }
 
 

@@ -4,8 +4,9 @@
         <div v-show="!notHome">home page</div>
         <div class="funcPart"  v-show="notHome">
         	<div class="funcGuid">
-	        	<projectList v-show = "funcType == 2"></projectList>
+	        	<projectList v-show = "funcType == 3"></projectList>
 	        	<algList v-show = "funcType == 4"></algList>
+	        	<dataList v-show = "funcType == 2"></dataList>
 	        </div>
 	        <div class="work">
 	        	<diagram style="height:70%"></diagram>
@@ -14,27 +15,35 @@
 	        <div class="config">
 	        	<Config></Config>
 	        </div>
-        </div>       
+        </div>
+        <div class="detailPop"  v-show="showDetail">	          
+	    </div>
+	    <div class="detail"><Detail v-show="showDetail"></Detail></div>
+	         
     </div>
 </template>
 
 <script>
 import projectList from '../function/projectList'
 import algList from '../function/algList'
+import dataList from '../function/dataList'
 import diagram from '../work/diagram'
 import Config from '../work/config'
 import RunLog from '../work/runLog'
+import Detail from '../work/detail'
 export default {
 	components: {
 	    projectList,
 	    algList,
+	    dataList,
 	    diagram,
 	    Config,
-	    RunLog
+	    RunLog,
+	    Detail
 	},
 	data(){
 		return {
-			notHome : false
+			notHome : false,
 		}
 	},
 	methods:{
@@ -43,6 +52,10 @@ export default {
 		funcType(){
 			console.log(this.$store.state.funcType);
 			return this.$store.state.funcType;
+		},
+		showDetail(){
+			console.log(this.$store.state.showDetail);
+			return this.$store.state.showDetail;
 		}
 	},
 	watch :{
@@ -52,7 +65,7 @@ export default {
 			}else{
 				this.notHome = false;
 			}
-		}
+		},
 	},
 
 };
@@ -62,6 +75,7 @@ export default {
 .cloud-container{
     width: 100%;
     height :100%;
+    position:relative;
     .funcPart {
 		width: 100%;
 		height:100%;
@@ -81,6 +95,25 @@ export default {
 			width :20%;			
 			height:95%;
 		}
+
+	}
+	.detailPop {
+		width : 100%;
+		height: 100%;
+	    position:absolute;
+		left: 0;
+		top: 0;
+	    filter: Alpha(opacity=60);
+	    opacity:0.6;
+	    background:#000000;
+	}
+	.detail{
+		width: 80%;
+		height: 80%;
+		position: fixed;
+		left: 0;
+		top:0;
+		margin:5% 10% 5% 10%;
 
 	}
 }

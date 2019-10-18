@@ -60,7 +60,7 @@ export default {
   		this.dragContent.removeAttribute("class");
   		this.dragContent.id = "drop"+this.dragContent.id;
   		this.dragContent.style.position = "absolute";
-  		this.dragContent.style.width = "80px";
+  		this.dragContent.style.width = "150px";
   		this.dragContent.style.height = "30px";
   		this.dragContent.style.border = "solid 1px black";				
   		this.dragContent.style.left = e.offsetX+"px";
@@ -103,6 +103,9 @@ export default {
       let ele = this.$store.state.menuType.type;
       this.plumb.remove(ele);
     },
+    showDetail(){
+      this.$store.commit("changeShow", true);
+    }
 
   },
   computed:{
@@ -115,9 +118,20 @@ export default {
   },
   watch:{
     menuOp(newV){
-      if(newV.slice(0,3) == "del"){
-        this.delElement();
+      let t = newV.slice(0,3);
+      switch(t){
+        case "del":
+          this.delElement();
+          break;
+        case "dat":
+          this.showDetail();
+          break;
+        default:
+          break;
       }
+      // if(newV.slice(0,3) == "del"){
+      //   this.delElement();
+      // }else if(newV.slice(0,3) == "dat")
     }
   }
 };
