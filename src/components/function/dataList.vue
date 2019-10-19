@@ -52,12 +52,12 @@ export default {
 .dragItem {
 	width: 90%;
 	height: 30px;
-	font-size: 17px;
+	font-size: 14px;
 	padding: 6px;
 	margin-left: 15px;
 }
 .dragItem:hover {
 	background-color: #F2F2F0;
-	font-size: 19px;
+	font-size: 16px;
 }
 </style>

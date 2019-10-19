@@ -28,7 +28,8 @@ const state = {
 	dragContent : {},
 	menuType : {},
 	menuOp : "",
-	showDetail : false
+	showDetail : false,
+	workData : {}
 }
 
 

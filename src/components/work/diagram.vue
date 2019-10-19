@@ -5,8 +5,10 @@
 </template>
 
 <script>
+import { Message } from 'element-ui'
 import {jsPlumb} from 'jsplumb'
 import RightMenu from './rightMenu'
+import { rawDataPreview, currentDataPreview } from '@/api/dataSource'
 export default {
   name: 'diagram',
   components : {
@@ -16,6 +18,7 @@ export default {
   	return {
   		plumb:null,
       showMenu : false,
+      workData : {name : "", detail : {}},
       // 将isSource和isTarget设置成true，那么久可以用户在拖动时，自动创建链接。
   		defaultConfig : {
         isSource: true,
@@ -56,7 +59,19 @@ export default {
   methods:{
   	drop(e){
   		let space = document.getElementById('diagram');
-  		e.preventDefault(); 
+  		e.preventDefault();
+      let isType = this.dragContent.id.slice(0,3);
+      if(isType == "alg"){
+        console.log("alg");
+      }else if(isType == "pre"){
+        console.log("pre");
+      }else if(isType == "exp"){
+        console.log("exp");
+      }else{
+        console.log("data");
+        this.getDataView();
+        
+      }
   		this.dragContent.removeAttribute("class");
   		this.dragContent.id = "drop"+this.dragContent.id;
   		this.dragContent.style.position = "absolute";
@@ -73,6 +88,28 @@ export default {
   	dragover(e){
       e.preventDefault();
   	},
+    getDataView(){
+      // this.tableCol = [];
+      rawDataPreview({ start: 1, end: 50, projectName: "医药病例分类分析" }).then(res => res.data)
+        .then(res => {
+          console.log(res);
+          this.workData.name = this.dragContent.id;
+          this.workData.detail["data"] = res.data;
+          this.workData.detail["length"] = res.length;
+          this.workData.detail["column"] = [];
+          for (var key in res.data[0]) {
+            this.workData.detail["column"].push({ prop: key })
+          }
+          this.workData.detail["column"][0].fixed = 'left';
+          console.log(this.workData);
+          this.$store.commit("changeConfig", this.workData);
+          // this.tableCol[0].fixed = 'left'
+          // console.log(this.tableCol)
+        })
+        .catch(e => {
+          Message.error(e.errors || 'rawDataPreview接口错误，请重试')
+        })
+    },
     addElement(){        
       let that = this; 
       //点击配置   
@@ -87,7 +124,7 @@ export default {
       this.dragContent.addEventListener("mouseup", function(event) {          
         if(event.button === 2){
           let ele = $("#"+event.currentTarget.id);
-          let left = parseInt(ele.css("left").slice(0,-2))+parseInt(ele.css("width").slice(0,-2)) + "px";
+          let left = parseInt(ele.css("left").slice(0,-2))+parseInt(ele.css("width").slice(0,-2)) + 3 + "px";
           let para = {type:event.currentTarget.id,left:left, top:ele.css("top")}
           that.$store.commit("changeMenu", para);
           that.showMenu = true;

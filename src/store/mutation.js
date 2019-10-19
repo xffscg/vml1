@@ -23,12 +23,14 @@ export const changeMenu = (state, menuType) => {
   state.menuType = deepCopy(menuType);
 }
 export const changeOp = (state, op) => {
-  console.log(op);
   state.menuOp = op;
 }
 export const changeShow = (state, b) => {
   console.log(b)
   state.showDetail = b;
+}
+export const changeConfig = (state, detailC) => {
+  state.workData[detailC.name] = deepCopy(detailC.detail);
 }
 function deepCopy(oldVal){
     let target = oldVal.constructor === Array?[]:{};

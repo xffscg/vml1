@@ -2,6 +2,7 @@
     <div class="cloud-container">
         <!-- <slot></slot> -->
         <div v-show="!notHome">home page</div>
+        
         <div class="funcPart"  v-show="notHome">
         	<div class="funcGuid">
 	        	<projectList v-show = "funcType == 3"></projectList>
@@ -18,7 +19,7 @@
         </div>
         <div class="detailPop"  v-show="showDetail">	          
 	    </div>
-	    <div class="detail"><Detail v-show="showDetail"></Detail></div>
+	    <div class="detail" v-show="showDetail"><Detail v-show="showDetail"></Detail></div>
 	         
     </div>
 </template>
