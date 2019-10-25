@@ -47,8 +47,20 @@ export default {
   },
   mounted(){
   	this.plumb = jsPlumb.getInstance();
-    this.plumb.setContainer('diagram');
+    this.plumb.setContainer('diagram');    
     let that = this;
+    this.plumb.bind('click', function (conn, originalEvent) {
+      console.log(that.plumb);
+      that.plumb.deleteConnection(conn);
+    });
+    this.plumb.bind('connection', function (conn, originalEvent) {
+      let c = that.plumb.getAllConnections();
+      let r = [];
+      for(let i = 0; i < c.length; i++){
+          r.push([c[i].sourceId, c[i].targetId]);
+        }
+      that.$store.commit("changeRelation", r);
+    });
     $(document).on('click', function(e) {
         var contentEle= $('RightMenu');
         if(contentEle!== e.target && contentEle.has(e.target).length === 0) {
@@ -69,7 +81,8 @@ export default {
         console.log("exp");
       }else{
         console.log("data");
-        this.getDataView();
+        this.$store.commit("changeStart", {type:"add", detail:"drop"+this.dragContent.id});
+        // this.getDataView();
         
       }
   		this.dragContent.removeAttribute("class");
@@ -88,33 +101,19 @@ export default {
   	dragover(e){
       e.preventDefault();
   	},
-    getDataView(){
-      // this.tableCol = [];
-      rawDataPreview({ start: 1, end: 50, projectName: "医药病例分类分析" }).then(res => res.data)
-        .then(res => {
-          console.log(res);
-          this.workData.name = this.dragContent.id;
-          this.workData.detail["data"] = res.data;
-          this.workData.detail["length"] = res.length;
-          this.workData.detail["column"] = [];
-          for (var key in res.data[0]) {
-            this.workData.detail["column"].push({ prop: key })
-          }
-          this.workData.detail["column"][0].fixed = 'left';
-          console.log(this.workData);
-          this.$store.commit("changeConfig", this.workData);
-          // this.tableCol[0].fixed = 'left'
-          // console.log(this.tableCol)
-        })
-        .catch(e => {
-          Message.error(e.errors || 'rawDataPreview接口错误，请重试')
-        })
-    },
     addElement(){        
       let that = this; 
       //点击配置   
       this.dragContent.addEventListener("click", function(event) { 
-        console.log("wait config");         
+        console.log(event.currentTarget.id);        
+        let connections = that.plumb.getAllConnections();
+        // let r = []
+        // for(let i = 0; i < connections.length; i++){
+        //   r.push([connections[i].sourceId, connections[i].targetId]);
+        // }
+        // console.log(r);
+        // that.$store.commit("changeRelation", r);
+        that.$store.commit("changeConfigType", event.currentTarget.id);
       }, false);
       //阻止右键的默认事件
       this.dragContent.addEventListener("contextmenu", function(event) {          
@@ -135,10 +134,20 @@ export default {
       this.plumb.addEndpoint(this.dragContent.id,{anchor : ['Top']}, this.defaultConfig);
       this.plumb.addEndpoint(this.dragContent.id,{anchor : ['Bottom']}, this.defaultConfig) ; 
       this.plumb.draggable(this.dragContent.id,{containment: 'parent'});
+      
     },
     delElement(){
       let ele = this.$store.state.menuType.type;
       this.plumb.remove(ele);
+      if(ele.slice(4,7) == "dat"){
+        this.$store.commit("changeStart", {type:"del", detail:ele});
+      }
+      let c = this.plumb.getAllConnections();
+      let r = [];
+        for(let i = 0; i < c.length; i++){
+            r.push([c[i].sourceId, c[i].targetId]);
+          }
+        this.$store.commit("changeRelation", r);
     },
     showDetail(){
       this.$store.commit("changeShow", true);
@@ -177,7 +186,7 @@ export default {
 <style scoped>
 #diagram {
 	width:100%;
-	height: 100%;
+	height: 80%;
 	border :solid 1px black;
 	position: relative;
   overflow-y: auto;

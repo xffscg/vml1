@@ -26,16 +26,17 @@ export default {
   		menuArr : {
   			alg:[0,1,3],
   			dat:[0,1,2],
-  			pre:[0,1,2]
+  			pre:[0,1,2],
+        exp:[0,1,3]
   		},
   		mType : "",
   		mId : ""
   	}
   },
   computed :{
-	menuType(){
-		return this.$store.state.menuType;
-	},
+  	menuType(){
+  		return this.$store.state.menuType;
+  	},
   },
   watch: {
   	menuType(newV){
@@ -51,7 +52,7 @@ export default {
   			this.$store.commit('changeOp', "del"+this.mId);
   		}else if(e.target.id == 2){
         if(this.$store.state.menuOp == "data"+this.mId){
-          this.$store.commit('changeShow', true);
+          this.$store.commit('changeShow', 1);
         }else{          
           this.$store.commit('changeOp', "data"+this.mId);
         }

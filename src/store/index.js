@@ -28,8 +28,11 @@ const state = {
 	dragContent : {},
 	menuType : {},
 	menuOp : "",
-	showDetail : false,
-	workData : {}
+	showDetail : 0,
+	configType : "",
+	configData : {},
+	relationship : [],
+	start : [],
 }
 
 

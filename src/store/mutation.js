@@ -26,11 +26,44 @@ export const changeOp = (state, op) => {
   state.menuOp = op;
 }
 export const changeShow = (state, b) => {
-  console.log(b)
   state.showDetail = b;
 }
-export const changeConfig = (state, detailC) => {
-  state.workData[detailC.name] = deepCopy(detailC.detail);
+export const changeConfigType = (state, configType) => {
+  state.configType = configType;
+}
+export const changeRelation = (state, relation) => {
+  console.log(relation);
+  state.relationship = [];
+  state.relationship = deepCopy(relation);
+}
+export const changeStart = (state, start) => {
+  if(start.type == "add"){
+    state.start.push(start.detail);
+  }else{
+    let index = state.start.indexOf(start.detail);
+    if(state.start.length == 1){
+      state.start = [];
+    }else{   
+      if(index == 0){
+        state.start = state.start.slice(1);
+      }else if(index == state.start.length -1){
+        state.start = state.start.slice(0, state.start.length-1);
+      }else{
+        state.start = (state.start.slice(0, index)).concat(state.start.slice(index+1, state.start.length));
+      }
+    }
+
+  }
+    console.log(state.start);
+}
+export const changeConfig = (state, configC) => {
+  console.log(configC);
+  if(state.configData[configC.name]){
+    console.log("already");
+    delete state.configData[configC.name];
+  }
+  state.configData[configC.name] = deepCopy(configC.config);
+  console.log(state.configData);
 }
 function deepCopy(oldVal){
     let target = oldVal.constructor === Array?[]:{};
