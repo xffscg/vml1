@@ -33,6 +33,7 @@ const state = {
 	configData : {},
 	relationship : [],
 	start : [],
+	runResult : []
 }
 
 

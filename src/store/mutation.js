@@ -65,6 +65,15 @@ export const changeConfig = (state, configC) => {
   state.configData[configC.name] = deepCopy(configC.config);
   console.log(state.configData);
 }
+export const changeResult = (state, result) => {
+  console.log(result);
+  if(state.runResult[result.name]){
+    console.log("already");
+    delete state.runResult[result.name];
+  }
+  state.runResult[result.name] = deepCopy(result.config);
+  console.log(state.runResult);
+}
 function deepCopy(oldVal){
     let target = oldVal.constructor === Array?[]:{};
     for(let key in oldVal){

@@ -12,7 +12,9 @@
 	        <div class="work">
 	        	<div class="workTop">
 	        		<div class="diagram">
-	        			<div class="header" @click="goRun"><span><i class="el-icon-video-play"></i>Run</span></div>
+	        			<div class="header">
+	        				<el-button type="primary" plain icon="el-icon-video-play" @click="goRun">运行</el-button>
+	        			</div>
 	        			<diagram></diagram>
 	        		</div>
 	        		<div class="config"><Config></Config></div>
@@ -86,10 +88,11 @@ export default {
 			console.log(order);
 			for(let i = 1; i< order.length; i++){
 				let para = this.$store.state.configData[order[i]];
-				this.allAlgApi(order[i].slice(4), para);
+				this.allAlgApi(order[i], para);
 			}
 		},
-		allAlgApi(type, para){
+		allAlgApi(id, para){
+			let type = id.slice(4);
 			console.log(type);
 			console.log(JSON.stringify(para));
 			switch(type){
@@ -98,6 +101,8 @@ export default {
 			        .then(res => {
 			          console.log('生成全表统计视图并展示')
 			          console.log(res)
+			          let result = {name : id, config : res};
+			          this.$store.commit("changeResult", result);
 			        })
 			        .catch(e => {
 			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
@@ -108,6 +113,8 @@ export default {
 			        .then(res => {
 			          console.log('生成频率统计视图并展示')
 			          console.log(res)
+			          let result = {name : id, config : res};
+			          this.$store.commit("changeResult", result);
 			        })
 			        .catch(e => {
 			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
@@ -118,6 +125,8 @@ export default {
 			        .then(res => {
 			          console.log('相关系数展示')
 			          console.log(res)
+			          let result = {name : id, config : res};
+			          this.$store.commit("changeResult", result);
 			        })
 			        .catch(e => {
 			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
@@ -128,6 +137,8 @@ export default {
 			        .then(res => {
 			          console.log('散点图展示')
 			          console.log(res)
+			          let result = {name : id, config : res};
+			          this.$store.commit("changeResult", result);
 			        })
 			        .catch(e => {
 			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
@@ -137,18 +148,24 @@ export default {
 			    	filter({ requestStr: JSON.stringify(para) }).then(res => res.data)
 			          .then(res => {
 			            console.log(res)
+			            let result = {name : id, config : res};
+			          	this.$store.commit("changeResult", result);
 			          });
 			        break;
 			    case "pre2":			    
 			    	fillNullValue({ requestStr: JSON.stringify(para) }).then(res => res.data)
 			          .then(res => {
-			            console.log(res)
+			            console.log(res);
+			            let result = {name : id, config : res};
+			          	this.$store.commit("changeResult", result);
 			          });
 			        break;
 		        case "pre3":			    
 			    	columnSplit({ requestStr: JSON.stringify(para) }).then(res => res.data)
 			          .then(res => {
-			            console.log(res)
+			            console.log(res);
+			            let result = {name : id, config : res};
+			          	this.$store.commit("changeResult", result);
 			          });
 			        break;
 			    case "pre4":
@@ -156,7 +173,9 @@ export default {
 			          requestStr: JSON.stringify(para)
 			        }).then(res => res.data)
 			          .then(res => {
-			            console.log(res);			            
+			            console.log(res);	
+			            let result = {name : id, config : res};
+			          	this.$store.commit("changeResult", result);		            
 			          })
 		        default:
 		        	break;
@@ -178,7 +197,8 @@ export default {
 	          for (var key in res.data[0]) {
 	            this.tableData.column.push({ prop: key })
 	          }
-	          this.ttableData.column[0].fixed = 'left';
+	          this.tableData.column[0].fixed = 'left';
+	          console.log(this.tableData.column);
 	        })
 	        .catch(e => {
 	          // Message.error(e.errors || 'rawDataPreview接口错误，请重试')
@@ -197,7 +217,23 @@ export default {
 		      }
 		    }
 		    return target;
-		}
+		},
+		setResult(){
+			this.tableData = {
+				data : [],
+				column : [],
+				length : 0,
+				title : ""
+			};
+			let res = this.$store.state.runResult[this.menuType.type];
+			this.tableData.data = res.data;
+			this.tableData.length = res.length;
+			for(let item in res.data[0]){
+				console.log(item);
+				this.tableData.column.push({prop : item});
+			}
+			this.tableData.column[0].fixed = "left";
+		},
     },
 	computed :{
 		funcType(){
@@ -206,7 +242,10 @@ export default {
 		},
 		showDetail(){
 			return this.$store.state.showDetail;
-		}
+		},
+		menuType(){
+	  		return this.$store.state.menuType;
+	  	},
 	},
 	watch :{
 		funcType(newV, oldV){
@@ -218,9 +257,14 @@ export default {
 		},
 		showDetail(newV){
 			if(newV == 1){
-				this.getDataView();
+				let t = this.menuType.type.slice(4,7)
+				if(t == "dat"){					
+					this.getDataView();
+				}else if(t == "pre"){
+					this.setResult();
+				}
 			}
-		}
+		},
 	},
 
 };
@@ -231,29 +275,35 @@ export default {
     width: 100%;
     height :100%;
     position:relative;
+    background-color: #FCFCF2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
     .funcPart {
 		width: 100%;
 		height:100%;
 	    display :flex;
 		.funcGuid {
-			width : 20%;			
+			width : 20%px;			
 			height:95%;
+			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 		}
 		.work {
 			flex : 1;
 			display : flex;
 			flex-direction : column;
-			border : solid 1px black;
 			position :relative;
-			margin:2%;			
-			height:95%;
+			margin:5px;			
+			height:100%;
 			.workTop {
 				height : 70%;
 				width : 100%;
+				background-color : #FFFFFF;
+				display : flex;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
 				.diagram {
-					width : 70%;
-					float : left;
-					height : 100%;
+					width : 75%;
+					height : 100%;					
+					display : flex;
+					flex-direction: column;
 					.header {
 						height : 50px;
 						background-color:#FFFFFC;
@@ -261,12 +311,12 @@ export default {
 				}
 				.config {
 					width : 25%;
-					float :right;
 					height : 100%;
 				}
 			}
 			.log {
 				flex : 1;
+				min-height : 30%;
 			}
 		}
 

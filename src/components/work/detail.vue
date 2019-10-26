@@ -1,11 +1,10 @@
 <template>
 	<div class="detail">
-		<div class="title"><h2>{{title}}</h2></div>
-		<div class="content">
+		<div class="content" v-show="">
 			<el-table :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)" style="width: 100%" height="600">
-	          <el-table-column v-for="col in column" :fixed="col.fixed" :prop="col.prop" :label="col.prop" :key="col.prop">
-	          </el-table-column>
-	        </el-table>			
+        <el-table-column v-for="col in column" :fixed="col.fixed" :prop="col.prop" :label="col.prop" :key="col.prop">
+        </el-table-column>
+      </el-table>			
 		</div>
         <div class="block">
           <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="length">

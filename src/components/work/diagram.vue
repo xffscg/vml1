@@ -186,9 +186,9 @@ export default {
 <style scoped>
 #diagram {
 	width:100%;
-	height: 80%;
-	border :solid 1px black;
+	height: 100%;
 	position: relative;
   overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
 }
 </style>

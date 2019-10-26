@@ -50,6 +50,7 @@ export default {
       width: 6%;
     }
     .layout-right {
+      height : 100%;
       position: relative;
       flex: 1;
       overflow-y: auto;
