@@ -55,7 +55,13 @@ export default {
           this.$store.commit('changeShow', 1);
         }else{          
           this.$store.commit('changeOp', "data"+this.mId);
-        }
+        }//保证可以多次查看
+      }else if(e.target.id == 3){
+        if(this.$store.state.menuOp == "res"+this.mId){
+          this.$store.commit('changeShow', 1);
+        }else{          
+          this.$store.commit('changeOp', "res"+this.mId);
+        }//保证可以多次查看
       }
   	},
   },

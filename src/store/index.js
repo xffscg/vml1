@@ -21,19 +21,20 @@ import * as mutations from './mutation'
 Vue.use(Vuex)
 
 const state = {
-	funcType : 1,
-	proList :[],
-	dataList : [],
-	algList : {},
-	dragContent : {},
-	menuType : {},
-	menuOp : "",
-	showDetail : 0,
-	configType : "",
-	configData : {},
-	relationship : [],
-	start : [],
-	runResult : []
+	funcType : 1,//sideBar的type 即数据、项目、算法
+	proList :[],//项目list
+	dataList : [],//数据list
+	algList : {},//算法list
+	dragContent : {},//拖过来的内容
+	menuType : {},//右键点击的内容
+	menuOp : "",//右键点击的操作
+	showDetail : 0,//点击右键知道要展示的数据类型
+	configType : "",//点击之后配置的类型
+	configData : {},//配置的数据
+	relationship : [],//图中连线
+	start : [],//开始的数据节点
+	runResult : [],//运行的结果
+	nodes : {},//图内节点数据
 }
 
 

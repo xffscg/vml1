@@ -74,6 +74,13 @@ export const changeResult = (state, result) => {
   state.runResult[result.name] = deepCopy(result.config);
   console.log(state.runResult);
 }
+export const changeNodes = (state, node) => {
+  if(node.type == "add"){
+    state.nodes[node["config"]["id"]] = node["config"]["name"];
+  }else{
+    delete state.nodes[node["config"]["id"]];
+  }
+}
 function deepCopy(oldVal){
     let target = oldVal.constructor === Array?[]:{};
     for(let key in oldVal){

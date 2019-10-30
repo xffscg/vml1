@@ -13,6 +13,6 @@ export default {
 <style>
 .runLog {
 	width: 100%;
-	min-height: 100px; 
+	min-height: 250px; 
 }
 </style>

@@ -50,7 +50,7 @@ export default {
     	let para = {name : this.configT, config : {projectName : "医药病例分类分析", columnNames: JSON.stringify(this.expValue)}};
     	this.$store.commit("changeConfig", para);
     },
-    getClomns(){
+    getColumns(){
       getColumnNames({ params: { projectName: "医药病例分类分析" } })
       .then(res => res.data)
       .then(res => {
@@ -95,13 +95,14 @@ export default {
       this.expValue = [];
   		let type = newV.slice(4,7);
       let type1 = newV.slice(7);
-      let r = this.$store.state.relationship;
-      for(let i = 0; i < r.length; i++){
-        if(r[i][1] == newV){
-          this.getClomns();
-        }
-      }
-  		if(type == "exp"){  		        
+      // let r = this.$store.state.relationship;
+      // for(let i = 0; i < r.length; i++){
+      //   if(r[i][1] == newV){
+      //     this.getClomns();
+      //   }
+      // }
+      this.getColumns();
+  		if(type == "exp"){          		        
         this.configType = 1;
   		}else if(type == "pre"){
   			this.configType = 2;

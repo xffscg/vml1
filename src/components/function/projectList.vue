@@ -3,21 +3,12 @@
 		<div class="addProject">
 	        <el-button icon="el-icon-plus" style="width:90%" type="primary">新建项目</el-button>
 	    </div>
-	    <el-menu background-color="#F9F9F5" text-color="#000" active-text-color router>
-	        <template v-for="(item,i) in proArr">
-	        	
-	          <el-submenu :index="i.toString()" :key="i">
-	            <template slot="title">
-	              <i :class="item.icon"></i>
-	              <span slot="title">{{ item.name }}</span>
-	            </template>
-	            <!-- <template v-for="(subItem,i) in item.submenuList">
-	              <el-menu-item :key="i" @click="know(subItem.path,subItem.submenuTitle,item.mainTitle)">
-	                <i :class="subItem.icon"></i>
-	                <span>{{subItem.submenuTitle}}</span>
-	              </el-menu-item>
-	            </template> -->
-	          </el-submenu>
+	    <el-menu background-color="#F9F9F5" text-color="#000" active-text-color router>	    	
+            <template v-for="(item,i) in proArr">
+	        	<div class="dragItem" :id="'pro'+item.id" draggable="true" @dragstart="drag($event)">
+	        		<i :class="item.icon"></i>
+	                <span>{{item.name}}</span>
+	            </div>
 	        </template>
 	    </el-menu>
 	</div>
@@ -34,6 +25,9 @@ export default {
 	mounted(){
 	},
 	methods :{
+		drag(e){
+			this.$store.commit('changeDrag', e.currentTarget.cloneNode(true));
+		},
 	},
 	computed:{
 		proArr(){
@@ -55,5 +49,16 @@ export default {
   display: flex;
   justify-content: center;
   margin-top: 10px;
+}
+.dragItem {
+	width: 90%;
+	height: 30px;
+	font-size: 14px;
+	padding: 6px;
+	margin-left: 15px;
+}
+.dragItem:hover {
+	background-color: #F2F2F0;
+	font-size: 16px;
 }
 </style>

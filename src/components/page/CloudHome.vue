@@ -36,24 +36,29 @@ export default {
 <style lang='scss'>
 .cloud-home {
   width: 100%;
-  height: 100%;
+  height : 100%;
   display: flex;
   flex-direction: column;
   .layout-header {
     height: 50px;
+    width :100%;
+    position :fixed;
+    z-index : 1;
   }
   .layout-container {
-    height:100%;
+    margin-top: 50px;
     flex: 1;
     display: flex;
     .layout-left {
       width: 6%;
+      height : 100%;
+      position : fixed;
+      z-index : 1;
     }
     .layout-right {
-      height : 100%;
       position: relative;
       flex: 1;
-      overflow-y: auto;
+      margin-left : 6%;
     }
   }
 }

@@ -67,6 +67,7 @@ export default {
 		goRun(){
 			let start = this.$store.state.start;
 			let r = this.$store.state.relationship;
+			let that = this;
 			console.log(r);
 			let order = [];
 			let flag = Array(r.length);
@@ -86,25 +87,45 @@ export default {
 				time += 1;
 			}
 			console.log(order);
-			for(let i = 1; i< order.length; i++){
-				let para = this.$store.state.configData[order[i]];
-				this.allAlgApi(order[i], para);
+			async function runAll(){
+				console.log(order);
+				for(let i = 1; i< order.length; i++){
+					console.log(order[i]);
+					let para = this.$store.state.configData[order[i]];
+					await this.allAlgApi(order[i], para);
+				}
 			}
+			runAll.call(this);
+			let session = window.sessionStorage;
+			if(session.getItem("project")){
+				session.removeItem("project");				
+			}
+			let project = {projectName : "", configData : {}, relationship : [], nodes : {}};
+			project["configData"] = this.$store.state.configData;
+			project["relationship"] = this.$store.state.relationship;
+			project["nodes"] = this.$store.state.nodes;
+            session.setItem('project',JSON.stringify(project));
 		},
 		allAlgApi(id, para){
 			let type = id.slice(4);
 			console.log(type);
 			console.log(JSON.stringify(para));
+			$("#" + id).css("border-color","solid 3px #409EFF");
 			switch(type){
 				case "exp1":
+					// return new Promise(function(){
+						
+					// })
 					fullTableStatistics(para).then(res => res.data)
 			        .then(res => {
 			          console.log('生成全表统计视图并展示')
 			          console.log(res)
 			          let result = {name : id, config : res};
 			          this.$store.commit("changeResult", result);
+			          $("#" + id).css("border-color","solid 2px #67C23A");
 			        })
 			        .catch(e => {
+			        	$("#" + id).css("border-color","solid 3px #E6A23C");
 			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
 			        })
 			        break;
@@ -115,8 +136,10 @@ export default {
 			          console.log(res)
 			          let result = {name : id, config : res};
 			          this.$store.commit("changeResult", result);
+			           $("#" + id).css("border-color","solid 3px #67C23A");
 			        })
 			        .catch(e => {
+			        	$("#" + id).css("border-color","solid 3px #E6A23C");
 			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
 			        })
 			        break;
@@ -127,8 +150,10 @@ export default {
 			          console.log(res)
 			          let result = {name : id, config : res};
 			          this.$store.commit("changeResult", result);
+			           $("#" + id).css("border-color","solid 2px #67C23A");
 			        })
 			        .catch(e => {
+			        	$("#" + id).css("border-color","solid 3px #E6A23C");
 			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
 			        })
 			        break;
@@ -139,8 +164,10 @@ export default {
 			          console.log(res)
 			          let result = {name : id, config : res};
 			          this.$store.commit("changeResult", result);
+			           $("#" + id).css("border-color","solid 2px #67C23A");
 			        })
 			        .catch(e => {
+			        	$("#" + id).css("border-color","solid 3px #E6A23C");
 			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
 			        })
 			        break;
@@ -150,6 +177,10 @@ export default {
 			            console.log(res)
 			            let result = {name : id, config : res};
 			          	this.$store.commit("changeResult", result);
+			          	 $("#" + id).css("border","solid 2px #67C23A");
+			          })
+			          .catch(e=>{
+			          	$("#" + id).css("border-color","solid 3px #E6A23C");
 			          });
 			        break;
 			    case "pre2":			    
@@ -158,6 +189,10 @@ export default {
 			            console.log(res);
 			            let result = {name : id, config : res};
 			          	this.$store.commit("changeResult", result);
+			          	$("#" + id).css("border","solid 2px #67C23A");
+			          })
+			          .catch(e=>{
+			          	$("#" + id).css("border-color","solid 3px #E6A23C");
 			          });
 			        break;
 		        case "pre3":			    
@@ -166,6 +201,10 @@ export default {
 			            console.log(res);
 			            let result = {name : id, config : res};
 			          	this.$store.commit("changeResult", result);
+			          	$("#" + id).css("border","solid 2px #67C23A");
+			          })
+			          .catch(e=>{
+			          	$("#" + id).css("border-color","solid 3px #E6A23C");
 			          });
 			        break;
 			    case "pre4":
@@ -175,7 +214,11 @@ export default {
 			          .then(res => {
 			            console.log(res);	
 			            let result = {name : id, config : res};
-			          	this.$store.commit("changeResult", result);		            
+			          	this.$store.commit("changeResult", result);		
+			          	$("#" + id).css("border","solid 2px #67C23A");            
+			          })
+			          .catch(e=>{
+			          	$("#" + id).css("border-color","solid 3px #E6A23C");
 			          })
 		        default:
 		        	break;
@@ -260,7 +303,7 @@ export default {
 				let t = this.menuType.type.slice(4,7)
 				if(t == "dat"){					
 					this.getDataView();
-				}else if(t == "pre"){
+				}else if(t == "pre" || t == "exp"){
 					this.setResult();
 				}
 			}
@@ -273,17 +316,14 @@ export default {
 <style lang='scss'>
 .cloud-container{
     width: 100%;
-    height :100%;
     position:relative;
     background-color: #FCFCF2;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
     .funcPart {
 		width: 100%;
-		height:100%;
 	    display :flex;
 		.funcGuid {
-			width : 20%px;			
-			height:95%;
+			width : 20%;		
 			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 		}
 		.work {
@@ -291,17 +331,14 @@ export default {
 			display : flex;
 			flex-direction : column;
 			position :relative;
-			margin:5px;			
-			height:100%;
+			margin:5px;		
 			.workTop {
-				height : 70%;
 				width : 100%;
 				background-color : #FFFFFF;
 				display : flex;
 				box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
 				.diagram {
-					width : 75%;
-					height : 100%;					
+					width : 75%;			
 					display : flex;
 					flex-direction: column;
 					.header {
@@ -310,13 +347,11 @@ export default {
 					}
 				}
 				.config {
-					width : 25%;
-					height : 100%;
+					margin : 5px;
 				}
 			}
 			.log {
 				flex : 1;
-				min-height : 30%;
 			}
 		}
 
@@ -338,6 +373,7 @@ export default {
 		left: 0;
 		top:0;
 		margin:5% 10% 5% 10%;
+		z-index : 2;
 
 	}
 }
