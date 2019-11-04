@@ -14,6 +14,7 @@
 	        		<div class="diagram">
 	        			<div class="header">
 	        				<el-button type="primary" plain icon="el-icon-video-play" @click="goRun">运行</el-button>
+	        				<el-button type="primary" plain icon="el-icon-s-operation" >保存模型</el-button>
 	        			</div>
 	        			<diagram></diagram>
 	        		</div>
@@ -22,7 +23,7 @@
 	        	<div class="log"><RunLog></RunLog></div>	        	
 	        </div>
         </div>
-        <div class="detailPop"  v-show="showDetail !=0">	          
+        <div class="detailPop"  v-show="showDetail !=0 && showDetail !=9">	          
 	    </div>
 	    <div class="detail" v-show="showDetail == 1"><Detail :tableData="tableData.data" :column="tableData.column" :length="tableData.length" :title="tableData.title"></Detail></div>
 	    <div class="detail" v-show=""></div>
@@ -69,6 +70,22 @@ export default {
 			let r = this.$store.state.relationship;
 			let that = this;
 			console.log(r);
+			let order = this.getOrder(r);
+			async function runAll(){
+				console.log(order);
+				for(let i = 1; i< order.length; i++){
+					console.log(order[i]);
+					let para = this.$store.state.configData[order[i]];
+					await this.allAlgApi(order[i], para);
+				}
+			}
+			runAll.call(this);
+			this.saveProject();
+
+		},
+		getOrder(r){
+			console.log(r);
+			let start = this.$store.state.start;
 			let order = [];
 			let flag = Array(r.length);
 			flag.fill(0);
@@ -86,16 +103,9 @@ export default {
 				}
 				time += 1;
 			}
-			console.log(order);
-			async function runAll(){
-				console.log(order);
-				for(let i = 1; i< order.length; i++){
-					console.log(order[i]);
-					let para = this.$store.state.configData[order[i]];
-					await this.allAlgApi(order[i], para);
-				}
-			}
-			runAll.call(this);
+			return order;
+		},
+		saveProject(){			
 			let session = window.sessionStorage;
 			if(session.getItem("project")){
 				session.removeItem("project");				
@@ -110,51 +120,58 @@ export default {
 			let type = id.slice(4);
 			console.log(type);
 			console.log(JSON.stringify(para));
-			$("#" + id).css("border-color","solid 3px #409EFF");
+			let that = this;
+			$("#" + id).css("border","groove 5px #67C23A");
 			switch(type){
 				case "exp1":
-					// return new Promise(function(){
-						
-					// })
-					fullTableStatistics(para).then(res => res.data)
-			        .then(res => {
-			          console.log('生成全表统计视图并展示')
-			          console.log(res)
-			          let result = {name : id, config : res};
-			          this.$store.commit("changeResult", result);
-			          $("#" + id).css("border-color","solid 2px #67C23A");
-			        })
-			        .catch(e => {
-			        	$("#" + id).css("border-color","solid 3px #E6A23C");
-			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
-			        })
+					return new Promise(function(resolve, reject){
+						fullTableStatistics(para).then(res => res.data)
+				        .then(res => {
+				          console.log('生成全表统计视图并展示')
+				          console.log(res)
+				          let result = {name : id, config : res};
+				          that.$store.commit("changeResult", result);
+				          $("#" + id).css("border","solid 2px #409EFF");
+				          resolve();
+				        })
+				        .catch(e => {
+				        	$("#" + id).css("border","solid 3px #E6A23C");
+				          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
+				          reject(e);
+				        })
+					})
 			        break;
 		        case "exp2":
-					frequencyStatistics(para).then(res => res.data)
-			        .then(res => {
-			          console.log('生成频率统计视图并展示')
-			          console.log(res)
-			          let result = {name : id, config : res};
-			          this.$store.commit("changeResult", result);
-			           $("#" + id).css("border-color","solid 3px #67C23A");
-			        })
-			        .catch(e => {
-			        	$("#" + id).css("border-color","solid 3px #E6A23C");
-			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
-			        })
+			        return new Promise(function(resolve, reject){
+							frequencyStatistics(para).then(res => res.data)
+					        .then(res => {
+					          console.log('生成频率统计视图并展示')
+					          console.log(res)
+					          let result = {name : id, config : res};
+					          that.$store.commit("changeResult", result);
+					           $("#" + id).css("border","solid 3px #409EFF");
+					           resolve();
+					        })
+					        .catch(e => {
+					        	$("#" + id).css("border","solid 3px #E6A23C");
+					          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
+					          reject(e);
+					        })
+						})
 			        break;
 		        case "exp3":
 					correlationCoefficient(para).then(res => res.data)
 			        .then(res => {
 			          console.log('相关系数展示')
-			          console.log(res)
 			          let result = {name : id, config : res};
 			          this.$store.commit("changeResult", result);
-			           $("#" + id).css("border-color","solid 2px #67C23A");
+			           $("#" + id).css("border","solid 2px #409EFF");
+			           resolve();
 			        })
 			        .catch(e => {
-			        	$("#" + id).css("border-color","solid 3px #E6A23C");
-			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
+			        	$("#" + id).css("border","solid 3px #E6A23C");
+			          Message.error(e.error || 'fullTableStatistics接口错误，请重试');
+			          reject(e);
 			        })
 			        break;
 		        case "exp4":
@@ -164,24 +181,30 @@ export default {
 			          console.log(res)
 			          let result = {name : id, config : res};
 			          this.$store.commit("changeResult", result);
-			           $("#" + id).css("border-color","solid 2px #67C23A");
+			           $("#" + id).css("border","solid 2px #409EFF");
+			           resolve();
 			        })
 			        .catch(e => {
-			        	$("#" + id).css("border-color","solid 3px #E6A23C");
-			          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
+			        	$("#" + id).css("border","solid 3px #E6A23C");
+			          Message.error(e.error || 'fullTableStatistics接口错误，请重试');
+			          reject(e);
 			        })
 			        break;
 			    case "pre1":
-			    	filter({ requestStr: JSON.stringify(para) }).then(res => res.data)
-			          .then(res => {
-			            console.log(res)
-			            let result = {name : id, config : res};
-			          	this.$store.commit("changeResult", result);
-			          	 $("#" + id).css("border","solid 2px #67C23A");
-			          })
-			          .catch(e=>{
-			          	$("#" + id).css("border-color","solid 3px #E6A23C");
-			          });
+			    	return new Promise(function(resolve, reject){
+							filter({ requestStr: JSON.stringify(para) }).then(res => res.data)
+					          .then(res => {
+					            console.log(res)
+					            let result = {name : id, config : res};
+					          	that.$store.commit("changeResult", result);
+					          	 $("#" + id).css("border","solid 2px #409EFF");
+					          	 resolve();
+					          })
+					          .catch(e=>{
+					          	$("#" + id).css("border","solid 3px #E6A23C");
+					          	reject(e);
+					          });
+						})
 			        break;
 			    case "pre2":			    
 			    	fillNullValue({ requestStr: JSON.stringify(para) }).then(res => res.data)
@@ -189,23 +212,29 @@ export default {
 			            console.log(res);
 			            let result = {name : id, config : res};
 			          	this.$store.commit("changeResult", result);
-			          	$("#" + id).css("border","solid 2px #67C23A");
+			          	$("#" + id).css("border","solid 2px #409EFF");
+			          	resolve();
 			          })
 			          .catch(e=>{
-			          	$("#" + id).css("border-color","solid 3px #E6A23C");
+			          	$("#" + id).css("border","solid 3px #E6A23C");
+			          	reject(e);
 			          });
 			        break;
-		        case "pre3":			    
-			    	columnSplit({ requestStr: JSON.stringify(para) }).then(res => res.data)
-			          .then(res => {
+		        case "pre3":	
+		       		 return new Promise(function(resolve, reject){
+						columnSplit({ requestStr: JSON.stringify(para) }).then(res => res.data)
+			            .then(res => {
 			            console.log(res);
 			            let result = {name : id, config : res};
-			          	this.$store.commit("changeResult", result);
-			          	$("#" + id).css("border","solid 2px #67C23A");
-			          })
-			          .catch(e=>{
-			          	$("#" + id).css("border-color","solid 3px #E6A23C");
-			          });
+			          	that.$store.commit("changeResult", result);
+			          	$("#" + id).css("border","solid 2px #409EFF");
+			          	resolve();
+				          })
+				          .catch(e=>{
+				          	$("#" + id).css("border","solid 3px #E6A23C");
+				          	reject(e);
+				          });
+						})		
 			        break;
 			    case "pre4":
 			    	sort({
@@ -215,16 +244,18 @@ export default {
 			            console.log(res);	
 			            let result = {name : id, config : res};
 			          	this.$store.commit("changeResult", result);		
-			          	$("#" + id).css("border","solid 2px #67C23A");            
+			          	$("#" + id).css("border","solid 2px #409EFF");  
+			          	resolve();          
 			          })
 			          .catch(e=>{
-			          	$("#" + id).css("border-color","solid 3px #E6A23C");
+			          	$("#" + id).css("border","solid 3px #E6A23C");
+			          	reject(e);
 			          })
 		        default:
 		        	break;
 			}
 		},
-		getDataView(){
+		getDataView(id, url){
 		  this.tableData = {
 				data : [],
 				column : [],
@@ -232,7 +263,8 @@ export default {
 				title : ""
 			};
 	      // this.tableCol = [];
-	      rawDataPreview({ start: 1, end: 50, projectName: "医药病例分类分析" }).then(res => res.data)
+	      let para = { start: 1, end: 50, userId: 1, fileId : id, fileUrl : url};
+	      rawDataPreview(para).then(res => res.data)
 	        .then(res => {
 	          console.log(res);
 	          this.tableData.data = res.data;
@@ -277,6 +309,20 @@ export default {
 			}
 			this.tableData.column[0].fixed = "left";
 		},
+		runFrom(){
+	      	let r = this.$store.state.relationship;
+	      	let order = this.getOrder(r);
+	      	let index = order.indexOf(this.menuType.type);
+		  	async function runAll(){
+				for(let i = index; i< order.length; i++){
+					console.log(order[i]);
+					let para = this.$store.state.configData[order[i]];
+					await this.allAlgApi(order[i], para);
+				}
+			}
+			runAll.call(this);
+			this.saveProject();
+	    },
     },
 	computed :{
 		funcType(){
@@ -289,6 +335,9 @@ export default {
 		menuType(){
 	  		return this.$store.state.menuType;
 	  	},
+	  	dataInfo(){
+	  		return this.$store.state.dataList;
+	  	}
 	},
 	watch :{
 		funcType(newV, oldV){
@@ -299,13 +348,17 @@ export default {
 			}
 		},
 		showDetail(newV){
+			let t = this.menuType.type.slice(4,7)
 			if(newV == 1){
-				let t = this.menuType.type.slice(4,7)
-				if(t == "dat"){					
-					this.getDataView();
+				if(t == "dat"){		
+					let index = this.menuType.type.slice(8);
+					let info = this.dataInfo[Number(index)];						
+					this.getDataView(info.fileId, info.fileUrl);
 				}else if(t == "pre" || t == "exp"){
 					this.setResult();
 				}
+			}else if(newV == 9){
+				this.runFrom();
 			}
 		},
 	},

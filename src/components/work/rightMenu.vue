@@ -62,6 +62,9 @@ export default {
         }else{          
           this.$store.commit('changeOp', "res"+this.mId);
         }//保证可以多次查看
+      }else if(e.target.id == 1){
+        this.$store.commit('changeOp', "run"+this.mId);        
+        this.$store.commit('changeShow', 9);
       }
   	},
   },

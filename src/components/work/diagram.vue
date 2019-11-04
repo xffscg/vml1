@@ -1,6 +1,6 @@
 <template>
 	<div id="diagram" @drop="drop($event)" @dragover.prevent="dragover($event)">
-   <RightMenu v-show="showMenu"></RightMenu>
+   <RightMenu v-show="showMenu" style="z-index : 3;"></RightMenu>
    <div class="hover" v-show="showHover">
      <div class="hoverItem" v-for="item in hoverDetail">{{item}}</div>
    </div> 
@@ -30,6 +30,7 @@ export default {
         isTarget: true,
         connector: 'Flowchart',
         endpoint: 'Blank',
+        maxConnections: -1,
         paintStyle: {
           fill: 'white',
           outlineStroke: 'black',
@@ -54,6 +55,7 @@ export default {
         isTarget: false,
         connector: 'Flowchart',
         endpoint: 'Dot',
+        maxConnections: -1,
         endpointStyle: { fill: 'lightgray', outlineStroke: 'darkblue', outlineWidth: 1, radius: 6},
         paintStyle: {
           fill: 'white',
@@ -148,10 +150,10 @@ export default {
         this.setDiagram(order, r.nodes);
         for(let i in r.configData){
           this.$store.commit("changeConfig", {name : i, config : r.configData[i]});
-        }
+        }//配置数据
         for(let i in r.nodes){
           this.$store.commit("changeNodes", {type : "add", config : {id : i, name : r.nodes[i]}});
-        }
+        }//节点名称数据
         this.$store.commit("changeRelation", r.relationship);
         for(let i in r.relationship){
           this.plumb.connect({
@@ -159,7 +161,7 @@ export default {
             target : r.relationship[i][1],
             uuids : ["from"+r.relationship[i][0], "to"+r.relationship[i][1]],
           },this.defaultConfig);
-        }
+        }//连接线
       }
       if(isType != "pro"){        
         this.dragContent.removeAttribute("class");
@@ -189,7 +191,13 @@ export default {
         d.style.height = "30px";
         d.style.border = "solid 1px black";
         let s = document.createElement("span");
+        // // s.style.display = "flex";
+        // // s.style
         s.innerHTML = node[order[i]];
+        // let icon = document.createElement("i");
+        // icon.setAttribute("class", "el-icon-circle-check");
+        // icon.style.flo
+        // s.append(icon);
         d.append(s);
         space.append(d);
         this.addElement(d);
@@ -204,6 +212,7 @@ export default {
         if(r[i][0].slice(4,7) == "dat"){
           order.push(r[i][0]);
           start = r[i][0];
+          this.$store.commit("changeStart", {type:"clear", detail:""});
           this.$store.commit("changeStart", {type:"add", detail:start});
         }
       }
@@ -299,7 +308,8 @@ export default {
     },
     showDetail(){
       this.$store.commit("changeShow", 1);
-    }
+    },
+    
 
   },
   computed:{

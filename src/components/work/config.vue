@@ -11,6 +11,7 @@
     <div class="save" @click="save"><el-button icon="el-icon-plus" style="width:90%" type="primary">保存</el-button></div>
 		</div>
 		<ConfigPre v-show="configType == 2" :column="dataColumns" :columnNumberType="dataColumnsNumber"></ConfigPre>
+    <ConfigFea v-show="configType == 3" :column="dataColumns" :columnNumberType="dataColumnsNumber"></ConfigFea>
 	</div>
 
 </template>
@@ -19,10 +20,12 @@
 import { getColumnNames, getColumnNameWithNumberType, fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 // import {  } from '@/api/dataExploration'
 import ConfigPre from '../configs/configPre'
+import ConfigFea from '../configs/configFea'
 export default {
   name: 'config',
   components :{
-    ConfigPre
+    ConfigPre,
+    ConfigFea
   },
   data(){
   	return {
@@ -50,8 +53,8 @@ export default {
     	let para = {name : this.configT, config : {projectName : "医药病例分类分析", columnNames: JSON.stringify(this.expValue)}};
     	this.$store.commit("changeConfig", para);
     },
-    getColumns(){
-      getColumnNames({ params: { projectName: "医药病例分类分析" } })
+    getColumns(id, url){
+      getColumnNames({ params: { userId: 1, fileId : id, fileUrl : url } })
       .then(res => res.data)
       .then(res => {
         this.dataColumns = res;
@@ -64,7 +67,7 @@ export default {
       })
       getColumnNameWithNumberType({ // 获取数值型列名
         params: {
-          projectName: "医药病例分类分析"
+          userId: 1, fileId : id, fileUrl : url
         }
       })
         .then(res => res.data)
@@ -106,7 +109,9 @@ export default {
         this.configType = 1;
   		}else if(type == "pre"){
   			this.configType = 2;
-  		}
+  		}else if(type == "fea"){
+        this.configType = 3;
+      }
   	},
   }
 };

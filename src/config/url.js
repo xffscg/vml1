@@ -1,12 +1,13 @@
 const config = {
   visualUrl: 'http://10.108.211.130:8993', // 需要连接校园网无线
+  addData : '/dataSource/upload',
   addProjectUrl: '/creatProject',
   getProjectUrl: '/getProjectList',
-  getDataSourceUrl: '/getDataSource',
-  rawDataPreviewUrl: '/rawDataPreview',
+  getDataSourceUrl: '/dataSource/getFiles?userId=1',
+  rawDataPreviewUrl: '/dataSource/dataPreview',
   currentDataPreviewUrl: '/currentDataPreview',
-  getColumnNamesUrl: '/getColumnNames',
-  getColumnNameWithNumberTypeUrl: '/getColumnNameWithNumberType',
+  getColumnNamesUrl: '/dataSource/getColumnNames',
+  getColumnNameWithNumberTypeUrl: '/dataSource/getColumnNameWithNumberType',
   fullTableStatisticsUrl: '/fullTableStatistics',
   scatterPlotUrl: '/scatterPlot',
   frequencyStatisticsUrl: '/frequencyStatistics',

@@ -10,6 +10,10 @@ export function addProject (params) {
   let url = `${config.visualUrl}${config.addProjectUrl}`
   return axios.post(url, qs.stringify(params))
 }
+export function addData (params) {
+  let url = `${config.visualUrl}${config.addData}`
+  return axios.post(url, qs.stringify(params))
+}
 export function getDataSource () {
   let url = `${config.visualUrl}${config.getDataSourceUrl}`
   return axios.post(url)

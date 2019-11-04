@@ -39,6 +39,8 @@ export const changeRelation = (state, relation) => {
 export const changeStart = (state, start) => {
   if(start.type == "add"){
     state.start.push(start.detail);
+  }else if(start.type == "clear"){
+    state.start = [];
   }else{
     let index = state.start.indexOf(start.detail);
     if(state.start.length == 1){
