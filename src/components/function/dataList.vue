@@ -15,7 +15,7 @@
 	    </div>
 	    <el-menu background-color="#F9F9F5" text-color="#000" active-text-color router>
 	    	<template v-for="(item,i) in dataArr">
-	        	<div class="dragItem" :id="'data'+i" draggable="true" @dragstart="drag($event)">
+	        	<div class="dragItem" :id="'dat'+i" draggable="true" @dragstart="drag($event)">
 	                <span>{{item.fileName}}</span>
 	            </div>
 	        </template>
@@ -37,6 +37,7 @@ export default {
 	},
 	methods :{
 		drag(e){
+			console.log(e);
 			this.$store.commit('changeDrag', e.currentTarget.cloneNode(true));
 		},
 		upload(){

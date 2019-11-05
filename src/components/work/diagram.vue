@@ -12,6 +12,7 @@ import { Message } from 'element-ui'
 import {jsPlumb} from 'jsplumb'
 import RightMenu from './rightMenu'
 import { rawDataPreview, currentDataPreview } from '@/api/dataSource'
+import { getColumnNames, getColumnNameWithNumberType, fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 export default {
   name: 'diagram',
   components : {
@@ -36,8 +37,6 @@ export default {
           outlineStroke: 'black',
           strokeWidth: 1
         },
-
-        // endpointStyle: { fill: 'lightgray', outlineStroke: 'darkgray', outlineWidth: 1 },
 
         hoverPaintStyle: {
           outlineStroke: 'lightblue'
@@ -108,14 +107,42 @@ export default {
     let that = this;
     this.plumb.bind('click', function (conn, originalEvent) {
       that.plumb.deleteConnection(conn);
+      let c = that.plumb.getAllConnections();
+      let r = [];
+      let list = {}
+      for(let i = 0; i < c.length; i++){
+          if(!list[c[i].sourceId]){ 
+            list[c[i].sourceId] = {next:[], pre :[]};          
+          } 
+          if(!list[c[i].targetId]){ 
+            list[c[i].targetId] = {next:[], pre :[]};          
+          }         
+          list[c[i].sourceId].next.push(c[i].targetId); 
+          list[c[i].targetId].pre.push(c[i].sourceId); 
+          r.push([c[i].sourceId, c[i].targetId]);
+
+        }
+        that.$store.commit("changeRun", list);
+        that.$store.commit("changeRelation", r);
     });
     this.plumb.bind('connection', function (conn, originalEvent) {
       let c = that.plumb.getAllConnections();
       let r = [];
+      let list = {}
       for(let i = 0; i < c.length; i++){
+          if(!list[c[i].sourceId]){ 
+            list[c[i].sourceId] = {next:[], pre :[]};          
+          } 
+          if(!list[c[i].targetId]){ 
+            list[c[i].targetId] = {next:[], pre :[]};          
+          }         
+          list[c[i].sourceId].next.push(c[i].targetId); 
+          list[c[i].targetId].pre.push(c[i].sourceId); 
           r.push([c[i].sourceId, c[i].targetId]);
+
         }
       that.$store.commit("changeRelation", r);
+      that.$store.commit("changeRun", list);
     });
     $(document).on('click', function(e) {
         var contentEle= $('RightMenu');
@@ -126,35 +153,24 @@ export default {
   },
   methods:{
   	drop(e){
-      console.log(this.dragContent.firstChild.innerHTML);
-      this.$store.commit("changeNodes", {type : "add", config : { id: "drop"+this.dragContent.id, name : this.dragContent.firstChild.innerHTML}});
+      let nameAll = this.dragContent.firstChild.innerHTML;
+      // this.$store.commit("changeNodes", {type : "add", config : { id: "drop"+this.dragContent.id, name : this.dragContent.firstChild.innerHTML}});
   		let space = document.getElementById('diagram');
   		e.preventDefault();
       let isType = this.dragContent.id.slice(0,3);
-      console.log(isType);
-      if(isType == "alg"){
-        console.log("alg");
-      }else if(isType == "pre"){
-        console.log("pre");
-      }else if(isType == "exp"){
-        console.log("exp");
-      }else if(isType == "dat"){
-        console.log("data");
-        this.$store.commit("changeStart", {type:"add", detail:"drop"+this.dragContent.id});
-        // this.getDataView();
-        
-      }else if(isType == "pro"){
+      if(isType == "pro"){
         let session = window.sessionStorage;
         let r = JSON.parse(session.getItem("project"));
-        let order = this.getOrder(r.relationship);
-        this.setDiagram(order, r.nodes);
-        for(let i in r.configData){
-          this.$store.commit("changeConfig", {name : i, config : r.configData[i]});
+        // let order = this.getOrder(r.relationship);
+        this.setDiagram(r.config);
+        for(let i in r.config){
+          this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
+          this.$store.commit("changeConfig", {type : "addConfig", detail:{name : i, config : r.config[i].config}});
         }//配置数据
-        for(let i in r.nodes){
-          this.$store.commit("changeNodes", {type : "add", config : {id : i, name : r.nodes[i]}});
+        for(let i in r.start){
+          this.$store.commit("changeStart", {type:"add", detail:r.start[i]});
         }//节点名称数据
-        this.$store.commit("changeRelation", r.relationship);
+        // this.$store.commit("changeRelation", r.relationship);
         for(let i in r.relationship){
           this.plumb.connect({
             source : r.relationship[i][0],
@@ -162,10 +178,10 @@ export default {
             uuids : ["from"+r.relationship[i][0], "to"+r.relationship[i][1]],
           },this.defaultConfig);
         }//连接线
-      }
-      if(isType != "pro"){        
+      }else{
+        let timestamp = new Date().getTime();  
         this.dragContent.removeAttribute("class");
-        this.dragContent.id = "drop"+this.dragContent.id;
+        this.dragContent.id = "drop"+this.dragContent.id+timestamp;
         this.dragContent.style.position = "absolute";
         this.dragContent.style.width = "150px";
         this.dragContent.style.height = "30px";
@@ -174,26 +190,41 @@ export default {
         this.dragContent.style.top = e.offsetY+"px"; 
         space.append(this.dragContent);
         //添加dom事件 
+        this.$store.commit("changeLoc", {name : this.dragContent.id, x : this.dragContent.style.left, y : this.dragContent.style.top});
         this.addElement(this.dragContent);
-        this.addJsPlumb(this.dragContent);
+        this.addJsPlumb(this.dragContent);        
+        this.saveConfigNode(isType, nameAll);
       }  		
   	},
-    setDiagram(order, node){
+    saveConfigNode(type, name){
+      if(type == "dat"){
+          this.$store.commit("changeStart", {type:"add", detail:this.dragContent.id});
+          let index = this.dragContent.id.slice(7,-13);
+          let info = this.dataInfo[Number(index)];
+          this.getColumns(this.dragContent.id, info.fileId, info.fileUrl);
+          this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : "data", nameAll : name}});
+          this.$store.commit("changeConfig", {type : "addConfig", detail:{name : this.dragContent.id, config : {fileId : info.fileId, fileUrl : info.fileUrl}}});
+      }else if(type == "exp"){
+          this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : "exploration", nameAll : name}});
+      }else if(type == "pre"){
+        this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : "preprocess", nameAll : name}});
+      }else if(type == "fea"){
+        this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : "feature", nameAll : name}});
+      }
+    },
+    setDiagram(config){
       let space = document.getElementById("diagram");
-      let left = "200px", top=50;
-      for(let i = 0; i < order.length; i++){
+      for(let i in config){
         let d = document.createElement("div");
-        d.id = order[i];
-        d.style.left = left;
-        d.style.top = top + "px";
+        d.id = i;
+        d.style.left = config[i].location.x;
+        d.style.top = config[i].location.y;
         d.style.position = "absolute";
         d.style.width = "130px";
         d.style.height = "30px";
         d.style.border = "solid 1px black";
         let s = document.createElement("span");
-        // // s.style.display = "flex";
-        // // s.style
-        s.innerHTML = node[order[i]];
+        s.innerHTML = config[i].name;
         // let icon = document.createElement("i");
         // icon.setAttribute("class", "el-icon-circle-check");
         // icon.style.flo
@@ -202,8 +233,30 @@ export default {
         space.append(d);
         this.addElement(d);
         this.addJsPlumb(d);
-        top += 80;
       }
+    },    
+    getColumns(name, id, url){
+      getColumnNames({ params: { userId: 1, fileId : id, fileUrl : url } })
+      .then(res => res.data)
+      .then(res => {
+        this.$store.commit("changeConfigOrder", {type : "addC", config : {name : name, column: res}});      })
+      .catch(e => {
+        Message.error(e.error || 'getColumnNames接口1错误，请重试')
+      })
+      getColumnNameWithNumberType({ // 获取数值型列名
+        params: {
+          userId: 1, fileId : id, fileUrl : url
+        }
+      })
+        .then(res => res.data)
+        .then(res => {
+          this.$store.commit("changeConfigOrder", {type : "addCN", config : {name : name, columnNumber: res}});
+          
+        })
+        .catch(e => {
+          Message.error(e.error || 'getColumnNameWithNumberType接口错误，请重试')
+        })
+        
     },
     getOrder(r){      
       let order = [];
@@ -240,9 +293,11 @@ export default {
       let that = this; 
       //点击配置   
       node.addEventListener("click", function(event) { 
-        console.log(event.currentTarget.id);        
+        console.log(event.currentTarget);   
+        console.log(event.currentTarget.style.left);     
         let connections = that.plumb.getAllConnections();
         that.$store.commit("changeConfigType", event.currentTarget.id);
+        that.$store.commit("changeLoc", {name : event.currentTarget.id, x : event.currentTarget.style.left, y : event.currentTarget.style.top});
       }, false);
       // this.dragContent.addEventListener("mouseover",function(event){
       //   let d = that.$store.state.configData[event.currentTarget.id] || [];
@@ -294,21 +349,49 @@ export default {
     },
     delElement(){
       let ele = this.$store.state.menuType.type;
-      this.$store.commit("changeNodes", {type : "del", config:{ id: ele}});
+      this.$store.commit("changeConfig", {type : "delNode", detail:{ name: ele}});
+      this.$store.commit("changeConfigOrder", {type : "del", config:{ name: ele}});
+      // this.$store.commit("changeLoc", {type : "del", config:{ name: ele}});
       this.plumb.remove(ele);
       if(ele.slice(4,7) == "dat"){
         this.$store.commit("changeStart", {type:"del", detail:ele});
       }
       let c = this.plumb.getAllConnections();
       let r = [];
-        for(let i = 0; i < c.length; i++){
-            r.push([c[i].sourceId, c[i].targetId]);
-          }
+      let list = {}
+      for(let i = 0; i < c.length; i++){
+          if(!list[c[i].sourceId]){ 
+            list[c[i].sourceId] = {next:[], pre :[]};          
+          } 
+          if(!list[c[i].targetId]){ 
+            list[c[i].targetId] = {next:[], pre :[]};          
+          }         
+          list[c[i].sourceId].next.push(c[i].targetId); 
+          list[c[i].targetId].pre.push(c[i].sourceId); 
+          r.push([c[i].sourceId, c[i].targetId]);
+
+        }
+        this.$store.commit("changeRun", list);
         this.$store.commit("changeRelation", r);
     },
     showDetail(){
       this.$store.commit("changeShow", 1);
     },
+    deepCopy(oldVal){
+        let target = oldVal.constructor === Array?[]:{};
+        for(let key in oldVal){
+          if(oldVal.hasOwnProperty(key)){
+            if(oldVal[key] && typeof oldVal[key] === "object"){
+              target[key] = oldVal[key].constructor === Array?[]:{};
+              target[key] = deepCopy(oldVal[key]);
+            }else{
+              target[key] = oldVal[key];
+            }
+          }
+        }
+        return target;
+    },
+
     
 
   },
@@ -319,8 +402,21 @@ export default {
     menuOp(){
       return this.$store.state.menuOp;
     },
+    dataInfo(){
+      return this.$store.state.dataList;
+    },
+    clear(){
+      return this.$store.state.clearFlag;
+    },
   },
   watch:{
+    clear(newV){
+      let all =  this.$store.state.configData;
+      for(let i in all){
+        this.plumb.remove(i);
+      }     
+      this.$store.commit("changeConfig", {type : "clear"});
+    },
     menuOp(newV){
       let t = newV.slice(0,3);
       switch(t){

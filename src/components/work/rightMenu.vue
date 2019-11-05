@@ -27,7 +27,9 @@ export default {
   			alg:[0,1,3],
   			dat:[0,1,2],
   			pre:[0,1,2],
-        exp:[0,1,3]
+        exp:[0,1,3],
+        fea:[0,1,3],
+        ana:[0,1,3]
   		},
   		mType : "",
   		mId : ""

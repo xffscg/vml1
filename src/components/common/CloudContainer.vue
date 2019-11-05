@@ -15,6 +15,7 @@
 	        			<div class="header">
 	        				<el-button type="primary" plain icon="el-icon-video-play" @click="goRun">运行</el-button>
 	        				<el-button type="primary" plain icon="el-icon-s-operation" >保存模型</el-button>
+	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="clear">清空画布</el-button>
 	        			</div>
 	        			<diagram></diagram>
 	        		</div>
@@ -65,196 +66,40 @@ export default {
 		}
 	},
 	methods:{
+		clear(){
+			let timestamp = new Date().getTime();
+			this.$store.commit("changeStart", {type : "clear"});
+			this.$store.commit("changeConfigOrder", {type : "clear"});
+			this.$store.commit("changeLoc", {name : "clearClear"});
+			this.$store.commit("changeClear", timestamp);
+		},
 		goRun(){
-			let start = this.$store.state.start;
-			let r = this.$store.state.relationship;
-			let that = this;
-			console.log(r);
-			let order = this.getOrder(r);
-			async function runAll(){
-				console.log(order);
-				for(let i = 1; i< order.length; i++){
-					console.log(order[i]);
-					let para = this.$store.state.configData[order[i]];
-					await this.allAlgApi(order[i], para);
-				}
-			}
-			runAll.call(this);
 			this.saveProject();
 
-		},
-		getOrder(r){
-			console.log(r);
-			let start = this.$store.state.start;
-			let order = [];
-			let flag = Array(r.length);
-			flag.fill(0);
-			order.push(start[0]);
-			let time = 0;
-			while(flag.some(function(v){ return (v == 0)}) && time < 10){
-				for(let i = 0; i < r.length; i++){
-					if(flag[i] == 0){
-						if(r[i][0] == start){
-							order.push(r[i][1]);
-							flag[i] = 1;
-							start = r[i][1];
-						}
-					}
-				}
-				time += 1;
-			}
-			return order;
 		},
 		saveProject(){			
 			let session = window.sessionStorage;
 			if(session.getItem("project")){
 				session.removeItem("project");				
 			}
-			let project = {projectName : "", configData : {}, relationship : [], nodes : {}};
-			project["configData"] = this.$store.state.configData;
-			project["relationship"] = this.$store.state.relationship;
-			project["nodes"] = this.$store.state.nodes;
-            session.setItem('project',JSON.stringify(project));
-		},
-		allAlgApi(id, para){
-			let type = id.slice(4);
-			console.log(type);
-			console.log(JSON.stringify(para));
-			let that = this;
-			$("#" + id).css("border","groove 5px #67C23A");
-			switch(type){
-				case "exp1":
-					return new Promise(function(resolve, reject){
-						fullTableStatistics(para).then(res => res.data)
-				        .then(res => {
-				          console.log('生成全表统计视图并展示')
-				          console.log(res)
-				          let result = {name : id, config : res};
-				          that.$store.commit("changeResult", result);
-				          $("#" + id).css("border","solid 2px #409EFF");
-				          resolve();
-				        })
-				        .catch(e => {
-				        	$("#" + id).css("border","solid 3px #E6A23C");
-				          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
-				          reject(e);
-				        })
-					})
-			        break;
-		        case "exp2":
-			        return new Promise(function(resolve, reject){
-							frequencyStatistics(para).then(res => res.data)
-					        .then(res => {
-					          console.log('生成频率统计视图并展示')
-					          console.log(res)
-					          let result = {name : id, config : res};
-					          that.$store.commit("changeResult", result);
-					           $("#" + id).css("border","solid 3px #409EFF");
-					           resolve();
-					        })
-					        .catch(e => {
-					        	$("#" + id).css("border","solid 3px #E6A23C");
-					          Message.error(e.error || 'fullTableStatistics接口错误，请重试')
-					          reject(e);
-					        })
-						})
-			        break;
-		        case "exp3":
-					correlationCoefficient(para).then(res => res.data)
-			        .then(res => {
-			          console.log('相关系数展示')
-			          let result = {name : id, config : res};
-			          this.$store.commit("changeResult", result);
-			           $("#" + id).css("border","solid 2px #409EFF");
-			           resolve();
-			        })
-			        .catch(e => {
-			        	$("#" + id).css("border","solid 3px #E6A23C");
-			          Message.error(e.error || 'fullTableStatistics接口错误，请重试');
-			          reject(e);
-			        })
-			        break;
-		        case "exp4":
-					scatterPlot(para).then(res => res.data)
-			        .then(res => {
-			          console.log('散点图展示')
-			          console.log(res)
-			          let result = {name : id, config : res};
-			          this.$store.commit("changeResult", result);
-			           $("#" + id).css("border","solid 2px #409EFF");
-			           resolve();
-			        })
-			        .catch(e => {
-			        	$("#" + id).css("border","solid 3px #E6A23C");
-			          Message.error(e.error || 'fullTableStatistics接口错误，请重试');
-			          reject(e);
-			        })
-			        break;
-			    case "pre1":
-			    	return new Promise(function(resolve, reject){
-							filter({ requestStr: JSON.stringify(para) }).then(res => res.data)
-					          .then(res => {
-					            console.log(res)
-					            let result = {name : id, config : res};
-					          	that.$store.commit("changeResult", result);
-					          	 $("#" + id).css("border","solid 2px #409EFF");
-					          	 resolve();
-					          })
-					          .catch(e=>{
-					          	$("#" + id).css("border","solid 3px #E6A23C");
-					          	reject(e);
-					          });
-						})
-			        break;
-			    case "pre2":			    
-			    	fillNullValue({ requestStr: JSON.stringify(para) }).then(res => res.data)
-			          .then(res => {
-			            console.log(res);
-			            let result = {name : id, config : res};
-			          	this.$store.commit("changeResult", result);
-			          	$("#" + id).css("border","solid 2px #409EFF");
-			          	resolve();
-			          })
-			          .catch(e=>{
-			          	$("#" + id).css("border","solid 3px #E6A23C");
-			          	reject(e);
-			          });
-			        break;
-		        case "pre3":	
-		       		 return new Promise(function(resolve, reject){
-						columnSplit({ requestStr: JSON.stringify(para) }).then(res => res.data)
-			            .then(res => {
-			            console.log(res);
-			            let result = {name : id, config : res};
-			          	that.$store.commit("changeResult", result);
-			          	$("#" + id).css("border","solid 2px #409EFF");
-			          	resolve();
-				          })
-				          .catch(e=>{
-				          	$("#" + id).css("border","solid 3px #E6A23C");
-				          	reject(e);
-				          });
-						})		
-			        break;
-			    case "pre4":
-			    	sort({
-			          requestStr: JSON.stringify(para)
-			        }).then(res => res.data)
-			          .then(res => {
-			            console.log(res);	
-			            let result = {name : id, config : res};
-			          	this.$store.commit("changeResult", result);		
-			          	$("#" + id).css("border","solid 2px #409EFF");  
-			          	resolve();          
-			          })
-			          .catch(e=>{
-			          	$("#" + id).css("border","solid 3px #E6A23C");
-			          	reject(e);
-			          })
-		        default:
-		        	break;
+			let project = {userId : 1, projectId : "1", config : {}, relationship : [], start : []};
+			let runList = this.$store.state.runList;
+			console.log(runList);
+			let loc = this.$store.state.location;
+			project["config"] = this.deepCopy(this.$store.state.configData);
+			console.log(project["config"]);
+			for(let i in project["config"]){
+				console.log(i);
+				console.log(runList[i].next);
+				project["config"][i]["next"] = this.deepCopy(runList[i].next);
+				project["config"][i]["pre"] = this.deepCopy(runList[i].pre);
+				project["config"][i]["location"] = this.deepCopy(loc[i]);
 			}
-		},
+			project["relationship"] = this.$store.state.relationship;
+			project["start"] = this.deepCopy(this.$store.state.start);
+			console.log(project);
+            session.setItem('project',JSON.stringify(project));
+		},		
 		getDataView(id, url){
 		  this.tableData = {
 				data : [],
@@ -335,9 +180,6 @@ export default {
 		menuType(){
 	  		return this.$store.state.menuType;
 	  	},
-	  	dataInfo(){
-	  		return this.$store.state.dataList;
-	  	}
 	},
 	watch :{
 		funcType(newV, oldV){
@@ -351,8 +193,7 @@ export default {
 			let t = this.menuType.type.slice(4,7)
 			if(newV == 1){
 				if(t == "dat"){		
-					let index = this.menuType.type.slice(8);
-					let info = this.dataInfo[Number(index)];						
+					let info = this.$store.state.configData[this.menuType.type].config;
 					this.getDataView(info.fileId, info.fileUrl);
 				}else if(t == "pre" || t == "exp"){
 					this.setResult();
@@ -400,6 +241,7 @@ export default {
 					}
 				}
 				.config {
+					width : 24%;
 					margin : 5px;
 				}
 			}

@@ -232,7 +232,7 @@ export default {
   watch: {
   	configT(newV){
   		let type = newV.slice(4,7);
-  		let preT = newV.slice(7);
+  		let preT = newV.slice(7,8);
   		if(type == "pre"){  			
   			this.preType = Number(preT);
   		}

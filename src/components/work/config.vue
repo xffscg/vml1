@@ -32,6 +32,7 @@ export default {
   		configType : 0,
   		checkAll: false,
       	isIndeterminate: true,
+        // expOption : ["date", "transaction", "item"],
         expOption : [],
       	dataColumns : [],
         dataColumnsNumber : [],
@@ -39,6 +40,20 @@ export default {
   	}
   },
   methods :{
+    deepCopy(oldVal){
+        let target = oldVal.constructor === Array?[]:{};
+        for(let key in oldVal){
+          if(oldVal.hasOwnProperty(key)){
+            if(oldVal[key] && typeof oldVal[key] === "object"){
+              target[key] = oldVal[key].constructor === Array?[]:{};
+              target[key] = this.deepCopy(oldVal[key]);
+            }else{
+              target[key] = oldVal[key];
+            }
+          }
+        }
+        return target;
+    },
   	handleCheckAllChange(val) {
   		console.log(val);
         this.expValue = val ? this.dataColumns : [];
@@ -51,41 +66,62 @@ export default {
     },
     save(){
     	let para = {name : this.configT, config : {projectName : "医药病例分类分析", columnNames: JSON.stringify(this.expValue)}};
-    	this.$store.commit("changeConfig", para);
+    	this.$store.commit("changeConfig", {type : "addConfig", detail : para});
     },
-    getColumns(id, url){
-      getColumnNames({ params: { userId: 1, fileId : id, fileUrl : url } })
-      .then(res => res.data)
-      .then(res => {
-        this.dataColumns = res;
-        if(this.configT.slice(7) == "1" || this.configT.slice(7) == "2"){
-          this.expOption = res;          
+
+    getColumns(id){
+
+      let path = this.popPart(id); 
+      let order = this.$store.state.configOrder;
+      let dataS = {};
+      for(let i = 0; i < path.length; i++){
+        if(!dataS[path[i][0]]){
+          dataS[path[i][0]] = {column : order[path[i][0]].column, columnNumber : order[path[i][0]].columnNumber}
         }
-      })
-      .catch(e => {
-        Message.error(e.error || 'getColumnNames接口1错误，请重试')
-      })
-      getColumnNameWithNumberType({ // 获取数值型列名
-        params: {
-          userId: 1, fileId : id, fileUrl : url
-        }
-      })
-        .then(res => res.data)
-        .then(res => {
-          this.dataColumnsNumber = res;
-          if(this.configT.slice(7) == "3" || this.configT.slice(7) == "4"){
-            this.expOption = res;          
+        for(let item in order){
+          if(path[i].indexOf(item)){
+            console.log("need");
           }
-          // console.log(res) // 以数组的形式返回列名
-          // for (var i = 0; i < res.length; i++) {
-          //   let value = { value: res[i], id: i }
-          //   this.dataShadowFieldList.push(value)
-          //   this.dataSortFieldList.push(value)
-          // }
-        })
-        .catch(e => {
-          Message.error(e.error || 'getColumnNameWithNumberType接口错误，请重试')
-        })
+        }
+      }
+      for(let i in dataS){
+        this.dataColumns = dataS[i].column;
+        this.dataColumnsNumber = dataS[i].columnNumber;
+      }
+      if((id.slice(7,8) == 1 || id.slice(7,8) == 2) && id.slice(4,7) == "exp"){
+        this.expOption = this.dataColumns;
+      }else if((id.slice(7,8) == 3 || id.slice(7,8) == 4) && id.slice(4,7) == "exp"){
+        this.expOption = this.dataColumnsNumber;
+      }
+    },//类似于事件的冒泡原理
+    popPart(id){
+      let list = this.$store.state.runList;
+      let res = [];
+      for(let i = 0; i < list[id].pre.length; i++){
+        let temp = this.deepCopy(res);
+        let subRes = this.popPart(list[id].pre[i]);
+        if(typeof subRes[0] == "string"){
+          res.push(subRes);
+        }else{
+          for(let i = 0; i< subRes.length; i++){
+            res.push(subRes[i]);
+          }
+        }
+      }
+      if(res.length != 0){
+        if(typeof res[0] == "string"){
+          res.push(id);
+        }else{
+          for(let i = 0; i < res.length; i++){
+            res[i].push(id);
+          }
+        }
+      }else{
+        res.push(id);
+      }
+      
+      return res;
+      
     },
   },
   computed:{
@@ -97,14 +133,10 @@ export default {
   	configT(newV){
       this.expValue = [];
   		let type = newV.slice(4,7);
-      let type1 = newV.slice(7);
-      // let r = this.$store.state.relationship;
-      // for(let i = 0; i < r.length; i++){
-      //   if(r[i][1] == newV){
-      //     this.getClomns();
-      //   }
-      // }
-      this.getColumns();
+      let run = this.$store.state.runList;
+      if(run[newV] && type!= "dat"){
+        this.getColumns(newV);
+      }
   		if(type == "exp"){          		        
         this.configType = 1;
   		}else if(type == "pre"){

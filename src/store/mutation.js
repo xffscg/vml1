@@ -19,6 +19,9 @@ export const getAlg = (state, alg) => {
 export const changeDrag = (state, content) => {
 	state.dragContent = content;
 }
+export const changeClear = (state, flag) => {
+  state.clearFlag = flag;
+}
 export const changeMenu = (state, menuType) => {
   state.menuType = deepCopy(menuType);
 }
@@ -32,9 +35,9 @@ export const changeConfigType = (state, configType) => {
   state.configType = configType;
 }
 export const changeRelation = (state, relation) => {
-  console.log(relation);
   state.relationship = [];
   state.relationship = deepCopy(relation);
+  console.log(state.relationship);
 }
 export const changeStart = (state, start) => {
   if(start.type == "add"){
@@ -56,31 +59,67 @@ export const changeStart = (state, start) => {
     }
 
   }
-    console.log(state.start);
 }
 export const changeConfig = (state, configC) => {
-  console.log(configC);
-  if(state.configData[configC.name]){
-    console.log("already");
-    delete state.configData[configC.name];
+  if(configC.type == "addNode"){    
+    if(state.configData[configC.detail.name]){
+      delete state.configData[configC.detail.name];
+    }
+    state.configData[configC.detail.name] = {type :configC.detail.type, name : configC.detail.nameAll, config : {}, next : [], pre : [] , location : {}};
+  }else if(configC.type == "delNode"){
+    delete state.configData[configC.detail.name];
+  }else if(configC.type == "addConfig"){
+     state.configData[configC.detail.name]["config"] = {};
+    state.configData[configC.detail.name]["config"] = deepCopy(configC.detail.config);
+  }else if(configC.type == "addRelation"){
+     // state.configData[configC.detail.name]["config"] = {};
+     // state.configData[configC.detail.name]["config"] = deepCopy(configC.detail.config);
+  }else if(configC.type == "clear"){
+    state.configData = {}
   }
-  state.configData[configC.name] = deepCopy(configC.config);
-  console.log(state.configData);
 }
 export const changeResult = (state, result) => {
-  console.log(result);
   if(state.runResult[result.name]){
-    console.log("already");
     delete state.runResult[result.name];
   }
   state.runResult[result.name] = deepCopy(result.config);
-  console.log(state.runResult);
 }
-export const changeNodes = (state, node) => {
-  if(node.type == "add"){
-    state.nodes[node["config"]["id"]] = node["config"]["name"];
+export const changeLoc = (state, result) => {
+  if(result.name == "clearClear"){
+    state.location = {};
   }else{
-    delete state.nodes[node["config"]["id"]];
+    if(state.location[result.name]){
+      delete state.location[result.name];
+    }
+    console.log(result);
+    state.location[result.name] = {x : result.x, y : result.y};
+  }
+  console.log(state.location);
+}
+export const changeRun = (state, result) => {
+  state.runList = {};
+  state.runList = deepCopy(result);
+}
+export const changeConfigOrder = (state, node) => {
+  // if()
+  if(node.type == "addC"){
+    if(!state.configOrder[node["config"]["name"]]){
+      state.configOrder[node["config"]["name"]] = {column : deepCopy(node["config"]["column"]), columnNumber : []};
+    }else{
+      state.configOrder[node["config"]["name"]]["column"] = [];
+      state.configOrder[node["config"]["name"]]["column"] = deepCopy(node["config"]["column"]);
+    }
+  }else if(node.type == "addCN"){
+    if(!state.configOrder[node["config"]["name"]]){
+      state.configOrder[node["config"]["name"]] = {column : [], columnNumber : deepCopy(node["config"]["columnNumber"])};
+    }else{
+      state.configOrder[node["config"]["name"]]["columnNumber"] = [];
+      state.configOrder[node["config"]["name"]]["columnNumber"] = deepCopy(node["config"]["columnNumber"]);
+    }
+  }else if(node.type == "del"){
+    delete state.configOrder[node["config"]["name"]];
+  }else if(node.type == "clear"){
+    state.configOrder = {};
   }
 }
 function deepCopy(oldVal){

@@ -34,7 +34,10 @@ const state = {
 	relationship : [],//图中连线
 	start : [],//开始的数据节点
 	runResult : [],//运行的结果
-	nodes : {},//图内节点数据
+	runList : {},
+	configOrder : {},
+	clearFlag : 0,
+	location : {},
 }
 
 
