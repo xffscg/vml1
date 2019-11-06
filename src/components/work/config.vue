@@ -3,8 +3,8 @@
 		<div v-show="configType == 1" style="padding-top:15px;">
 			<h3>请选择字段</h3>
 			<div class="choose">
-			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
-          <el-checkbox-group v-model="expValue" @change="handleCheckedOptionsChange">
+			     <el-checkbox v-show="showAll" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+          <el-checkbox-group v-model="expValue" @change="handleCheckedOptionsChange" :min="min" :max="max">
               <el-checkbox v-for="value in expOption" :label="value" :key="value">{{value}}</el-checkbox>
           </el-checkbox-group>
     	</div>       
@@ -30,13 +30,16 @@ export default {
   data(){
   	return {
   		configType : 0,
+      showAll : true,
   		checkAll: false,
       	isIndeterminate: true,
         // expOption : ["date", "transaction", "item"],
         expOption : [],
       	dataColumns : [],
         dataColumnsNumber : [],
-      	expValue : []
+      	expValue : [],
+        min : 0,
+        max : 0,
   	}
   },
   methods :{
@@ -56,21 +59,24 @@ export default {
     },
   	handleCheckAllChange(val) {
   		console.log(val);
-        this.expValue = val ? this.dataColumns : [];
+        this.expValue = val ? this.expOption : [];
         this.isIndeterminate = false;
    },
     handleCheckedOptionsChange(value) {
 	    let checkedCount = value.length;
-	    this.checkAll = checkedCount === this.dataColumns.length;
-	    this.isIndeterminate = checkedCount > 0 && checkedCount < this.dataColumns.length;
+	    this.checkAll = checkedCount === this.expOption.length;
+	    this.isIndeterminate = checkedCount > 0 && checkedCount < this.expOption.length;
     },
     save(){
-    	let para = {name : this.configT, config : {projectName : "医药病例分类分析", columnNames: JSON.stringify(this.expValue)}};
+    	let para = {};
+      if(this.configT.slice(7,8) == 2){
+        para = {columnNames : this.expValue[0]};
+      }else{
+        para = {columnNames : this.expValue};
+      }
     	this.$store.commit("changeConfig", {type : "addConfig", detail : para});
     },
-
     getColumns(id){
-
       let path = this.popPart(id); 
       let order = this.$store.state.configOrder;
       let dataS = {};
@@ -80,7 +86,16 @@ export default {
         }
         for(let item in order){
           if(path[i].indexOf(item)){
-            console.log("need");
+            if(order[item].type == "addcolumn"){
+              for(let j in order[item].config){
+                dataS[item].column.push(order[item].config[j]);
+              }
+              
+            }else if(order[item].type == "addcolumnN"){
+              for(let j in order[item].config){
+                dataS[item].columnNumber.push(order[item].config[j]);
+              }
+            }
           }
         }
       }
@@ -89,8 +104,21 @@ export default {
         this.dataColumnsNumber = dataS[i].columnNumber;
       }
       if((id.slice(7,8) == 1 || id.slice(7,8) == 2) && id.slice(4,7) == "exp"){
+        if(id.slice(7,8) == 2){
+          this.max = 1;
+          this.showAll = false;
+        }else{
+          this.max = this.dataColumns.length;
+        }
         this.expOption = this.dataColumns;
       }else if((id.slice(7,8) == 3 || id.slice(7,8) == 4) && id.slice(4,7) == "exp"){
+        if(id.slice(7,8) == 4){
+          this.max = 2;
+          // this.min = 2;
+          this.showAll = false;
+        }else{
+          this.max = this.dataColumnsNumber.length;
+        }
         this.expOption = this.dataColumnsNumber;
       }
     },//类似于事件的冒泡原理
@@ -132,12 +160,14 @@ export default {
   watch: {
   	configT(newV){
       this.expValue = [];
+      this.checkAll = false;
+      this.isIndeterminate = true;
   		let type = newV.slice(4,7);
       let run = this.$store.state.runList;
       if(run[newV] && type!= "dat"){
         this.getColumns(newV);
       }
-  		if(type == "exp"){          		        
+  		if(type == "exp"){        
         this.configType = 1;
   		}else if(type == "pre"){
   			this.configType = 2;

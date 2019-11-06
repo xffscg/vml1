@@ -43,7 +43,7 @@ export default {
     height: 50px;
     width :100%;
     position :fixed;
-    z-index : 1;
+    z-index : 2;
   }
   .layout-container {
     margin-top: 50px;
@@ -53,7 +53,7 @@ export default {
       width: 6%;
       height : 100%;
       position : fixed;
-      z-index : 1;
+      z-index : 2;
     }
     .layout-right {
       position: relative;
