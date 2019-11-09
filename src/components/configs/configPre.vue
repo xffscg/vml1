@@ -217,6 +217,7 @@ export default {
 	        value_2: '',
 	        newName : ''
   		},
+  		shadowNewNameArray : [],
   		shadowArray : [],
 		newColumnN: "",
 		shadowRuleList: ['+', '-', '*', '/'],
@@ -284,14 +285,17 @@ export default {
 	  		para = {parameter : this.fillArray};
 	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
   		}else if(this.preType == 3){
+  			// 增加列
   			if(this.newColumnN != ""){
 	  			this.divide.newColumnNames.push(this.newColumnN);
 	  			this.newColumnN = "";
 	  		}
 	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.divide}});
+	  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.divide.newColumnNames}});
   		}else if(this.preType == 5){
   			if(this.shadow.colName_1 != "" && this.shadow.operate_1 != "" && this.shadow.value_1 != "" && this.shadow.operate != "" && this.shadow.colName_2 != "" && this.shadow.operate_2 != "" && this.shadow.value_2 != "" && this.shadow.newName != ""){
 	  			this.shadowArray.push({colName_1 :this.shadow.colName_1, operate_1 : this.shadow.operate_1, value_1 : this.shadow.value_1, operate : this.shadow.operate, colName_2 :this.shadow.colName_2, operate_2 : this.shadow.operate_2, value_2 : this.shadow.value_2, newName : this.shadow.newName});
+	  			this.shadowNewNameArray.push(this.shadow.newName);
 	  			this.shadow.colName_1 = "";
 	  			this.shadow.operate_1 = "";
 	  			this.shadow.value_1 = "";
@@ -303,11 +307,14 @@ export default {
 	  		}
 	  		para = {parameter : this.shadowArray};
 	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+	  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.shadowNewNameArray}});
+	  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.shadowNewNameArray}});
   		}else if(this.preType == 5){
   			for(let i in this.columnsValue){
   				this.connect.columnNames.push(this.columnsValue[i]);
   			}
 	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.connect}});
+	  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.connect.newColumnName]}});
   		}
   	},
   	addFill(){
@@ -332,6 +339,7 @@ export default {
   	addShadow(){
   		if(this.shadow.colName_1 != "" && this.shadow.operate_1 != "" && this.shadow.value_1 != "" && this.shadow.operate != "" && this.shadow.colName_2 != "" && this.shadow.operate_2 != "" && this.shadow.value_2 != "" && this.shadow.newName != ""){
   			this.shadowArray.push({colName_1 :this.shadow.colName_1, operate_1 : this.shadow.operate_1, value_1 : this.shadow.value_1, operate : this.shadow.operate, colName_2 :this.shadow.colName_2, operate_2 : this.shadow.operate_2, value_2 : this.shadow.value_2, newName : this.shadow.newName});
+  			this.shadowNewNameArray.push(this.shadow.newName);
   			this.shadow.colName_1 = "";
   			this.shadow.operate_1 = "";
   			this.shadow.value_1 = "";

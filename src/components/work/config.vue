@@ -33,7 +33,6 @@ export default {
       showAll : true,
   		checkAll: false,
       	isIndeterminate: true,
-        // expOption : ["date", "transaction", "item"],
         expOption : [],
       	dataColumns : [],
         dataColumnsNumber : [],
@@ -69,36 +68,38 @@ export default {
     },
     save(){
     	let para = {};
-      if(this.configT.slice(7,8) == 2){
+      if(this.configT.slice(7,8) == "2"){
         para = {columnNames : this.expValue[0]};
       }else{
         para = {columnNames : this.expValue};
       }
-    	this.$store.commit("changeConfig", {type : "addConfig", detail : para});
+    	this.$store.commit("changeConfig", {type : "addConfig", detail : {name : this.configT, config : para}});
     },
     getColumns(id){
       let path = this.popPart(id); 
       let order = this.$store.state.configOrder;
+      console.log(order);
       let dataS = {};
       for(let i = 0; i < path.length; i++){
         if(!dataS[path[i][0]]){
-          dataS[path[i][0]] = {column : order[path[i][0]].column, columnNumber : order[path[i][0]].columnNumber}
+          dataS[path[i][0]] = {column : this.deepCopy(order[path[i][0]].column), columnNumber : this.deepCopy(order[path[i][0]].columnNumber)}
         }
         for(let item in order){
           if(path[i].indexOf(item)){
-            if(order[item].type == "addcolumn"){
-              for(let j in order[item].config){
-                dataS[item].column.push(order[item].config[j]);
-              }
-              
-            }else if(order[item].type == "addcolumnN"){
-              for(let j in order[item].config){
-                dataS[item].columnNumber.push(order[item].config[j]);
-              }
+            if(order[item].column.length != 0){
+              for(let j in order[item].column){
+                dataS[path[i][0]].column.push(order[item].column[j]);
+              }              
+            }
+            if(order[item].columnNumber.length != 0){
+              for(let j in order[item].columnNumber){
+                dataS[path[i][0]].columnNumber.push(order[item].columnNumber[j]);
+              } 
             }
           }
         }
       }
+      console.log(dataS);
       for(let i in dataS){
         this.dataColumns = dataS[i].column;
         this.dataColumnsNumber = dataS[i].columnNumber;
@@ -146,10 +147,8 @@ export default {
         }
       }else{
         res.push(id);
-      }
-      
-      return res;
-      
+      }      
+      return res;      
     },
   },
   computed:{

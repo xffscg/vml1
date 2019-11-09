@@ -161,7 +161,6 @@ export default {
       if(isType == "pro"){
         let session = window.sessionStorage;
         let r = JSON.parse(session.getItem("project"));
-        // let order = this.getOrder(r.relationship);
         this.setDiagram(r.config);
         for(let i in r.config){
           this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
@@ -239,7 +238,7 @@ export default {
       getColumnNames({ params: { userId: 1, fileId : id, fileUrl : url } })
       .then(res => res.data)
       .then(res => {
-        this.$store.commit("changeConfigOrder", {type : "addC", config : {name : name, column: res}});      })
+        this.$store.commit("changeConfigOrder", {type : "addColumn", config : {name : name, column: res}});      })
       .catch(e => {
         Message.error(e.error || 'getColumnNames接口1错误，请重试')
       })
@@ -250,42 +249,14 @@ export default {
       })
         .then(res => res.data)
         .then(res => {
-          this.$store.commit("changeConfigOrder", {type : "addCN", config : {name : name, columnNumber: res}});
+          this.$store.commit("changeConfigOrder", {type : "addColumnN", config : {name : name, columnNumber: res}});
           
         })
         .catch(e => {
           Message.error(e.error || 'getColumnNameWithNumberType接口错误，请重试')
         })
         
-    },
-    getOrder(r){      
-      let order = [];
-      let start = "";
-      for(let i = 0; i < r.length; i++){
-        if(r[i][0].slice(4,7) == "dat"){
-          order.push(r[i][0]);
-          start = r[i][0];
-          this.$store.commit("changeStart", {type:"clear", detail:""});
-          this.$store.commit("changeStart", {type:"add", detail:start});
-        }
-      }
-      let flag = Array(r.length);
-      flag.fill(0);
-      let time = 0;
-      while(flag.some(function(v){ return (v == 0)}) && time < 10){
-        for(let i = 0; i < r.length; i++){
-          if(flag[i] == 0){
-            if(r[i][0] == start){
-              order.push(r[i][1]);
-              flag[i] = 1;
-              start = r[i][1];
-            }
-          }
-        }
-        time += 1;
-      }//得到执行的顺序
-      return order;
-    },
+    },    
   	dragover(e){
       e.preventDefault();
   	},

@@ -4,7 +4,7 @@
 			<h3>分位数离散</h3>
 			<div class="select">
 				<el-select v-model="quantile.columnName">
-					<el-option v-for="value in columnNumberType" :label="value" :key="value" :value="value"></el-option>
+					<el-option v-for="(value, i) in columnNumberType" :label="value" :key="i" :value="value"></el-option>
 				</el-select>
 			</div>
 			<div class="select">
@@ -20,7 +20,7 @@
 				<h5>列名</h5>				
 			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
 		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
-		              <el-checkbox v-for="value in columnsOption" :label="value" :key="value">{{value}}</el-checkbox>
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
 		          </el-checkbox-group>
 			</div>
 			<div class="select">
@@ -37,7 +37,7 @@
 
 			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
 		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
-		              <el-checkbox v-for="value in columnsOption" :label="value" :key="value">{{value}}</el-checkbox>
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
 		          </el-checkbox-group>
 			</div>
 			<div class="select">
@@ -51,7 +51,7 @@
 				
 			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
 		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
-		              <el-checkbox v-for="value in columnsOption" :label="value" :key="value">{{value}}</el-checkbox>
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
 		          </el-checkbox-group>
 			</div>
 			<div class="select">
@@ -65,7 +65,7 @@
 			<h3>字符串转标签</h3>
 			<div class="select">
 				<el-select v-model="indexer.columnName">
-					<el-option v-for="value in column" :label="value" :key="value" :value="value"></el-option>
+					<el-option v-for="(value,i) in column" :label="value" :key="i" :value="value"></el-option>
 				</el-select>
 			</div>
 			<div class="select">
@@ -79,7 +79,7 @@
 
 			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
 		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
-		              <el-checkbox v-for="value in columnsOption" :label="value" :key="value">{{value}}</el-checkbox>
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
 		          </el-checkbox-group>
 			</div>
 			<div class="select">
@@ -93,7 +93,7 @@
 
 			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
 		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
-		              <el-checkbox v-for="value in columnsOption" :label="value" :key="value">{{value}}</el-checkbox>
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
 		          </el-checkbox-group>
 			</div>
 			<div class="select">
@@ -180,29 +180,35 @@ export default {
     },
   	save(){
   		let para = {};
-  		if(this.feaType == 1){		  			
+  		if(this.feaType == 1){	
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.quantile.newColumnName]}});	  			
         	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.quantile}});
   		}else if(this.feaType == 2){
   			for(let i in this.columnsValue){
   				this.vector.columnNames.push(this.columnsValue[i]);
   			}
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.vector.newColumnName}});
         	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.vector}});
   		}else if(this.feaType == 3){
   			for(let i in this.columnsValue){
   				this.standard.columnNames.push(this.columnsValue[i]);
   			}
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.standard.newColumnName}});
   			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.standard}});
   		}else if(this.feaType == 4){
   			for(let i in this.columnsValue){
   				this.pca.columnNames.push(this.columnsValue[i]);
   			}
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.pca.newColumnName}});
   			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.pca}});
   		}else if(this.feaType == 5){
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.indexer.newColumnName}});
         	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.indexer}});
 	    }else if(this.feaType == 6){
 	    	for(let i in this.columnsValue){
   				this.poly.columnNames.push(this.columnsValue[i]);
   			}
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.poly.newColumnName}});
 	        this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.poly}});
 	    }
   	},

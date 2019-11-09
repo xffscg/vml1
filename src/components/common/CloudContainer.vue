@@ -1,21 +1,22 @@
 <template>
     <div class="cloud-container">
         <!-- <slot></slot> -->
-        <div v-show="!notHome">home page</div>
-        
-        <div class="funcPart"  v-show="notHome">
+        <div v-show="funcType == 1">home page</div>        
+        <div class="funcPart"  v-show="funcType != 1">
         	<div class="funcGuid">
 	        	<projectList v-show = "funcType == 3"></projectList>
 	        	<algList v-show = "funcType == 4"></algList>
 	        	<dataList v-show = "funcType == 2"></dataList>
+	        	<reportList v-show = "funcType == 5"></reportList>
 	        </div>
-	        <div class="work">
+	        <div class="work" v-show = "funcType != 5">
 	        	<div class="workTop">
 	        		<div class="diagram">
 	        			<div class="header">
 	        				<el-button type="primary" plain icon="el-icon-video-play" @click="goRun">运行</el-button>
 	        				<el-button type="primary" plain icon="el-icon-s-operation" >保存模型</el-button>
 	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="clear">清空画布</el-button>
+	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="getReport">生成报告</el-button>
 	        			</div>
 	        			<diagram></diagram>
 	        		</div>
@@ -23,11 +24,11 @@
 	        	</div>
 	        	<div class="log"><RunLog></RunLog></div>	        	
 	        </div>
+	        <div class="reportPart" v-show = "funcType == 5"><Report></Report></div>
         </div>
         <div class="detailPop"  v-show="showDetail !=0 && showDetail !=9">	          
 	    </div>
 	    <div class="detail" v-show="showDetail == 1"><Detail :tableData="tableData.data" :column="tableData.column" :length="tableData.length" :title="tableData.title"></Detail></div>
-	    <div class="detail" v-show=""></div>
 	         
     </div>
 </template>
@@ -40,10 +41,12 @@ import { Message } from 'element-ui'
 import projectList from '../function/projectList'
 import algList from '../function/algList'
 import dataList from '../function/dataList'
+import reportList from '../function/reportList'
 import diagram from '../work/diagram'
 import Config from '../work/config'
 import RunLog from '../work/runLog'
 import Detail from '../work/detail'
+import Report from '../work/report'
 export default {
 	components: {
 	    projectList,
@@ -52,11 +55,13 @@ export default {
 	    diagram,
 	    Config,
 	    RunLog,
-	    Detail
+	    Detail,
+	    Report,
+	    reportList
 	},
 	data(){
 		return {
-			notHome : false,
+			// notHome : false,
 			tableData : {
 				data : [],
 				column : [],
@@ -72,6 +77,10 @@ export default {
 			this.$store.commit("changeConfigOrder", {type : "clear"});
 			this.$store.commit("changeLoc", {name : "clearClear"});
 			this.$store.commit("changeClear", timestamp);
+		},
+		getReport(){
+			this.$store.commit('changeReportList', {type : "add", detail : {name : "新建报告"}});
+			this.$store.commit('changeType', 5);
 		},
 		goRun(){
 			this.saveProject();
@@ -182,24 +191,19 @@ export default {
 	  	},
 	},
 	watch :{
-		funcType(newV, oldV){
-			if(newV != 1){
-				this.notHome = true;
-			}else{
-				this.notHome = false;
-			}
-		},
 		showDetail(newV){
-			let t = this.menuType.type.slice(4,7)
-			if(newV == 1){
-				if(t == "dat"){		
-					let info = this.$store.state.configData[this.menuType.type].config;
-					this.getDataView(info.fileId, info.fileUrl);
-				}else if(t == "pre" || t == "exp"){
-					this.setResult();
+			if(newV != 11){				
+				let t = this.menuType.type.slice(4,7)
+				if(newV == 1){
+					if(t == "dat"){		
+						let info = this.$store.state.configData[this.menuType.type].config;
+						this.getDataView(info.fileId, info.fileUrl);
+					}else if(t == "pre" || t == "exp"){
+						this.setResult();
+					}
+				}else if(newV == 9){
+					this.runFrom();
 				}
-			}else if(newV == 9){
-				this.runFrom();
 			}
 		},
 	},
@@ -248,6 +252,12 @@ export default {
 			.log {
 				flex : 1;
 			}
+		}
+		.reportPart {
+			flex : 1;
+			position :relative;
+			margin:5px;
+			height : 700px;	
 		}
 
 	}

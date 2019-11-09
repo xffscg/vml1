@@ -5,6 +5,7 @@
  * @version $Id$
  */
 export const changeType = (state, funcType) => {
+  console.log(funcType);
 	state.funcType = funcType;
 }
 export const getPro = (state, proN) => {
@@ -15,6 +16,11 @@ export const getData = (state, dataN) => {
 }
 export const getAlg = (state, alg) => {
 	state.algList = deepCopy(alg);
+}
+export const changeReportList = (state, content) => {
+  if(content.type = "add"){
+    state.reportList.push(content.detail);
+  }
 }
 export const changeDrag = (state, content) => {
 	state.dragContent = content;
@@ -101,15 +107,16 @@ export const changeRun = (state, result) => {
   state.runList = deepCopy(result);
 }
 export const changeConfigOrder = (state, node) => {
+  console.log(node);
   // if()
-  if(node.type == "addC"){
+  if(node.type == "addColumn"){
     if(!state.configOrder[node["config"]["name"]]){
       state.configOrder[node["config"]["name"]] = {column : deepCopy(node["config"]["column"]), columnNumber : []};
     }else{
       state.configOrder[node["config"]["name"]]["column"] = [];
       state.configOrder[node["config"]["name"]]["column"] = deepCopy(node["config"]["column"]);
     }
-  }else if(node.type == "addCN"){
+  }else if(node.type == "addColumnN"){
     if(!state.configOrder[node["config"]["name"]]){
       state.configOrder[node["config"]["name"]] = {column : [], columnNumber : deepCopy(node["config"]["columnNumber"])};
     }else{
@@ -121,6 +128,7 @@ export const changeConfigOrder = (state, node) => {
   }else if(node.type == "clear"){
     state.configOrder = {};
   }
+  console.log(state.configOrder);
 }
 function deepCopy(oldVal){
     let target = oldVal.constructor === Array?[]:{};
