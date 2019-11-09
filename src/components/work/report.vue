@@ -10,11 +10,9 @@
 </template>
 
 <script>
-import FullTable from '../report/fullTable'
 export default {
   name: 'report',
   components : {
-  	FullTable
   },
   methods: {
   	close(){

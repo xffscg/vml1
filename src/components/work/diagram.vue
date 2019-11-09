@@ -345,8 +345,8 @@ export default {
         this.$store.commit("changeRun", list);
         this.$store.commit("changeRelation", r);
     },
-    showDetail(){
-      this.$store.commit("changeShow", 1);
+    showDetail(n){
+      this.$store.commit("changeShow", Number(n));
     },
     deepCopy(oldVal){
         let target = oldVal.constructor === Array?[]:{};
@@ -398,7 +398,7 @@ export default {
           this.showDetail();
           break;
         case "res":
-          this.showDetail();
+          this.showDetail(newV.slice(3,4));
           break;
         default:
           break;

@@ -90,7 +90,6 @@
 			<h3>卡方</h3>
 			<div class="selectHigh">
 				<h5>列名</h5>
-
 			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
 		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
 		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>

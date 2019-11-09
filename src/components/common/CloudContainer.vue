@@ -28,8 +28,8 @@
         </div>
         <div class="detailPop"  v-show="showDetail !=0 && showDetail !=9">	          
 	    </div>
-	    <div class="detail" v-show="showDetail == 1"><Detail :tableData="tableData.data" :column="tableData.column" :length="tableData.length" :title="tableData.title"></Detail></div>
-	         
+	    <div class="detail" v-show="showDetail == 1"><Detail  :tableData="tableData.data" :column="tableData.column" :length="tableData.length" :title="tableData.title"></Detail></div>	      
+	    <div class="detail" v-show="showDetail == 2"><CoeDetail></CoeDetail></div>	   
     </div>
 </template>
 
@@ -47,6 +47,7 @@ import Config from '../work/config'
 import RunLog from '../work/runLog'
 import Detail from '../work/detail'
 import Report from '../work/report'
+import CoeDetail from '../work/coeDetail'
 export default {
 	components: {
 	    projectList,
@@ -57,7 +58,8 @@ export default {
 	    RunLog,
 	    Detail,
 	    Report,
-	    reportList
+	    reportList,
+	    CoeDetail
 	},
 	data(){
 		return {
@@ -167,14 +169,6 @@ export default {
 	      	let r = this.$store.state.relationship;
 	      	let order = this.getOrder(r);
 	      	let index = order.indexOf(this.menuType.type);
-		  	async function runAll(){
-				for(let i = index; i< order.length; i++){
-					console.log(order[i]);
-					let para = this.$store.state.configData[order[i]];
-					await this.allAlgApi(order[i], para);
-				}
-			}
-			runAll.call(this);
 			this.saveProject();
 	    },
     },
@@ -191,19 +185,21 @@ export default {
 	  	},
 	},
 	watch :{
-		showDetail(newV){
-			if(newV != 11){				
-				let t = this.menuType.type.slice(4,7)
-				if(newV == 1){
-					if(t == "dat"){		
-						let info = this.$store.state.configData[this.menuType.type].config;
-						this.getDataView(info.fileId, info.fileUrl);
-					}else if(t == "pre" || t == "exp"){
-						this.setResult();
-					}
-				}else if(newV == 9){
-					this.runFrom();
+		showDetail(newV){				
+			let t = this.menuType.type.slice(4,7)
+			if(newV == 1){
+				if(t == "dat"){		
+					let info = this.$store.state.configData[this.menuType.type].config;
+					this.getDataView(info.fileId, info.fileUrl);
+				}else if(t == "pre" || t == "fea" || t == "exp"){
+					this.setResult();
 				}
+			}else if(newV == 2){
+				console.log("2");
+			}else if(newV == 3){
+				console.log("3");
+			}else if(newV == 9){
+				this.runFrom();
 			}
 		},
 	},

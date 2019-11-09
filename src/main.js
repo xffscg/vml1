@@ -6,6 +6,7 @@ import router from './router'
 import store from './store'
 import './assets/css/base.css'
 import 'element-ui/lib/theme-chalk/index.css'
+import echarts from "echarts"
 // element-ui组件
 import ElementUI from 'element-ui'
 import gojs from 'gojs'
