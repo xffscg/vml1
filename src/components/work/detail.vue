@@ -57,7 +57,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .detail {
 	width:100%;
 	height: 100%;
@@ -86,11 +86,4 @@ export default {
   margin-top: 10px;
   margin-bottom: 20px;
 }
-/*.resPart {
-	position: relative;
-	width: 80%;
-	height: 80%;
-	background-color: white;
-	opacity:1;
-}*/
 </style>

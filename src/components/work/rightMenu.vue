@@ -62,14 +62,14 @@ export default {
         if(this.$store.state.menuOp == "res1"+this.mId){
           this.$store.commit('changeShow', 1);
         }else if(this.$store.state.menuOp == "res2"+this.mId){
-          this.$store.commit('changeShow', 1);
+          this.$store.commit('changeShow', 2);
         }else if(this.$store.state.menuOp == "res3"+this.mId){
           this.$store.commit('changeShow', 3);
-        }else if(this.mId.slice(4,8) == "exp1" || this.mId.slice(4,8) == "exp2" || this.mId.slice(4,7) == "pre" || this.mId.slice(4,7) == "fea"){          
+        }else if(this.mId.slice(4,8) == "exp1" || this.mId.slice(4,7) == "pre" || this.mId.slice(4,7) == "fea"){          
           this.$store.commit('changeOp', "res1"+this.mId);
-        }else if(this.mId.slice(4,8) == "exp3"){          
+        }else if(this.mId.slice(4,8) == "exp3" || this.mId.slice(4,8) == "exp4"){          
           this.$store.commit('changeOp', "res2"+this.mId);
-        }else if(this.mId.slice(4,8) == "exp4"){          
+        }else if(this.mId.slice(4,8) == "exp2"){          
           this.$store.commit('changeOp', "res3"+this.mId);
         }//保证可以多次查看
       }else if(e.target.id == 1){

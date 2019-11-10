@@ -29,7 +29,8 @@
         <div class="detailPop"  v-show="showDetail !=0 && showDetail !=9">	          
 	    </div>
 	    <div class="detail" v-show="showDetail == 1"><Detail  :tableData="tableData.data" :column="tableData.column" :length="tableData.length" :title="tableData.title"></Detail></div>	      
-	    <div class="detail" v-show="showDetail == 2"><CoeDetail></CoeDetail></div>	   
+	    <div class="detail" v-show="showDetail == 2"><ChartDetail ref="ChartDetail"></ChartDetail></div>
+	    <div class="detail" v-show="showDetail == 3"><TableChartDetail ref="TableChartDetail" :tableData="temFrequencyTable" :freName="freName"></TableChartDetail></div>	   
     </div>
 </template>
 
@@ -47,7 +48,8 @@ import Config from '../work/config'
 import RunLog from '../work/runLog'
 import Detail from '../work/detail'
 import Report from '../work/report'
-import CoeDetail from '../work/coeDetail'
+import ChartDetail from '../work/chartDetail'
+import TableChartDetail from '../work/tableChartDetail'
 export default {
 	components: {
 	    projectList,
@@ -59,7 +61,8 @@ export default {
 	    Detail,
 	    Report,
 	    reportList,
-	    CoeDetail
+	    ChartDetail,
+	    TableChartDetail
 	},
 	data(){
 		return {
@@ -70,6 +73,8 @@ export default {
 				length : 0,
 				title : ""
 			},
+			temFrequencyTable : [],
+			freName : ""
 		}
 	},
 	methods:{
@@ -171,6 +176,7 @@ export default {
 	      	let index = order.indexOf(this.menuType.type);
 			this.saveProject();
 	    },
+	    
     },
 	computed :{
 		funcType(){
@@ -195,9 +201,61 @@ export default {
 					this.setResult();
 				}
 			}else if(newV == 2){
-				console.log("2");
+				// let res = this.$store.state.runResult[newV];
+				// this.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
+
+				// 为暂时替代
+				let that = this;
+				if(this.menuType.type.slice(7,8) == "3"){
+					correlationCoefficient({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["数量", "销售额", "折扣"]) }).then(res => res.data) // 列名的传送和处理待定
+			        .then(res => {
+			          console.log(res)
+					that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
+			        })
+			        .catch(e => {
+			          Message.error(e.error || 'correlationCoefficient接口错误，请重试')
+			        })
+				}else{
+					scatterPlot({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["数量", "销售额"]) }).then(res => res.data)
+			        .then(res => {
+			          console.log(res);
+			         that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
+			        })
+			        .catch(e => {
+			          Message.error(e.error || '接口错误，请重试')
+			        })
+				}
+				// 暂时替代
+				
 			}else if(newV == 3){
-				console.log("3");
+				// let res = this.$store.state.runResult[newV];
+				// this.temFrequencyTable = []
+		  //       for (let index in res) {
+		  //         	let obj = {}
+		  //           obj.columnName = index
+		  //           obj.rate = res[index]
+		  //           this.temFrequencyTable.push(obj)
+		  //       }
+				// let config = this.$store.state.configData[newV].config;
+				// this.freName = config.columnNames[0];
+				// this.$refs.TableChartDetail.setChart(this.temFrequencyTable);
+				let that = this;
+				frequencyStatistics({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["产品名称"]) }).then(res => res.data)
+		        .then(res => {
+		          console.log(res)
+		          that.temFrequencyTable = []
+		          for (let index in res) {
+		          	let obj = {}
+		            obj.columnName = index
+		            obj.rate = res[index]
+		            that.temFrequencyTable.push(obj)
+		          }
+		          that.freName = "产品名称"
+		          that.$refs.TableChartDetail.setChart(that.temFrequencyTable);
+		        })
+		        .catch(e => {
+		          Message.error(e.error || 'frequencyStatistics接口错误，请重试')
+		        })
 			}else if(newV == 9){
 				this.runFrom();
 			}

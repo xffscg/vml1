@@ -34,7 +34,7 @@ const state = {
 	configData : {},//配置的数据
 	relationship : [],//图中连线
 	start : [],//开始的数据节点
-	runResult : [],//运行的结果
+	runResult : {},//运行的结果
 	runList : {},
 	configOrder : {},
 	clearFlag : 0,
