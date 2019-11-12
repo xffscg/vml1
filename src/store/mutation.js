@@ -71,7 +71,7 @@ export const changeConfig = (state, configC) => {
     if(state.configData[configC.detail.name]){
       delete state.configData[configC.detail.name];
     }
-    state.configData[configC.detail.name] = {type :configC.detail.type, name : configC.detail.nameAll, config : {}, next : [], pre : [] , location : {}};
+    state.configData[configC.detail.name] = {name :configC.detail.nameAll, type : configC.detail.type, config : null, next : [], pre : [] , location : {}};
   }else if(configC.type == "delNode"){
     delete state.configData[configC.detail.name];
   }else if(configC.type == "addConfig"){
@@ -83,12 +83,22 @@ export const changeConfig = (state, configC) => {
   }else if(configC.type == "clear"){
     state.configData = {}
   }
+  // console.log(state.configData)
 }
 export const changeResult = (state, result) => {
-  if(state.runResult[result.name]){
-    delete state.runResult[result.name];
+  if(result.type == "add"){
+    if(state.runResult[result.name]){
+      delete state.runResult[result.name];
+    }
+    state.runResult[result.name] = deepCopy(result.config);
+  }else if(result.type == "del"){
+    if(state.runResult[result.name]){
+      delete state.runResult[result.name];
+    }
+  }else if(result.type == "clear"){
+    state.runResult = {};
   }
-  state.runResult[result.name] = deepCopy(result.config);
+  
 }
 export const changeLoc = (state, result) => {
   if(result.name == "clearClear"){
@@ -127,6 +137,8 @@ export const changeConfigOrder = (state, node) => {
     delete state.configOrder[node["config"]["name"]];
   }else if(node.type == "clear"){
     state.configOrder = {};
+  }else if(node.type == "copy"){
+    state.configOrder = deepCopy(node.config);
   }
   console.log(state.configOrder);
 }

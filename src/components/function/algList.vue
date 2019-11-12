@@ -4,11 +4,11 @@
 	        <template v-for="(item,i) in algArr">
 	          <el-submenu :index="i.toString()" :key="i">
 	            <template slot="title">
-	              <i :class="item.icon"></i>
+	              <!-- <i :class="item.icon"></i> -->
 	              <span slot="title">{{ item.name }}</span>
 	            </template>
-	            <template v-for="(subItem,i) in item.list">
-	            	<div class="dragItem" :id="subItem.id" draggable="true" @dragstart="drag($event)">
+	            <template v-for="subItem in item.list">
+	            	<div class="dragItem" :id="changeId(subItem.id)" :key="subItem.id" draggable="true" @dragstart="drag($event)">
 		                <span>{{subItem.name}}</span>
 		            </div>
 	            </template>
@@ -35,6 +35,19 @@ export default {
 	methods :{
 		drag(e){
 			this.$store.commit('changeDrag', e.currentTarget.cloneNode(true));
+		},
+		changeId(id){
+			let newId = ""
+			if(String(id).slice(0,3) == "300"){
+				newId = String(id) + "exp" + String(id).slice(3);
+			}else if(String(id).slice(0,3) == "100"){
+				newId = String(id) + "pre" + String(id).slice(3);
+			}else if(String(id).slice(0,3) == "200"){
+				newId = String(id) + "fea" + String(id).slice(3);
+			}else if(String(id).slice(0,3) == "400"){
+				newId = String(id) + "ana" + String(id).slice(3);
+			}
+			return newId;
 		}
 	},
 	computed:{

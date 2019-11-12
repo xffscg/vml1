@@ -53,6 +53,7 @@ export default {
   		if(e.target.id == 0){
   			this.$store.commit('changeOp', "del"+this.mId);
   		}else if(e.target.id == 2){
+        console.log(this.$store.state.menuOp);
         if(this.$store.state.menuOp == "data"+this.mId){
           this.$store.commit('changeShow', 1);
         }else{          

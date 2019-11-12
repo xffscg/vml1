@@ -4,7 +4,7 @@
 		<el-table :data="tableData" style="width: 100%" height="600">
 	        <el-table-column v-for="col in column" :fixed="col.fixed" :prop="col.prop" :label="col.prop" :key="col.prop">
 	        </el-table-column>
-	    </el-table>	
+    </el-table>	
 	</div>
 </template>
 

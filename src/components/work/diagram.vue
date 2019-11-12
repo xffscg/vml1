@@ -152,12 +152,30 @@ export default {
     });
   },
   methods:{
+    changeClass(state, currentNode){
+      console.log(currentNode);
+      if(state == "success"){
+        console.log("s");
+        $("#" + currentNode).css("border","solid 3px #409EFF");
+        // $("#" + currentNode).css("border","3px dashed #fff")
+        // $("#" + currentNode).css("background","linear-gradient(to bottom, #34538b, #cd0000)");
+        // $("#" + currentNode).css("backgroundOrigin","border-box");
+      }else if(state == "fail"){
+        console.log("fail");
+        $("#" + currentNode).css("border","solid 3px #F56C6C");
+      }else if(state == "run"){
+        $("#" + currentNode).css("border","3px dashed #67C23A")
+        // $("#" + currentNode).css("background","linear-gradient(to bottom, #34538b, #cd0000)");
+        // $("#" + currentNode).css("background-origin","border-box");
+      }
+    },
   	drop(e){
       let nameAll = this.dragContent.firstChild.innerHTML;
       // this.$store.commit("changeNodes", {type : "add", config : { id: "drop"+this.dragContent.id, name : this.dragContent.firstChild.innerHTML}});
   		let space = document.getElementById('diagram');
   		e.preventDefault();
       let isType = this.dragContent.id.slice(0,3);
+      let typeAlg =this.dragContent.id.slice(0,4);
       if(isType == "pro"){
         let session = window.sessionStorage;
         let r = JSON.parse(session.getItem("project"));
@@ -169,6 +187,7 @@ export default {
         for(let i in r.start){
           this.$store.commit("changeStart", {type:"add", detail:r.start[i]});
         }//节点名称数据
+        this.$store.commit("changeConfigOrder", {type:"copy", config:r.configOrder});
         // this.$store.commit("changeRelation", r.relationship);
         for(let i in r.relationship){
           this.plumb.connect({
@@ -177,10 +196,17 @@ export default {
             uuids : ["from"+r.relationship[i][0], "to"+r.relationship[i][1]],
           },this.defaultConfig);
         }//连接线
-      }else{
+      }else{ 
         let timestamp = new Date().getTime();  
         this.dragContent.removeAttribute("class");
-        this.dragContent.id = "drop"+this.dragContent.id+timestamp;
+        console.log(this.dragContent);
+        if(this.dragContent.id.slice(0,3) == "100" || this.dragContent.id.slice(0,3) == "200" || this.dragContent.id.slice(0,3) == "300" || this.dragContent.id.slice(0,3) == "400"){
+          this.dragContent.id = "drop"+this.dragContent.id.slice(4)+timestamp;
+          isType = "alg";
+        }else{
+          this.dragContent.id = "drop"+this.dragContent.id+timestamp;
+        }
+        console.log(this.dragContent.id)
         this.dragContent.style.position = "absolute";
         this.dragContent.style.width = "150px";
         this.dragContent.style.height = "30px";
@@ -192,23 +218,20 @@ export default {
         this.$store.commit("changeLoc", {name : this.dragContent.id, x : this.dragContent.style.left, y : this.dragContent.style.top});
         this.addElement(this.dragContent);
         this.addJsPlumb(this.dragContent);        
-        this.saveConfigNode(isType, nameAll);
+        this.saveConfigNode(isType, nameAll, typeAlg);
       }  		
   	},
-    saveConfigNode(type, name){
+    saveConfigNode(type, name, typeAlg){
       if(type == "dat"){
           this.$store.commit("changeStart", {type:"add", detail:this.dragContent.id});
           let index = this.dragContent.id.slice(7,-13);
           let info = this.dataInfo[Number(index)];
           this.getColumns(this.dragContent.id, info.fileId, info.fileUrl);
-          this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : "data", nameAll : name}});
+          this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : name, nameAll : "data"}});
+          this.$store.commit("changeResult", {type : "add",name : this.dragContent.id, config:{fileId : info.fileId, fileUrl : info.fileUrl}});
           this.$store.commit("changeConfig", {type : "addConfig", detail:{name : this.dragContent.id, config : {fileId : info.fileId, fileUrl : info.fileUrl}}});
-      }else if(type == "exp"){
-          this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : "exploration", nameAll : name}});
-      }else if(type == "pre"){
-        this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : "preprocess", nameAll : name}});
-      }else if(type == "fea"){
-        this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : "feature", nameAll : name}});
+      }else if(type == "alg"){
+          this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : name, nameAll : Number(typeAlg)}});
       }
     },
     setDiagram(config){
@@ -223,7 +246,7 @@ export default {
         d.style.height = "30px";
         d.style.border = "solid 1px black";
         let s = document.createElement("span");
-        s.innerHTML = config[i].name;
+        s.innerHTML = config[i].type;
         // let icon = document.createElement("i");
         // icon.setAttribute("class", "el-icon-circle-check");
         // icon.style.flo
@@ -267,6 +290,7 @@ export default {
         console.log(event.currentTarget);   
         console.log(event.currentTarget.style.left);     
         let connections = that.plumb.getAllConnections();
+        that.$store.commit("changeConfigType", "forChange");
         that.$store.commit("changeConfigType", event.currentTarget.id);
         that.$store.commit("changeLoc", {name : event.currentTarget.id, x : event.currentTarget.style.left, y : event.currentTarget.style.top});
       }, false);
@@ -322,6 +346,7 @@ export default {
       let ele = this.$store.state.menuType.type;
       this.$store.commit("changeConfig", {type : "delNode", detail:{ name: ele}});
       this.$store.commit("changeConfigOrder", {type : "del", config:{ name: ele}});
+      this.$store.commit("changeResult", {type : "del",name: ele});
       // this.$store.commit("changeLoc", {type : "del", config:{ name: ele}});
       this.plumb.remove(ele);
       if(ele.slice(4,7) == "dat"){
@@ -395,7 +420,7 @@ export default {
           this.delElement();
           break;
         case "dat":
-          this.showDetail();
+          this.showDetail(1);
           break;
         case "res":
           this.showDetail(newV.slice(3,4));
@@ -440,4 +465,18 @@ export default {
   font-weight: bold;
   background-color: #EEEEE4;
 }
+.runBox {
+    width: 150px;
+    border: 2px dashed #fff;
+    background: linear-gradient(to bottom, #34538b, #cd0000);
+}
+/*.runState {
+  animation: runAni 
+}
+@keyframes runAni{
+  from {}
+}
+@-webkit-keyframes runAni
+{*/
+/*}*/
 </style>

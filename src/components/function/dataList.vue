@@ -1,19 +1,14 @@
 <template>
 	<div class="data">
 		<div class="adddata">
-			<!-- <form method=post enctype=multipart/form-data :action="uploadUrl">
-				<input type=file name=file>
-         		<input type=button value=上传 @click="upload">
-			</form> -->
 			<el-upload class="upload-demo" method=post enctype=multipart/form-data :action="uploadUrl">
 				<el-button icon="el-icon-plus" style="width:90%" type="primary">上传数据</el-button>
 			</el-upload>
-			<!-- <form method=post enctype=multipart/form-data>
-		         <el-input type=file name=file value="上传"></el-input>
-		    </form> -->
-	        <!-- <el-button icon="el-icon-plus" style="width:90%" type="primary">上传数据</el-button> -->
 	    </div>
 	    <el-menu background-color="#F9F9F5" text-color="#000" active-text-color router>
+	    	<div class="dragItem" id="dat6666" draggable="true" @dragstart="drag($event)">
+                <span>testtest</span>
+            </div>
 	    	<template v-for="(item,i) in dataArr">
 	        	<div class="dragItem" :id="'dat'+i" draggable="true" @dragstart="drag($event)">
 	                <span>{{item.fileName}}</span>

@@ -1,6 +1,5 @@
 <template>
-	<div>
-		<h3>mmmm</h3>
+	<div class="relation">
 		<h3>分析方法： {{title}}</h3>
 		<div id="Chart" style="width:80%; height:200px; margin-top:15px"></div>
 	</div>
@@ -22,10 +21,14 @@ export default {
   },
   mounted(){
   	var temChart = echarts.init(document.getElementById('Chart'));
-  	// temChart.setOption(this.option);
+    temChart.clear();
+  	temChart.setOption(this.option);
   },
 };
 </script>
 
-<style>
+<style scoped>
+.relation {
+  width: 100%
+}
 </style>

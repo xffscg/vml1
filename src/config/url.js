@@ -4,6 +4,7 @@ const config = {
   addProjectUrl: '/creatProject',
   getProjectUrl: '/getProjectList',
   getDataSourceUrl: '/dataSource/getFiles?userId=1',
+  getAlgriListUrl: '/operateType/getAll',
   rawDataPreviewUrl: '/dataSource/dataPreview',
   currentDataPreviewUrl: '/currentDataPreview',
   getColumnNamesUrl: '/dataSource/getColumnNames',

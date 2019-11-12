@@ -27,7 +27,7 @@
 			</div>
 			<div class="save" @click="addFilter"><el-button icon="el-icon-plus" style="width:90%" type="primary">新增</el-button></div>
 		</div>
-		<div v-show="preType == 2" class="preFunc">
+		<div v-show="preType == 7" class="preFunc">
 			<h3>填充空值</h3>
 			<div class="preList">
 				<div class="preItem" v-for="(item, index) in fillArray" :key="index">
@@ -71,7 +71,7 @@
 			</div>
 			<div class="save" @click="addDivideName"><el-button icon="el-icon-plus" style="width:90%" type="primary">新增</el-button></div>
 		</div>
-		<div v-show="preType == 4" class="preFunc">
+		<div v-show="preType == 2" class="preFunc">
 			<h3>排序</h3>
 			<div class="select">
 				<h5>参考列</h5>
@@ -85,7 +85,7 @@
               	<el-radio v-model="chooseType" label="2">降序</el-radio>
 			</div>
 		</div>
-		<div v-show="preType == 5" class="preFunc">
+		<div v-show="preType == 8" class="preFunc">
 			<h3>数据列投影</h3>
 			<div class="preList">
 				<div class="preItem" v-for="(item, index) in shadowArray" :key="index">
@@ -138,7 +138,7 @@
 			</div>
 			<div class="save" @click="addShadow"><el-button icon="el-icon-plus" style="width:90%" type="primary">新增</el-button></div>
 		</div>
-		<div v-show="preType == 6" class="preFunc">
+		<div v-show="preType == 5" class="preFunc">
 			<h3>多列合并</h3>
 			<div class="selectHigh">
 				<h5>列名</h5>				
@@ -257,6 +257,20 @@ export default {
 	    this.checkAll = checkedCount === this.columnsOption.length;
 	    this.isIndeterminate = checkedCount > 0 && checkedCount < this.columnsOption.length;
     },
+    deepCopy(oldVal){
+        let target = oldVal.constructor === Array?[]:{};
+        for(let key in oldVal){
+          if(oldVal.hasOwnProperty(key)){
+            if(oldVal[key] && typeof oldVal[key] === "object"){
+              target[key] = oldVal[key].constructor === Array?[]:{};
+              target[key] = this.deepCopy(oldVal[key]);
+            }else{
+              target[key] = oldVal[key];
+            }
+          }
+        }
+        return target;
+    },
   	save(){
   		let para = {};
   		if(this.preType == 1){ 
@@ -268,7 +282,7 @@ export default {
 	  		}		
   			para = {parameter : this.filterArray};
   			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
-  		}else if(this.preType == 4){
+  		}else if(this.preType == 2){
   			if(this.chooseType == "1"){
   				this.sort.sortType = "升序";
   			}else{
@@ -276,7 +290,7 @@ export default {
   			}
   			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.sort}});
   			// para = {name : this.configT, config : this.sort};
-  		}else if(this.preType == 2){
+  		}else if(this.preType == 7){
   			if(this.fill.colName != "" && this.fill.operate != ""){
 	  			this.fillArray.push({colName :this.fill.colName, operate : this.fill.operate});
 	  			this.fill.colName = "";
@@ -292,7 +306,7 @@ export default {
 	  		}
 	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.divide}});
 	  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.divide.newColumnNames}});
-  		}else if(this.preType == 5){
+  		}else if(this.preType == 8){
   			if(this.shadow.colName_1 != "" && this.shadow.operate_1 != "" && this.shadow.value_1 != "" && this.shadow.operate != "" && this.shadow.colName_2 != "" && this.shadow.operate_2 != "" && this.shadow.value_2 != "" && this.shadow.newName != ""){
 	  			this.shadowArray.push({colName_1 :this.shadow.colName_1, operate_1 : this.shadow.operate_1, value_1 : this.shadow.value_1, operate : this.shadow.operate, colName_2 :this.shadow.colName_2, operate_2 : this.shadow.operate_2, value_2 : this.shadow.value_2, newName : this.shadow.newName});
 	  			this.shadowNewNameArray.push(this.shadow.newName);
@@ -427,9 +441,28 @@ export default {
   	configT(newV){
   		let type = newV.slice(4,7);
   		let preT = newV.slice(7,8);
+  		let para = this.$store.state.configData[newV];
+  		console.log(para);
   		this.columnsOption = this.column;
-  		if(type == "pre"){  			
-  			this.preType = Number(preT);
+  		if(type == "pre"){  
+  			let n = Number(preT);
+  			if(para.config != null){  				
+	  			if(n == 1){
+	  				this.filterArray = this.deepCopy(para.config.parameter);
+	  			}else if(n == 7){
+	  				this.fillArray = this.deepCopy(para.config.parameter);
+	  				console.log(this.fillArray);
+	  			}else if(n == 5){
+	  				this.connect = this.deepCopy(para.config) ;
+	  			}else if(n == 8){
+	  				this.shadowArray = this.deepCopy(para.config.parameter) ;
+	  			}else if(n == 3){
+	  				this.divide = this.deepCopy(para.config) ;
+	  			}else if(n == 2){
+	  				this.sort = this.deepCopy(para.config) ;
+	  			}	
+  			}	
+  			this.preType = n;
   		}
   	},
   }

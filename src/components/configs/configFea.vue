@@ -72,7 +72,7 @@
 				<el-input v-model="indexer.newColumnName" placeholder="请输入新列名"></el-input>
 			</div>			
 		</div>
-		<div v-show="feaType == 6" class="feaFunc">
+		<div v-show="feaType == 7" class="feaFunc">
 			<h3>多项式扩展</h3>
 			<div class="selectHigh">
 				<h5>列名</h5>
@@ -86,7 +86,7 @@
 				<el-input v-model="poly.newColumnName" placeholder="请输入新列名"></el-input>
 			</div>			
 		</div>
-		<div v-show="feaType == 7" class="feaFunc">
+		<div v-show="feaType == 8" class="feaFunc">
 			<h3>卡方</h3>
 			<div class="selectHigh">
 				<h5>列名</h5>
@@ -167,6 +167,20 @@ export default {
   	}
   },
   methods :{
+  	deepCopy(oldVal){
+        let target = oldVal.constructor === Array?[]:{};
+        for(let key in oldVal){
+          if(oldVal.hasOwnProperty(key)){
+            if(oldVal[key] && typeof oldVal[key] === "object"){
+              target[key] = oldVal[key].constructor === Array?[]:{};
+              target[key] = this.deepCopy(oldVal[key]);
+            }else{
+              target[key] = oldVal[key];
+            }
+          }
+        }
+        return target;
+    },
   	handleCheckAllChange(val) {
   		console.log(val);
         this.columnsValue = val ? this.columnsOption : [];
@@ -186,28 +200,28 @@ export default {
   			for(let i in this.columnsValue){
   				this.vector.columnNames.push(this.columnsValue[i]);
   			}
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.vector.newColumnName}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column :[this.vector.newColumnName]}});
         	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.vector}});
   		}else if(this.feaType == 3){
   			for(let i in this.columnsValue){
   				this.standard.columnNames.push(this.columnsValue[i]);
   			}
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.standard.newColumnName}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.standard.newColumnName]}});
   			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.standard}});
   		}else if(this.feaType == 4){
   			for(let i in this.columnsValue){
   				this.pca.columnNames.push(this.columnsValue[i]);
   			}
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.pca.newColumnName}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.pca.newColumnNam]}});
   			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.pca}});
   		}else if(this.feaType == 5){
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.indexer.newColumnName}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.indexer.newColumnName]}});
         	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.indexer}});
-	    }else if(this.feaType == 6){
+	    }else if(this.feaType == 7){
 	    	for(let i in this.columnsValue){
   				this.poly.columnNames.push(this.columnsValue[i]);
   			}
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.poly.newColumnName}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.poly.newColumnName]}});
 	        this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.poly}});
 	    }
   	},
@@ -221,10 +235,34 @@ export default {
   	configT(newV){
   		let type = newV.slice(4,7);
   		let feaT = newV.slice(7,8);
-
+  		let para = this.$store.state.configData[newV]; 
   		this.columnsOption = this.column;
-  		if(type == "fea"){  			
-  			this.feaType = Number(feaT);
+      this.columnsValue = [];
+  		if(type == "fea"){  
+  			let n = Number(feaT)
+        if(para.config != null){
+          if(n == 7){      
+              this.poly.newColumnName = para.config.newColumnName;
+              this.columnsValue = this.deepCopy(para.config.columnNames);
+          }else if(n == 3){
+              this.standard.newColumnName = para.config.newColumnName;
+              this.columnsValue = this.deepCopy(para.config.columnNames);
+          }else if(n == 4){
+              this.pca.newColumnName = para.config.newColumnName;
+              this.columnsValue = this.deepCopy(para.config.columnNames);
+          }else if(n == 2){   
+              this.vector.newColumnName = para.config.newColumnName;
+              this.vector.maxCategories = para.config.maxCategories;
+              this.columnsValue = this.deepCopy(para.config.columnNames);
+          }else if(n == 5){
+            this.indexer = this.deepCopy(para.config);
+          }else if(n == 1){
+            this.quantile = this.deepCopy(para.config);
+          } 
+        }
+  			
+
+  			this.feaType = n;
   		}
   	},
   }

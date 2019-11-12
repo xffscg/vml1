@@ -7,7 +7,8 @@
 	        	<projectList v-show = "funcType == 3"></projectList>
 	        	<algList v-show = "funcType == 4"></algList>
 	        	<dataList v-show = "funcType == 2"></dataList>
-	        	<reportList v-show = "funcType == 5"></reportList>
+	        	<reportList v-show = "funcType == 6"></reportList>
+	        	<ChooseList v-show = "funcType == 5"></ChooseList>
 	        </div>
 	        <div class="work" v-show = "funcType != 5">
 	        	<div class="workTop">
@@ -18,13 +19,13 @@
 	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="clear">清空画布</el-button>
 	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="getReport">生成报告</el-button>
 	        			</div>
-	        			<diagram></diagram>
+	        			<diagram ref="diagram"></diagram>
 	        		</div>
 	        		<div class="config"><Config></Config></div>
 	        	</div>
 	        	<div class="log"><RunLog></RunLog></div>	        	
 	        </div>
-	        <div class="reportPart" v-show = "funcType == 5"><Report></Report></div>
+	        <div class="reportPart" v-show = "funcType == 5"><Report ref="Report"></Report></div>
         </div>
         <div class="detailPop"  v-show="showDetail !=0 && showDetail !=9">	          
 	    </div>
@@ -35,7 +36,7 @@
 </template>
 
 <script>
-import { rawDataPreview, currentDataPreview } from '@/api/dataSource'
+import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 import { filter, fillNullValue, columnMap, columnSplit, columnsMerge, sort, replace } from '@/api/dataProcess'
 import { Message } from 'element-ui'
@@ -50,6 +51,7 @@ import Detail from '../work/detail'
 import Report from '../work/report'
 import ChartDetail from '../work/chartDetail'
 import TableChartDetail from '../work/tableChartDetail'
+import ChooseList from '../report/chooseList'
 export default {
 	components: {
 	    projectList,
@@ -62,7 +64,8 @@ export default {
 	    Report,
 	    reportList,
 	    ChartDetail,
-	    TableChartDetail
+	    TableChartDetail,
+	    ChooseList
 	},
 	data(){
 		return {
@@ -74,7 +77,10 @@ export default {
 				title : ""
 			},
 			temFrequencyTable : [],
-			freName : ""
+			freName : "",
+			polling : null,
+			times : 0,
+			interval : 1000
 		}
 	},
 	methods:{
@@ -84,21 +90,35 @@ export default {
 			this.$store.commit("changeConfigOrder", {type : "clear"});
 			this.$store.commit("changeLoc", {name : "clearClear"});
 			this.$store.commit("changeClear", timestamp);
+			this.$store.commit("changeResult", {type : "clear"});
 		},
 		getReport(){
 			this.$store.commit('changeReportList', {type : "add", detail : {name : "新建报告"}});
+			this.$refs.Report.createReport();
 			this.$store.commit('changeType', 5);
 		},
 		goRun(){
 			this.saveProject();
-
+			this.getResult();
+		},
+		getResult(){
+			this.times += 1;			
+			let cur = this.$store.state.start[0];
+			if(this.times < 20){
+				this.polling = setTimeout(()=>{
+					this.getResult();
+				}, this.interval)
+			}else{
+				this.$refs.diagram.changeClass("run", cur);
+				clearTimeout(this.polling);
+			}			
 		},
 		saveProject(){			
 			let session = window.sessionStorage;
 			if(session.getItem("project")){
 				session.removeItem("project");				
 			}
-			let project = {userId : 1, projectId : "1", config : {}, relationship : [], start : []};
+			let project = {userId : 1, projectId : "1", config : {}, relationship : [], start : [], configOrder : {}};
 			let runList = this.$store.state.runList;
 			console.log(runList);
 			let loc = this.$store.state.location;
@@ -111,8 +131,9 @@ export default {
 				project["config"][i]["pre"] = this.deepCopy(runList[i].pre);
 				project["config"][i]["location"] = this.deepCopy(loc[i]);
 			}
-			project["relationship"] = this.$store.state.relationship;
+			project["relationship"] = this.deepCopy(this.$store.state.relationship);
 			project["start"] = this.deepCopy(this.$store.state.start);
+			project["configOrder"] = this.deepCopy(this.$store.state.configOrder);
 			console.log(project);
             session.setItem('project',JSON.stringify(project));
 		},		
@@ -191,9 +212,11 @@ export default {
 	  	},
 	},
 	watch :{
-		showDetail(newV){				
+		showDetail(newV){		
+		console.log(newV);		
 			let t = this.menuType.type.slice(4,7)
 			if(newV == 1){
+				console.log(t);
 				if(t == "dat"){		
 					let info = this.$store.state.configData[this.menuType.type].config;
 					this.getDataView(info.fileId, info.fileUrl);

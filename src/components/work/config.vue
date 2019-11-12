@@ -101,8 +101,8 @@ export default {
       }
       console.log(dataS);
       for(let i in dataS){
-        this.dataColumns = dataS[i].column;
-        this.dataColumnsNumber = dataS[i].columnNumber;
+        this.dataColumns = this.deepCopy(dataS[i].column);
+        this.dataColumnsNumber = this.deepCopy(dataS[i].columnNumber);
       }
       if((id.slice(7,8) == 1 || id.slice(7,8) == 2) && id.slice(4,7) == "exp"){
         if(id.slice(7,8) == 2){
@@ -166,7 +166,11 @@ export default {
       if(run[newV] && type!= "dat"){
         this.getColumns(newV);
       }
-  		if(type == "exp"){        
+  		if(type == "exp"){    
+        let para = this.$store.state.configData[newV]; 
+        if(para.config != null){
+          this.expValue = this.deepCopy(para.config);
+        }    
         this.configType = 1;
   		}else if(type == "pre"){
   			this.configType = 2;

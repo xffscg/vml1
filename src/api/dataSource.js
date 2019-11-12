@@ -14,3 +14,7 @@ export function currentDataPreview (params) {
   let url = `${config.visualUrl}${config.currentDataPreviewUrl}`
   return axios.post(url, qs.stringify(params))
 }
+export function getAlgriList () {
+  let url = `${config.visualUrl}${config.getAlgriListUrl}`
+  return axios.get(url)
+}
