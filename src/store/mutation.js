@@ -11,6 +11,9 @@ export const changeType = (state, funcType) => {
 export const getPro = (state, proN) => {
 	state.proList = deepCopy(proN);
 }
+export const changeProId = (state, proId) => {
+  state.projectId = proId;
+}
 export const getData = (state, dataN) => {
   state.dataList = deepCopy(dataN);
 }

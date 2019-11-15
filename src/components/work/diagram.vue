@@ -11,6 +11,7 @@
 import { Message } from 'element-ui'
 import {jsPlumb} from 'jsplumb'
 import RightMenu from './rightMenu'
+import { getProject, getDataSource, addProject, goRun, queryProject, queryResult } from '@/api/addProject'
 import { rawDataPreview, currentDataPreview } from '@/api/dataSource'
 import { getColumnNames, getColumnNameWithNumberType, fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 export default {
@@ -171,31 +172,39 @@ export default {
     },
   	drop(e){
       let nameAll = this.dragContent.firstChild.innerHTML;
-      // this.$store.commit("changeNodes", {type : "add", config : { id: "drop"+this.dragContent.id, name : this.dragContent.firstChild.innerHTML}});
   		let space = document.getElementById('diagram');
   		e.preventDefault();
       let isType = this.dragContent.id.slice(0,3);
       let typeAlg =this.dragContent.id.slice(0,4);
       if(isType == "pro"){
-        let session = window.sessionStorage;
-        let r = JSON.parse(session.getItem("project"));
-        this.setDiagram(r.config);
-        for(let i in r.config){
-          this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
-          this.$store.commit("changeConfig", {type : "addConfig", detail:{name : i, config : r.config[i].config}});
-        }//配置数据
-        for(let i in r.start){
-          this.$store.commit("changeStart", {type:"add", detail:r.start[i]});
-        }//节点名称数据
-        this.$store.commit("changeConfigOrder", {type:"copy", config:r.configOrder});
-        // this.$store.commit("changeRelation", r.relationship);
-        for(let i in r.relationship){
-          this.plumb.connect({
-            source : r.relationship[i][0],
-            target : r.relationship[i][1],
-            uuids : ["from"+r.relationship[i][0], "to"+r.relationship[i][1]],
-          },this.defaultConfig);
-        }//连接线
+        let proId = Number(this.dragContent.id.slice(3));
+        this.$store.commit("changeProId", proId);
+        queryProject({userId : this.$store.state.userId, projectId : proId}).then(res=>res.data)
+        .then(res=>{
+          console.log(res);
+       })
+        .catch(e=>{
+            console.log(e);
+        })
+        // let session = window.sessionStorage;
+        // let r = JSON.parse(session.getItem("project"));
+        // this.setDiagram(r.config);
+        // for(let i in r.config){
+        //   this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
+        //   this.$store.commit("changeConfig", {type : "addConfig", detail:{name : i, config : r.config[i].config}});
+        // }//配置数据
+        // for(let i in r.start){
+        //   this.$store.commit("changeStart", {type:"add", detail:r.start[i]});
+        // }//节点名称数据
+        // this.$store.commit("changeConfigOrder", {type:"copy", config:r.configOrder});
+        // // this.$store.commit("changeRelation", r.relationship);
+        // for(let i in r.relationship){
+        //   this.plumb.connect({
+        //     source : r.relationship[i][0],
+        //     target : r.relationship[i][1],
+        //     uuids : ["from"+r.relationship[i][0], "to"+r.relationship[i][1]],
+        //   },this.defaultConfig);
+        // }//连接线
       }else{ 
         let timestamp = new Date().getTime();  
         this.dragContent.removeAttribute("class");
@@ -222,13 +231,16 @@ export default {
       }  		
   	},
     saveConfigNode(type, name, typeAlg){
+
+      let fileUrl = {};
       if(type == "dat"){
           this.$store.commit("changeStart", {type:"add", detail:this.dragContent.id});
           let index = this.dragContent.id.slice(7,-13);
           let info = this.dataInfo[Number(index)];
+          fileUrl[this.dragContent.id] = info.fileUrl;
           this.getColumns(this.dragContent.id, info.fileId, info.fileUrl);
           this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : name, nameAll : "data"}});
-          this.$store.commit("changeResult", {type : "add",name : this.dragContent.id, config:{fileId : info.fileId, fileUrl : info.fileUrl}});
+          this.$store.commit("changeResult", {type : "add",name : this.dragContent.id, config:{fileId : info.fileId, fileUrl : fileUrl}});
           this.$store.commit("changeConfig", {type : "addConfig", detail:{name : this.dragContent.id, config : {fileId : info.fileId, fileUrl : info.fileUrl}}});
       }else if(type == "alg"){
           this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : name, nameAll : Number(typeAlg)}});

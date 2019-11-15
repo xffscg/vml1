@@ -5,8 +5,25 @@
 </template>
 
 <script>
+import { getProject, getDataSource, addProject, goRun, queryProject, queryResult } from '@/api/addProject'
 export default {
-  name: 'runLog'
+  name: 'runLog',
+  data(){
+  	return {
+  		interval : 1000,
+  	}
+  },
+  methods : {
+  	queryResult(){
+  		queryResult({userId : 1, projectId : 32}).then(res=>res.data)
+        .then(res=>{
+	      	console.log(res);
+	     })
+        .catch(e=>{
+      	    console.log(e);
+        })
+  	}
+  }
 };
 </script>
 

@@ -23,7 +23,7 @@
 	        		</div>
 	        		<div class="config"><Config></Config></div>
 	        	</div>
-	        	<div class="log"><RunLog></RunLog></div>	        	
+	        	<div class="log"><RunLog ref="RunLog"></RunLog></div>	        	
 	        </div>
 	        <div class="reportPart" v-show = "funcType == 5"><Report ref="Report"></Report></div>
         </div>
@@ -39,6 +39,7 @@
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 import { filter, fillNullValue, columnMap, columnSplit, columnsMerge, sort, replace } from '@/api/dataProcess'
+import { getProject, getDataSource, addProject, goRun, queryProject, queryResult } from '@/api/addProject'
 import { Message } from 'element-ui'
 import projectList from '../function/projectList'
 import algList from '../function/algList'
@@ -99,34 +100,32 @@ export default {
 		},
 		goRun(){
 			this.saveProject();
-			this.getResult();
+			// this.getResult();
 		},
-		getResult(){
-			this.times += 1;			
-			let cur = this.$store.state.start[0];
-			if(this.times < 20){
-				this.polling = setTimeout(()=>{
-					this.getResult();
-				}, this.interval)
-			}else{
-				this.$refs.diagram.changeClass("run", cur);
-				clearTimeout(this.polling);
-			}			
-		},
+		// getResult(){
+		// 	this.times += 1;			
+		// 	let cur = this.$store.state.start[0];
+		// 	if(this.times < 20){
+		// 		this.polling = setTimeout(()=>{
+		// 			this.getResult();
+		// 		}, this.interval)
+		// 	}else{
+		// 		this.$refs.diagram.changeClass("run", cur);
+		// 		clearTimeout(this.polling);
+		// 	}			
+		// },
 		saveProject(){			
-			let session = window.sessionStorage;
-			if(session.getItem("project")){
-				session.removeItem("project");				
-			}
-			let project = {userId : 1, projectId : "1", config : {}, relationship : [], start : [], configOrder : {}};
+			// let session = window.sessionStorage;
+			// if(session.getItem("project")){
+			// 	session.removeItem("project");				
+			// }
+			let project = {userId : 1, projectId : 32, config : {}, relationship : [], start : [], configOrder : {}};
 			let runList = this.$store.state.runList;
 			console.log(runList);
 			let loc = this.$store.state.location;
 			project["config"] = this.deepCopy(this.$store.state.configData);
 			console.log(project["config"]);
 			for(let i in project["config"]){
-				console.log(i);
-				console.log(runList[i].next);
 				project["config"][i]["next"] = this.deepCopy(runList[i].next);
 				project["config"][i]["pre"] = this.deepCopy(runList[i].pre);
 				project["config"][i]["location"] = this.deepCopy(loc[i]);
@@ -134,8 +133,17 @@ export default {
 			project["relationship"] = this.deepCopy(this.$store.state.relationship);
 			project["start"] = this.deepCopy(this.$store.state.start);
 			project["configOrder"] = this.deepCopy(this.$store.state.configOrder);
-			console.log(project);
-            session.setItem('project',JSON.stringify(project));
+			// console.log(project);
+   //          session.setItem('project',JSON.stringify(project));
+            goRun(project).then(res => res.data)
+	        .then(res => {
+	          console.log('提交')
+	          console.log(res);	    
+	          this.$refs.RunLog.queryResult();       
+	        })
+	        .catch(e => {
+	          Message.error(e.error || 'run接口错误，请重试')
+	        })
 		},		
 		getDataView(id, url){
 		  this.tableData = {

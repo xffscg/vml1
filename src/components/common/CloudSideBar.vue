@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { getProject, getDataSource, addProject } from '@/api/addProject'
+import { getProject, getDataSource, addProject, goRun } from '@/api/addProject'
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { Message } from 'element-ui'
 import axios from 'axios'
@@ -70,15 +70,6 @@ export default {
           Message.error(e.errors || '算法接口错误，请重试')
         })
     },
-    // getAlg() {
-    //   axios.get('./../../static/algL.json').then(res => res.data)
-    //     .then((res) => {
-    //       console.log(res);
-    //       this.$store.commit('getAlg', res.list);
-    //     }).catch(e => {
-    //       Message.error(e.errors || '接口错误，请重试')
-    //     });
-    // },
     getDataSource () {
       this.dataSourceList = []
       getDataSource().then(res => res.data)

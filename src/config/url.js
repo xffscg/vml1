@@ -1,7 +1,7 @@
 const config = {
   visualUrl: 'http://10.108.211.130:8993', // 需要连接校园网无线
   addData : '/dataSource/upload',
-  addProjectUrl: '/creatProject',
+  addProjectUrl: '/project/create',
   getProjectUrl: '/getProjectList',
   getDataSourceUrl: '/dataSource/getFiles?userId=1',
   getAlgriListUrl: '/operateType/getAll',
@@ -35,6 +35,10 @@ const config = {
   stringIndexerUrl: '/stringIndexer',
   polynomialExpansionUrl: '/polynomialExpansion',
   chiSqSelectorUrl: '/chiSqSelector',
-  oneHotEncoderUrl: '/oneHotEncoder'
+  oneHotEncoderUrl: '/oneHotEncoder',
+  // run
+  goRunUrl : '/model/updateFlow',
+  queryProjectUrl : '/model/getFlow',
+  queryResultUrl :'/model/getRunStatus'
 }
 export { config }

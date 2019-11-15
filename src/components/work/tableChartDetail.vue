@@ -37,7 +37,7 @@ export default {
       let yName = [];
       for (let i = 0; i < res.length; i++) {
         xName.push(res[i].columnName)
-        yName.push(res[i].rate)
+        yName.push(res[i].rate);
       }
       let option = {
         title: {

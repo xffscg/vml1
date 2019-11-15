@@ -18,3 +18,15 @@ export function getDataSource () {
   let url = `${config.visualUrl}${config.getDataSourceUrl}`
   return axios.post(url)
 }
+export function goRun (params) {
+  let url = `${config.visualUrl}${config.goRunUrl}`
+  return axios.post(url, qs.stringify(params))
+}
+export function queryProject (params) {
+  let url = `${config.visualUrl}${config.queryProjectUrl}`
+  return axios.post(url, qs.stringify(params))
+}
+export function queryResult (params) {
+  let url = `${config.visualUrl}${config.queryResultUrl}`
+  return axios.post(url, qs.stringify(params))
+}
