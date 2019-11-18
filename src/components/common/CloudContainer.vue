@@ -14,6 +14,7 @@
 	        	<div class="workTop">
 	        		<div class="diagram">
 	        			<div class="header">
+	        				<el-button type="primary" plain icon="el-icon-video-play" @click="saveProject">保存项目</el-button>
 	        				<el-button type="primary" plain icon="el-icon-video-play" @click="goRun">运行</el-button>
 	        				<el-button type="primary" plain icon="el-icon-s-operation" >保存模型</el-button>
 	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="clear">清空画布</el-button>
@@ -23,7 +24,7 @@
 	        		</div>
 	        		<div class="config"><Config></Config></div>
 	        	</div>
-	        	<div class="log"><RunLog ref="RunLog"></RunLog></div>	        	
+	        	<div class="log"><RunLog ref="RunLog" @changeD="changeStyle"></RunLog></div>	        	
 	        </div>
 	        <div class="reportPart" v-show = "funcType == 5"><Report ref="Report"></Report></div>
         </div>
@@ -39,7 +40,7 @@
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 import { filter, fillNullValue, columnMap, columnSplit, columnsMerge, sort, replace } from '@/api/dataProcess'
-import { getProject, getDataSource, addProject, goRun, queryProject, queryResult } from '@/api/addProject'
+import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne } from '@/api/addProject'
 import { Message } from 'element-ui'
 import projectList from '../function/projectList'
 import algList from '../function/algList'
@@ -98,48 +99,42 @@ export default {
 			this.$refs.Report.createReport();
 			this.$store.commit('changeType', 5);
 		},
-		goRun(){
-			this.saveProject();
-			// this.getResult();
+		changeStyle(node){
+			this.$refs.diagram.changeClass(node.state, node.id);
 		},
-		// getResult(){
-		// 	this.times += 1;			
-		// 	let cur = this.$store.state.start[0];
-		// 	if(this.times < 20){
-		// 		this.polling = setTimeout(()=>{
-		// 			this.getResult();
-		// 		}, this.interval)
-		// 	}else{
-		// 		this.$refs.diagram.changeClass("run", cur);
-		// 		clearTimeout(this.polling);
-		// 	}			
-		// },
-		saveProject(){			
-			// let session = window.sessionStorage;
-			// if(session.getItem("project")){
-			// 	session.removeItem("project");				
-			// }
-			let project = {userId : 1, projectId : 32, config : {}, relationship : [], start : [], configOrder : {}};
+		goRun(){
+			executeAll({userId : this.$store.state.userId, projectId :32}).then(res=>res.data)
+			.then(res=>{
+				console.log(res);
+				let start = setTimeout(()=>{	
+					this.$refs.RunLog.clearLog(); 				
+	          		this.$refs.RunLog.queryResult(); 
+				}, 1000);
+				start = null;
+			})
+			.catch(e=>{
+				Message.error(e.error || "运行错误");
+			})
+		},
+		saveProject(){	
+			let project = {userId : 1, projectId : 32, config : {}, relationship : [], startNode : [], configOrder : {}};
 			let runList = this.$store.state.runList;
 			console.log(runList);
 			let loc = this.$store.state.location;
-			project["config"] = this.deepCopy(this.$store.state.configData);
-			console.log(project["config"]);
-			for(let i in project["config"]){
-				project["config"][i]["next"] = this.deepCopy(runList[i].next);
-				project["config"][i]["pre"] = this.deepCopy(runList[i].pre);
-				project["config"][i]["location"] = this.deepCopy(loc[i]);
+			let configer = this.deepCopy(this.$store.state.configData);
+			for(let i in configer){
+				configer[i]["next"] = this.deepCopy(runList[i].next);
+				configer[i]["pre"] = this.deepCopy(runList[i].pre);
+				configer[i]["location"] = this.deepCopy(loc[i]);
 			}
-			project["relationship"] = this.deepCopy(this.$store.state.relationship);
-			project["start"] = this.deepCopy(this.$store.state.start);
-			project["configOrder"] = this.deepCopy(this.$store.state.configOrder);
-			// console.log(project);
-   //          session.setItem('project',JSON.stringify(project));
+			project["config"] = JSON.stringify(this.deepCopy(configer));
+			project["relationship"] = JSON.stringify(this.deepCopy(this.$store.state.relationship));
+			project["startNode"] = JSON.stringify(this.deepCopy(this.$store.state.start));
+			project["configOrder"] = JSON.stringify(this.deepCopy(this.$store.state.configOrder));
+			console.log(project);
             goRun(project).then(res => res.data)
 	        .then(res => {
-	          console.log('提交')
-	          console.log(res);	    
-	          this.$refs.RunLog.queryResult();       
+	          console.log(res);
 	        })
 	        .catch(e => {
 	          Message.error(e.error || 'run接口错误，请重试')
@@ -200,10 +195,14 @@ export default {
 			this.tableData.column[0].fixed = "left";
 		},
 		runFrom(){
-	      	let r = this.$store.state.relationship;
-	      	let order = this.getOrder(r);
-	      	let index = order.indexOf(this.menuType.type);
-			this.saveProject();
+	      	let id = this.menuType.type;
+	      	executeFromOne({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId: id})
+	      	.then(res=>res.data).then(res=>{
+	      		console.log(res);
+	      	})
+	      	.catch(e=>{
+	      		Message.error("运行失败");
+	      	})
 	    },
 	    
     },
@@ -221,7 +220,7 @@ export default {
 	},
 	watch :{
 		showDetail(newV){		
-		console.log(newV);		
+		    console.log(newV);		
 			let t = this.menuType.type.slice(4,7)
 			if(newV == 1){
 				console.log(t);

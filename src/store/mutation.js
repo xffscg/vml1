@@ -74,7 +74,7 @@ export const changeConfig = (state, configC) => {
     if(state.configData[configC.detail.name]){
       delete state.configData[configC.detail.name];
     }
-    state.configData[configC.detail.name] = {name :configC.detail.nameAll, type : configC.detail.type, config : null, next : [], pre : [] , location : {}};
+    state.configData[configC.detail.name] = {name :configC.detail.nameAll, type : configC.detail.type, config : {}, next : [], pre : [] , location : {}};
   }else if(configC.type == "delNode"){
     delete state.configData[configC.detail.name];
   }else if(configC.type == "addConfig"){
@@ -144,6 +144,24 @@ export const changeConfigOrder = (state, node) => {
     state.configOrder = deepCopy(node.config);
   }
   console.log(state.configOrder);
+}
+export const changeReportContent = (state, node)=>{
+  if(node.type == "add"){
+    state.reportContent.push(node.name);
+  }else if(node.type == "del"){
+    let index = state.reportContent.indexOf(node.name);
+    if(state.start.length == 1){
+      state.reportContent = [];
+    }else{   
+      if(index == 0){
+        state.reportContent = state.reportContent.slice(1);
+      }else if(index == state.reportContent.length -1){
+        state.reportContent = state.reportContent.slice(0, state.reportContent.length-1);
+      }else{
+        state.reportContent = (state.reportContent.slice(0, index)).concat(state.reportContent.slice(index+1, state.reportContent.length));
+      }
+    }
+  }
 }
 function deepCopy(oldVal){
     let target = oldVal.constructor === Array?[]:{};

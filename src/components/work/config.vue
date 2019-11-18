@@ -67,48 +67,57 @@ export default {
 	    this.isIndeterminate = checkedCount > 0 && checkedCount < this.expOption.length;
     },
     save(){
-    	let para = {};
-      if(this.configT.slice(7,8) == "2"){
-        para = {columnNames : this.expValue[0]};
-      }else{
-        para = {columnNames : this.expValue};
+    	let para = {parameter : {}, fileUrl : []};
+      console.log(this.expValue);
+      para.parameter["columnNames"] = this.expValue;
+      para.parameter["userId"] = this.$store.state.userId;
+      para.parameter["projectId"] = this.$store.state.projectId;
+      let list = this.$store.state.runList;
+      let pre = list[this.configT].pre;
+      let fileUrl = [];
+      // 可以后续加判断，如果父节点是分数据的就另外写
+      for(let i in pre){
+        let obj = {};
+        obj[pre[i]] = 0;
+        fileUrl.push(obj);
       }
+      para["fileUrl"] = fileUrl;
     	this.$store.commit("changeConfig", {type : "addConfig", detail : {name : this.configT, config : para}});
+      this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.dataColumns}});
+      this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.dataColumnsNumber}});
     },
     getColumns(id){
-      let path = this.popPart(id); 
+      // let path = this.popPart(id); 
       let order = this.$store.state.configOrder;
-      console.log(order);
-      let dataS = {};
-      for(let i = 0; i < path.length; i++){
-        if(!dataS[path[i][0]]){
-          dataS[path[i][0]] = {column : this.deepCopy(order[path[i][0]].column), columnNumber : this.deepCopy(order[path[i][0]].columnNumber)}
-        }
-        for(let item in order){
-          if(path[i].indexOf(item)){
-            if(order[item].column.length != 0){
-              for(let j in order[item].column){
-                dataS[path[i][0]].column.push(order[item].column[j]);
-              }              
+      let list = this.$store.state.runList;
+      let pre = list[id].pre;
+      if(pre.length == 0){
+        this.dataColumns = this.deepCopy(order[id].column);
+        this.dataColumnsNumber = this.deepCopy(order[id].columnNumber);
+      }else{
+        this.dataColumns = []
+        this.dataColumnsNumber = [];
+        for(let i in pre){
+          console.log(pre[i]);
+          for(let j in order[pre[i]].column){
+            if(this.dataColumns.indexOf(order[pre[i]].column[j]) == -1){
+              this.dataColumns.push(order[pre[i]].column[j]);
             }
-            if(order[item].columnNumber.length != 0){
-              for(let j in order[item].columnNumber){
-                dataS[path[i][0]].columnNumber.push(order[item].columnNumber[j]);
-              } 
+            
+          }
+          for(let j in order[pre[i]].columnNumber){
+            if(this.dataColumnsNumber.indexOf(order[pre[i]].columnNumber[j]) == -1){
+              this.dataColumnsNumber.push(order[pre[i]].columnNumber[j]);
             }
           }
         }
-      }
-      console.log(dataS);
-      for(let i in dataS){
-        this.dataColumns = this.deepCopy(dataS[i].column);
-        this.dataColumnsNumber = this.deepCopy(dataS[i].columnNumber);
       }
       if((id.slice(7,8) == 1 || id.slice(7,8) == 2) && id.slice(4,7) == "exp"){
         if(id.slice(7,8) == 2){
           this.max = 1;
           this.showAll = false;
         }else{
+          this.showAll = true;
           this.max = this.dataColumns.length;
         }
         this.expOption = this.dataColumns;
@@ -123,33 +132,6 @@ export default {
         this.expOption = this.dataColumnsNumber;
       }
     },//类似于事件的冒泡原理
-    popPart(id){
-      let list = this.$store.state.runList;
-      let res = [];
-      for(let i = 0; i < list[id].pre.length; i++){
-        let temp = this.deepCopy(res);
-        let subRes = this.popPart(list[id].pre[i]);
-        if(typeof subRes[0] == "string"){
-          res.push(subRes);
-        }else{
-          for(let i = 0; i< subRes.length; i++){
-            res.push(subRes[i]);
-          }
-        }
-      }
-      if(res.length != 0){
-        if(typeof res[0] == "string"){
-          res.push(id);
-        }else{
-          for(let i = 0; i < res.length; i++){
-            res[i].push(id);
-          }
-        }
-      }else{
-        res.push(id);
-      }      
-      return res;      
-    },
   },
   computed:{
   	configT(){
@@ -166,17 +148,34 @@ export default {
       if(run[newV] && type!= "dat"){
         this.getColumns(newV);
       }
-  		if(type == "exp"){    
-        let para = this.$store.state.configData[newV]; 
-        if(para.config != null){
-          this.expValue = this.deepCopy(para.config);
-        }    
-        this.configType = 1;
-  		}else if(type == "pre"){
-  			this.configType = 2;
-  		}else if(type == "fea"){
-        this.configType = 3;
-      }
+      this.$nextTick(()=>{
+        if(type == "exp"){    
+          let para = this.$store.state.configData[newV]; 
+          if(JSON.stringify(para.config) != "{}"){
+            for(let i in para.config.parameter.columnNames){
+              if(this.dataColumns.indexOf(para.config.parameter.columnNames[i]) != -1){
+                this.expValue.push(para.config.parameter.columnNames[i]);
+              }
+            }
+          }    
+          this.configType = 1;
+        }else if(type == "pre"){
+          this.configType = 2;
+        }else if(type == "fea"){
+          this.configType = 3;
+        }
+      })
+  		// if(type == "exp"){    
+    //     let para = this.$store.state.configData[newV]; 
+    //     if(para.config != null){
+    //       this.expValue = this.deepCopy(para.config);
+    //     }    
+    //     this.configType = 1;
+  		// }else if(type == "pre"){
+  		// 	this.configType = 2;
+  		// }else if(type == "fea"){
+    //     this.configType = 3;
+    //   }
   	},
   }
 };

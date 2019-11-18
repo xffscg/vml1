@@ -15,7 +15,6 @@
 import { getProject, getDataSource, addProject, goRun } from '@/api/addProject'
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { Message } from 'element-ui'
-import axios from 'axios'
 
 export default {
   data () {
@@ -33,6 +32,7 @@ export default {
         this.getDataSource();
       }else if(n == 4){
         let alg = this.$store.state.algList;
+        console.log(alg.length)
         if(alg.length == 0){
           this.getAlgri();
         }

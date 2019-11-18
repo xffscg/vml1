@@ -192,39 +192,177 @@ export default {
 	    this.isIndeterminate = checkedCount > 0 && checkedCount < this.columnsOption.length;
     },
   	save(){
-  		let para = {};
-  		if(this.feaType == 1){	
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.quantile.newColumnName]}});	  			
-        	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.quantile}});
+      // 需要做的事情:是否已有配置。已有则读取；已有配置是否合法，不合法则删掉；保存新的配置时，避免重复添加;保证新列名无重复
+  		let para = {parameter : {}, fileUrl : []};;
+      let list = this.$store.state.runList;
+      let pre = list[this.configT].pre;
+      let fileUrl = [];
+      // 可以后续加判断，如果父节点是分数据的就另外写
+      for(let i in pre){
+        let obj = {};
+        obj[pre[i]] = 0;
+        fileUrl.push(obj);
+      }
+      para["fileUrl"] = fileUrl;
+      para.parameter["userId"] = this.$store.state.userId;
+      para.parameter["projectId"] = this.$store.state.projectId;
+  		if(this.feaType == 1){
+        if(this.column.indexOf(this.quantile.newColumnName) != -1){
+          Message.error(this.quantile.newColumnName + "列名已存在")
+        }else{	  		
+          let orderPara = this.column.concat([this.quantile.newColumnName]);
+          for(let i in this.quantile){
+            if(typeof this.quantile[i] === "object"){
+              para.parameter[i] = this.deepCopy(this.quantile[i]);
+            }else{
+              para.parameter[i] = this.quantile[i];
+            }
+          }
+        	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+          this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+          this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+          this.nextVaild(orderPara, this.columnNumberType);
+        }
   		}else if(this.feaType == 2){
-  			for(let i in this.columnsValue){
-  				this.vector.columnNames.push(this.columnsValue[i]);
-  			}
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column :[this.vector.newColumnName]}});
-        	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.vector}});
+        if(this.column.indexOf(this.vector.newColumnName) != -1){
+          Message.error(this.vector.newColumnName + "列名已存在")
+        }else{  
+    			for(let i in this.columnsValue){
+    				this.vector.columnNames.push(this.columnsValue[i]);
+    			}
+          for(let i in this.vector){
+              if(typeof this.vector[i] === "object"){
+                para.parameter[i] = this.deepCopy(this.vector[i]);
+              }else{
+                para.parameter[i] = this.vector[i];
+              }
+            }
+          	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+            let orderPara = this.column.concat([this.vector.newColumnName]);
+            this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+            this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+            this.nextVaild(orderPara, this.columnNumberType);
+          }
   		}else if(this.feaType == 3){
-  			for(let i in this.columnsValue){
-  				this.standard.columnNames.push(this.columnsValue[i]);
-  			}
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.standard.newColumnName]}});
-  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.standard}});
+        if(this.column.indexOf(this.standard.newColumnName) != -1){
+          Message.error(this.standard.newColumnName + "列名已存在")
+        }else{  
+    			for(let i in this.columnsValue){
+    				this.standard.columnNames.push(this.columnsValue[i]);
+    			}
+          for(let i in this.standard){
+              if(typeof this.standard[i] === "object"){
+                para.parameter[i] = this.deepCopy(this.standard[i]);
+              }else{
+                para.parameter[i] = this.standard[i];
+              }
+            }
+    			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+          let orderPara = this.column.concat([this.standard.newColumnName]);
+            this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+            this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+            this.nextVaild(orderPara, this.columnNumberType);
+          }
   		}else if(this.feaType == 4){
-  			for(let i in this.columnsValue){
-  				this.pca.columnNames.push(this.columnsValue[i]);
-  			}
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.pca.newColumnNam]}});
-  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.pca}});
+        if(this.column.indexOf(this.pca.newColumnName) != -1){
+          Message.error(this.pca.newColumnName + "列名已存在")
+        }else{  
+    			for(let i in this.columnsValue){
+    				this.pca.columnNames.push(this.columnsValue[i]);
+    			}
+          for(let i in this.pca){
+              if(typeof this.pca[i] === "object"){
+                para.parameter[i] = this.deepCopy(this.pca[i]);
+              }else{
+                para.parameter[i] = this.pca[i];
+              }
+            }
+    			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+          let orderPara = this.column.concat([this.pca.newColumnName]);
+            this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+            this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+            this.nextVaild(orderPara, this.columnNumberType);
+          }
   		}else if(this.feaType == 5){
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.indexer.newColumnName]}});
-        	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.indexer}});
+        if(this.column.indexOf(this.indexer.newColumnName) != -1){
+          Message.error(this.indexer.newColumnName + "列名已存在")
+        }else{  
+          for(let i in this.indexer){
+              if(typeof this.indexer[i] === "object"){
+                para.parameter[i] = this.deepCopy(this.indexer[i]);
+              }else{
+                para.parameter[i] = this.indexer[i];
+              }
+            }
+          	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+            let orderPara = this.column.concat([this.indexer.newColumnName]);
+            this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+            this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+            this.nextVaild(orderPara, this.columnNumberType);
+          }
 	    }else if(this.feaType == 7){
-	    	for(let i in this.columnsValue){
-  				this.poly.columnNames.push(this.columnsValue[i]);
-  			}
-  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.poly.newColumnName]}});
-	        this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.poly}});
+        if(this.column.indexOf(this.poly.newColumnName) != -1){
+          Message.error(this.poly.newColumnName + "列名已存在")
+        }else{  
+  	    	for(let i in this.columnsValue){
+    				this.poly.columnNames.push(this.columnsValue[i]);
+    			}
+          for(let i in this.poly){
+              if(typeof this.poly[i] === "object"){
+                para.parameter[i] = this.deepCopy(this.poly[i]);
+              }else{
+                para.parameter[i] = this.poly[i];
+              }
+            }
+  	        this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+            let orderPara = this.column.concat([this.poly.newColumnName]);
+            this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+            this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+            this.nextVaild(orderPara, this.columnNumberType);
+          }
 	    }
   	},
+    nextVaild(col, colN){
+      let nextNode = this.$store.state.runList[this.configT].next;
+      console.log(nextNode);
+      if(nextNode.length == 0){
+        console.log("valid");
+      }else{
+        for(let i in nextNode){
+          let config = this.$store.state.configData[nextNode[i]].config;
+          let name = this.$store.state.configData[nextNode[i]].type;
+          console.log(config);
+          if(JSON.stringify(config) == "{}"){
+            console.log("valid");
+          }else{
+            if(config.parameter["parameter"]){
+              if(typeof config.parameter["parameter"] === "object"){
+                console.log("filter或者fill或者shadow")
+                if(config.parameter["parameter"]["colName"] && col.indexOf(config.parameter["parameter"]["colName"]) == -1){
+                  Message.warning(name + "配置中包含的" + config.parameter["parameter"]["colName"] +"可能出现错误，请检查");
+                }else if(config.parameter["parameter"]["colName_1"] && col.indexOf(config.parameter["parameter"]["colName_1"]) == -1){
+                  Message.warning(name + "配置中包含的" + config.parameter["parameter"]["colName_1"] +"可能出现错误，请检查");
+                }else if(config.parameter["parameter"]["colName_2"] && col.indexOf(config.parameter["parameter"]["colName_2"]) == -1){
+                  Message.warning(name + "配置中包含的" + config.parameter["parameter"]["colName_2"] +"可能出现错误，请检查");
+                }
+              }
+            }else if(config.parameter["columnName"] && col.indexOf(config.parameter["columnName"]) == -1){
+              console.log("feature或者sort")
+            Message.warning(name + "配置中包含的" + config.parameter["columnName"] +"可能出现错误，请检查");
+          }else if(config.parameter["columnNames"]){
+            console.log("feature或者connect")
+            console.log(col);
+            for(let j in config.parameter["columnNames"]){
+              console.log(col.indexOf(config.parameter["columnNames"][j]));
+              if(col.indexOf(config.parameter["columnNames"][j]) == -1){
+                Message.warning(name + "配置中包含的" + config.parameter["columnNames"][j] +"可能出现错误，请检查");
+              }
+            }
+          }
+          }
+        }
+      }
+    },
   },
   computed:{
   	configT(){
@@ -239,28 +377,69 @@ export default {
   		this.columnsOption = this.column;
       this.columnsValue = [];
   		if(type == "fea"){  
+        this.quantile = {
+          columnName : "",
+          newColumnName : "",
+          numBuckets : 5,
+        };
+        this.vector = {
+          columnNames : [],
+          newColumnName : "",
+          maxCategories : 0
+        };
+        this.standard = {
+          columnNames : [],
+          newColumnName : ""
+        };
+        this.pca = {
+          columnNames : [],
+          newColumnName : "",
+          k : 0
+        };
+        this.indexer = {
+          columnName : "",
+          newColumnName : ""
+        };
+        this.poly = {
+          columnNames : [],
+          newColumnName : ""
+        };
+        this.chi ={
+          columnNames : [],
+          newColumnName : "",
+          numTopFeatures : 0,
+          label : ""
+        };
   			let n = Number(feaT)
-        if(para.config != null){
-          if(n == 7){      
-              this.poly.newColumnName = para.config.newColumnName;
-              this.columnsValue = this.deepCopy(para.config.columnNames);
+        if(JSON.stringify(para.config) != "{}"){
+          if(para.config.parameter["columnNames"]){
+            for(let i in para.config.parameter.columnNames){
+              if(this.column.indexOf(para.config.parameter.columnNames[i]) != -1){
+                this.columnsValue.push(para.config.parameter.columnNames[i]);
+              }
+            } 
+          }           
+          if(n == 7){
+              this.poly.newColumnName = para.config.parameter.newColumnName;
           }else if(n == 3){
-              this.standard.newColumnName = para.config.newColumnName;
-              this.columnsValue = this.deepCopy(para.config.columnNames);
+              this.standard.newColumnName = para.config.parameter.newColumnName;
           }else if(n == 4){
-              this.pca.newColumnName = para.config.newColumnName;
-              this.columnsValue = this.deepCopy(para.config.columnNames);
+              this.pca.newColumnName = para.config.parameter.newColumnName;
           }else if(n == 2){   
-              this.vector.newColumnName = para.config.newColumnName;
-              this.vector.maxCategories = para.config.maxCategories;
-              this.columnsValue = this.deepCopy(para.config.columnNames);
+              this.vector.newColumnName = para.config.parameter.newColumnName;
+              this.vector.maxCategories = para.config.parameter.maxCategories;
           }else if(n == 5){
-            this.indexer = this.deepCopy(para.config);
-          }else if(n == 1){
-            this.quantile = this.deepCopy(para.config);
+            if(this.column.indexOf(para.config.parameter.columnName) != -1){
+              this.indexer.columnName = para.config.parameter.columnName;
+            }
+            this.indexer.newColumnName = para.parameter.config.newColumnName;          }else if(n == 1){
+            if(this.column.indexOf(para.config.parameter.columnName) != -1){
+              this.quantile.columnName = para.config.parameter.columnName;
+            }
+            this.quantile.newColumnName = para.config.parameter.newColumnName;
+            this.quantile.numBuckets = para.config.parameter.numBuckets;
           } 
-        }
-  			
+        } 			
 
   			this.feaType = n;
   		}

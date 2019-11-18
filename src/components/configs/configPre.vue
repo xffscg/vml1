@@ -21,8 +21,8 @@
 				<el-input v-model="filter.value" placeholder="请输入数字"></el-input>
 			</div>	
 			<div class="select">
-				<el-select :disabled="true" v-model="filter.relation">
-					<el-option v-for="item in filterRuleList" :label="item.value" :key="item.id" :value="item.value"></el-option>
+				<el-select v-model="filter.relation">
+					<el-option v-for="item in dataSymbolList" :label="item.value" :key="item.id" :value="item.value"></el-option>
 				</el-select>
 			</div>
 			<div class="save" @click="addFilter"><el-button icon="el-icon-plus" style="width:90%" type="primary">新增</el-button></div>
@@ -221,6 +221,19 @@ export default {
   		shadowArray : [],
 		newColumnN: "",
 		shadowRuleList: ['+', '-', '*', '/'],
+		dataSymbolList: [
+        {
+          id: 0,
+          value: 'OR'
+        },
+        {
+          id: 1,
+          value: 'AND'
+        },
+        {
+          id: 2,
+          value: ''
+        }],
   		filterRuleList: [
         {
           id: 0,
@@ -272,23 +285,46 @@ export default {
         return target;
     },
   	save(){
-  		let para = {};
+  		let para = {parameter : {}, fileUrl : []};
+  		let list = this.$store.state.runList;
+	    let pre = list[this.configT].pre;
+	    let fileUrl = [];
+      // 可以后续加判断，如果父节点是分数据的就另外写
+      for(let i in pre){
+        let obj = {};
+        obj[pre[i]] = 0;
+        fileUrl.push(obj);
+      }
+	    para["fileUrl"] = fileUrl;
+	    para.parameter["userId"] = this.$store.state.userId;
+	    para.parameter["projectId"] = this.$store.state.projectId;
   		if(this.preType == 1){ 
 	  		if(this.filter.colName != "" && this.filter.operate != "" && this.filter.value != ""){
-	  			this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value});
+	  			this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value, relation : this.filter.relation});
 	  			this.filter.colName = "";
 	  			this.filter.operate = "";
 	  			this.filter.value = "";
 	  		}		
-  			para = {parameter : this.filterArray};
+  			para.parameter["parameter"] = this.filterArray;
   			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+	  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
   		}else if(this.preType == 2){
   			if(this.chooseType == "1"){
   				this.sort.sortType = "升序";
   			}else{
   				this.sort.sortType = "降序";
   			}
-  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.sort}});
+  			for(let i in this.sort){
+  				if(typeof this.sort[i] === "object"){
+  					para.parameter[i] = this.deepCopy(this.sort[i]);
+  				}else{
+  					para.parameter[i] = this.sort[i];
+  				}
+  			}
+  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+	  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
   			// para = {name : this.configT, config : this.sort};
   		}else if(this.preType == 7){
   			if(this.fill.colName != "" && this.fill.operate != ""){
@@ -296,16 +332,37 @@ export default {
 	  			this.fill.colName = "";
 	  			this.fill.operate = "";
 	  		}
-	  		para = {parameter : this.fillArray};
+	  		para.parameter["parameter"] = this.fillArray;
 	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+	  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
   		}else if(this.preType == 3){
   			// 增加列
   			if(this.newColumnN != ""){
 	  			this.divide.newColumnNames.push(this.newColumnN);
 	  			this.newColumnN = "";
 	  		}
-	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.divide}});
-	  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.divide.newColumnNames}});
+	  		let flag = true;
+	  		for(let i in this.divide.newColumnNames){
+	  			if(this.column.indexOf(this.divide.newColumnNames[i]) != -1){
+	  				Message.error(this.divide.newColumnNames[i] + "列名已存在");
+	  				flag = false;
+	  			}
+	  		}
+	  		if(flag == true){
+		  		for(let i in this.divide){
+	  				if(typeof this.divide[i] === "object"){
+	  					para.parameter[i] = this.deepCopy(this.divide[i]);
+	  				}else{
+	  					para.parameter[i] = this.divide[i];
+	  				}
+	  			}
+		  		let orderPara = this.column.concat(this.divide.newColumnNames);
+		  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+		  		this.nextVaild(orderPara, this.columnNumberType);
+	  		}
   		}else if(this.preType == 8){
   			if(this.shadow.colName_1 != "" && this.shadow.operate_1 != "" && this.shadow.value_1 != "" && this.shadow.operate != "" && this.shadow.colName_2 != "" && this.shadow.operate_2 != "" && this.shadow.value_2 != "" && this.shadow.newName != ""){
 	  			this.shadowArray.push({colName_1 :this.shadow.colName_1, operate_1 : this.shadow.operate_1, value_1 : this.shadow.value_1, operate : this.shadow.operate, colName_2 :this.shadow.colName_2, operate_2 : this.shadow.operate_2, value_2 : this.shadow.value_2, newName : this.shadow.newName});
@@ -319,16 +376,83 @@ export default {
 	  			this.shadow.value_2 = "";
 	  			this.shadow.newName = "";
 	  		}
-	  		para = {parameter : this.shadowArray};
-	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
-	  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.shadowNewNameArray}});
-	  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.shadowNewNameArray}});
+	  		let flag = true;
+	  		for(let i in this.shadowArray){
+	  			if(this.column.indexOf(this.shadowArray.newName) != -1){
+	  				flag = false;
+	  				Message.error(this.shadowArray.newName + "列名已存在");
+	  			}
+	  		}
+	  		if(flag == true){
+		  		para.parameter["parameter"]  =  this.shadowArray;
+		  		let orderPara = this.column.concat(this.shadowNewNameArray);
+		  		let orderParaN = this.columnNumberType.concat(this.shadowNewNameArray);
+		  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : orderParaN}});
+		  		this.nextVaild(orderPara, this.columnNumberType);
+	  		}
   		}else if(this.preType == 5){
-  			for(let i in this.columnsValue){
-  				this.connect.columnNames.push(this.columnsValue[i]);
+  			if(this.column.indexOf(this.connect.newColumnName) != -1){
+  				Message.error(this.connect.newColumnName + "列名已存在");
+  			}else{
+	  			for(let i in this.columnsValue){
+	  				this.connect.columnNames.push(this.columnsValue[i]);
+	  			}
+	  			for(let i in this.connect){
+	  				if(typeof this.connect[i] === "object"){
+	  					para.parameter[i] = this.deepCopy(this.connect[i]);
+	  				}else{
+	  					para.parameter[i] = this.connect[i];
+	  				}
+	  			}
+	  			let orderPara = this.column.concat([this.connect.newColumnName]);
+		  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+		  		this.nextVaild(orderPara, this.columnNumberType);
+	  		}
+  		}
+  	},
+  	nextVaild(col, colN){
+  		let nextNode = this.$store.state.runList[this.configT].next;
+  		console.log(nextNode);
+  		if(nextNode.length == 0){
+  			console.log("valid");
+  		}else{
+  			for(let i in nextNode){
+  				let config = this.$store.state.configData[nextNode[i]].config;
+  				let name = this.$store.state.configData[nextNode[i]].type;
+  				console.log(config);
+  				if(JSON.stringify(config) == "{}"){
+  					console.log("valid");
+  				}else{
+  					if(config.parameter["parameter"]){
+  						if(typeof config.parameter["parameter"] === "object"){
+  							console.log("filter或者fill或者shadow")
+  							if(config.parameter["parameter"]["colName"] && col.indexOf(config.parameter["parameter"]["colName"]) == -1){
+  								Message.warning(name + "配置中包含的" + config.parameter["parameter"]["colName"] +"可能出现错误，请检查");
+  							}else if(config.parameter["parameter"]["colName_1"] && col.indexOf(config.parameter["parameter"]["colName_1"]) == -1){
+  								Message.warning(name + "配置中包含的" + config.parameter["parameter"]["colName_1"] +"可能出现错误，请检查");
+  							}else if(config.parameter["parameter"]["colName_2"] && col.indexOf(config.parameter["parameter"]["colName_2"]) == -1){
+  								Message.warning(name + "配置中包含的" + config.parameter["parameter"]["colName_2"] +"可能出现错误，请检查");
+  							}
+  						}
+  					}else if(config.parameter["columnName"] && col.indexOf(config.parameter["columnName"]) == -1){
+  						console.log("feature或者sort")
+						Message.warning(name + "配置中包含的" + config.parameter["columnName"] +"可能出现错误，请检查");
+					}else if(config.parameter["columnNames"]){
+						console.log("feature或者connect")
+						console.log(col);
+						for(let j in config.parameter["columnNames"]){
+							console.log(col.indexOf(config.parameter["columnNames"][j]));
+							if(col.indexOf(config.parameter["columnNames"][j]) == -1){
+								Message.warning(name + "配置中包含的" + config.parameter["columnNames"][j] +"可能出现错误，请检查");
+							}
+						}
+					}
+  				}
   			}
-	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : this.connect}});
-	  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : [this.connect.newColumnName]}});
   		}
   	},
   	addFill(){
@@ -342,7 +466,7 @@ export default {
   	},
   	addFilter(){
   		if(this.filter.colName != "" && this.filter.operate != "" && this.filter.value != ""){
-  			this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value});
+  			this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value, relation : this.filter.relation});
   			this.filter.colName = "";
   			this.filter.operate = "";
   			this.filter.value = "";
@@ -427,7 +551,7 @@ export default {
 	        }else if(index == this.divide.newColumnNames.length -1){
 	        	this.divide.newColumnNames = this.divide.newColumnNames.slice(0, this.divide.newColumnNames.length-1);
 	        }else{
-	        	this.divide.newColumnNames = (this.divide.newColumnNamesy.slice(0, index)).concat(this.divide.newColumnNames.slice(index+1, this.divide.newColumnNames.length));
+	        	this.divide.newColumnNames = (this.divide.newColumnNames.slice(0, index)).concat(this.divide.newColumnNames.slice(index+1, this.divide.newColumnNames.length));
 	        }
 	    }
   	},
@@ -444,22 +568,67 @@ export default {
   		let para = this.$store.state.configData[newV];
   		console.log(para);
   		this.columnsOption = this.column;
+  		
   		if(type == "pre"){  
+  			this.filterArray = [];
+	  		this.fillArray = [];
+	  		this.shadowArray = [];
+	  		this.sort = {
+	  			columnName : "",
+	  			sortType: ""
+	  		};
+	  		this.divide = {
+	  			columnName : "",
+	  			delimiter : "",
+	  			newColumnNames : []
+	  		};
+	  		this.connect = {
+	  			columnNames : [],
+	  			connector : "",
+	  			newColumnName : ""
+	  		};
   			let n = Number(preT);
-  			if(para.config != null){  				
+  			if(JSON.stringify(para.config) != "{}"){  				
 	  			if(n == 1){
-	  				this.filterArray = this.deepCopy(para.config.parameter);
+	  				for(let i in para.config.parameter.parameter){
+	  					if(this.column.indexOf(para.config.parameter.parameter[i].colName) != -1){
+	  						this.filterArray.push(this.deepCopy(para.config.parameter.parameter[i]));
+	  					}
+	  				}
 	  			}else if(n == 7){
-	  				this.fillArray = this.deepCopy(para.config.parameter);
-	  				console.log(this.fillArray);
+	  				for(let i in para.config.parameter.parameter){
+	  					if(this.column.indexOf(para.config.parameter.parameter[i].colName) != -1){
+	  						this.fillArray.push(this.deepCopy(para.config.parameter.parameter[i]));
+	  					}
+	  				}
 	  			}else if(n == 5){
-	  				this.connect = this.deepCopy(para.config) ;
+	  				for(let i in para.config.parameter.columnNames){
+	  					if(this.column.indexOf(para.config.parameter.columnNames[i]) != -1){
+	  						this.connect.columnNames.push(para.config.parameter.columnNames[i]);
+	  					}
+	  				}
+	  				this.connect.connector =  para.config.parameter.connector;
+	  				this.connect.newColumnName =  para.config.parameter.newColumnName;
 	  			}else if(n == 8){
-	  				this.shadowArray = this.deepCopy(para.config.parameter) ;
+	  				for(let i in para.config.parameter.parameter){
+	  					if(this.column.indexOf(para.config.parameter.parameter[i].colName_1) != -1 && this.column.indexOf(para.config.parameter.parameter[i].colName_2) != -1){
+	  						this.shadowArray.push(para.parameter.config.parameter.parameter[i]);
+	  					}
+	  				}
 	  			}else if(n == 3){
-	  				this.divide = this.deepCopy(para.config) ;
+  					if(this.column.indexOf(para.config.parameter.columnName) != -1){
+  						this.divide.columnName = para.config.parameter.columnName;
+  						this.divide.delimiter = para.config.parameter.delimiter;
+  						this.divide.newColumnNames = this.deepCopy(para.config.parameter.newColumnNames);
+  					}
 	  			}else if(n == 2){
-	  				this.sort = this.deepCopy(para.config) ;
+	  				if(this.column.indexOf(para.config.parameter.columnName) != -1){
+  						this.sort.columnName = para.config.parameter.columnName;
+  						this.sort.sortType = para.config.parameter.sortType;
+  					}else{
+  						this.sort.sortType = "";
+  						this.sort.columnName = "";
+  					}
 	  			}	
   			}	
   			this.preType = n;

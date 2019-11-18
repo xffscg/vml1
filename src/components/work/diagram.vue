@@ -164,7 +164,7 @@ export default {
       }else if(state == "fail"){
         console.log("fail");
         $("#" + currentNode).css("border","solid 3px #F56C6C");
-      }else if(state == "run"){
+      }else if(state == "running"){
         $("#" + currentNode).css("border","3px dashed #67C23A")
         // $("#" + currentNode).css("background","linear-gradient(to bottom, #34538b, #cd0000)");
         // $("#" + currentNode).css("background-origin","border-box");
@@ -182,6 +182,26 @@ export default {
         queryProject({userId : this.$store.state.userId, projectId : proId}).then(res=>res.data)
         .then(res=>{
           console.log(res);
+          let r = this.deepCopy(res);
+          this.setDiagram(r.config);
+          for(let i in r.config){
+            this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
+            this.$store.commit("changeConfig", {type : "addConfig", detail:{name : i, config : r.config[i].config}});
+          }//配置数据
+          for(let i in r.start){
+            this.$store.commit("changeStart", {type:"add", detail:r.startNode[i]});
+          }//节点名称数据
+          this.$store.commit("changeConfigOrder", {type:"copy", config:r.config_order});
+          // this.$store.commit("changeRelation", r.relationship);
+          for(let i in r.relationship){
+            let item = r.relationship[i];
+            this.plumb.connect({
+              source : item[0],
+              target : item[1],
+              uuids : ["from"+item[0], "to"+item[1]],
+            },this.defaultConfig);
+          }//连接线
+          // this.$store.commit("changeRelation", r.relationship);
        })
         .catch(e=>{
             console.log(e);
@@ -232,16 +252,18 @@ export default {
   	},
     saveConfigNode(type, name, typeAlg){
 
-      let fileUrl = {};
+      let fileUrl = [];
       if(type == "dat"){
           this.$store.commit("changeStart", {type:"add", detail:this.dragContent.id});
           let index = this.dragContent.id.slice(7,-13);
           let info = this.dataInfo[Number(index)];
-          fileUrl[this.dragContent.id] = info.fileUrl;
+          let obj = {};
+          obj[this.dragContent.id] = info.fileUrl;
+          fileUrl.push(obj);
           this.getColumns(this.dragContent.id, info.fileId, info.fileUrl);
-          this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : name, nameAll : "data"}});
-          this.$store.commit("changeResult", {type : "add",name : this.dragContent.id, config:{fileId : info.fileId, fileUrl : fileUrl}});
-          this.$store.commit("changeConfig", {type : "addConfig", detail:{name : this.dragContent.id, config : {fileId : info.fileId, fileUrl : info.fileUrl}}});
+          this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : name, nameAll : 5001}});
+          this.$store.commit("changeResult", {type : "add",name : this.dragContent.id, config:{fileId : info.fileId, fileUrl : info.fileUrl}});
+          this.$store.commit("changeConfig", {type : "addConfig", detail:{name : this.dragContent.id, config : {fileId : info.fileId, fileUrl : fileUrl}}});
       }else if(type == "alg"){
           this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : name, nameAll : Number(typeAlg)}});
       }
@@ -391,7 +413,7 @@ export default {
           if(oldVal.hasOwnProperty(key)){
             if(oldVal[key] && typeof oldVal[key] === "object"){
               target[key] = oldVal[key].constructor === Array?[]:{};
-              target[key] = deepCopy(oldVal[key]);
+              target[key] = this.deepCopy(oldVal[key]);
             }else{
               target[key] = oldVal[key];
             }

@@ -39,6 +39,8 @@ const config = {
   // run
   goRunUrl : '/model/updateFlow',
   queryProjectUrl : '/model/getFlow',
-  queryResultUrl :'/model/getRunStatus'
+  queryResultUrl :'/model/getRunStatus',
+  executeAllUrl :'/model/executeAll',
+  executeFromOneUrl :'/model/executeFromOne',
 }
 export { config }

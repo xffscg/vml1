@@ -22,7 +22,7 @@ Vue.use(Vuex)
 
 const state = {
 	userId : 1,
-	projectId : -1,
+	projectId : 32,
 	funcType : 1,//sideBar的type 即数据、项目、算法
 	proList :[],//项目list
 	dataList : [],//数据list
@@ -41,6 +41,7 @@ const state = {
 	configOrder : {},
 	clearFlag : 0,
 	location : {},
+	reportContent : [],
 }
 
 

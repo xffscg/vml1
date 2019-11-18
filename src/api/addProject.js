@@ -30,3 +30,11 @@ export function queryResult (params) {
   let url = `${config.visualUrl}${config.queryResultUrl}`
   return axios.post(url, qs.stringify(params))
 }
+export function executeAll (params) {
+  let url = `${config.visualUrl}${config.executeAllUrl}`
+  return axios.post(url, qs.stringify(params))
+}
+export function executeFromOne (params) {
+  let url = `${config.visualUrl}${config.executeFromOneUrl}`
+  return axios.post(url, qs.stringify(params))
+}
