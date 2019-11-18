@@ -44,7 +44,6 @@ export default {
   methods : {
     clearLog(){
       let space = document.getElementById("log");
-      space.innerHTML = null;
     },
   	queryResult(){
       let start = null;
@@ -53,7 +52,7 @@ export default {
 	      	console.log(res);
           this.log = res;
           this.times += 1;
-          if((res.modelExecuteStatus == "running" || res.modelExecuteStatus == "initial") && this.times < 5){
+          if(res.modelExecuteStatus == "running" || res.modelExecuteStatus == "initial"){
             start = setTimeout(()=>{          
                     this.queryResult(); 
             }, 1000);

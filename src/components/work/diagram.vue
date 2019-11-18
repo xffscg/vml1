@@ -168,6 +168,8 @@ export default {
         $("#" + currentNode).css("border","3px dashed #67C23A")
         // $("#" + currentNode).css("background","linear-gradient(to bottom, #34538b, #cd0000)");
         // $("#" + currentNode).css("background-origin","border-box");
+      }else if(state == "initial"){
+        $("#" + currentNode).css("border","solid 1px black");
       }
     },
   	drop(e){
@@ -206,25 +208,6 @@ export default {
         .catch(e=>{
             console.log(e);
         })
-        // let session = window.sessionStorage;
-        // let r = JSON.parse(session.getItem("project"));
-        // this.setDiagram(r.config);
-        // for(let i in r.config){
-        //   this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
-        //   this.$store.commit("changeConfig", {type : "addConfig", detail:{name : i, config : r.config[i].config}});
-        // }//配置数据
-        // for(let i in r.start){
-        //   this.$store.commit("changeStart", {type:"add", detail:r.start[i]});
-        // }//节点名称数据
-        // this.$store.commit("changeConfigOrder", {type:"copy", config:r.configOrder});
-        // // this.$store.commit("changeRelation", r.relationship);
-        // for(let i in r.relationship){
-        //   this.plumb.connect({
-        //     source : r.relationship[i][0],
-        //     target : r.relationship[i][1],
-        //     uuids : ["from"+r.relationship[i][0], "to"+r.relationship[i][1]],
-        //   },this.defaultConfig);
-        // }//连接线
       }else{ 
         let timestamp = new Date().getTime();  
         this.dragContent.removeAttribute("class");
@@ -281,6 +264,7 @@ export default {
         d.style.border = "solid 1px black";
         let s = document.createElement("span");
         s.innerHTML = config[i].type;
+        this.$store.commit("changeLoc", {name : i, x : config[i].location.x, y : config[i].location.y});
         // let icon = document.createElement("i");
         // icon.setAttribute("class", "el-icon-circle-check");
         // icon.style.flo
@@ -458,6 +442,9 @@ export default {
           break;
         case "res":
           this.showDetail(newV.slice(3,4));
+          break;
+        case "run":
+          this.showDetail(9);
           break;
         default:
           break;

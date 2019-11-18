@@ -195,15 +195,28 @@ export default {
 			this.tableData.column[0].fixed = "left";
 		},
 		runFrom(){
+			console.log(9);
 	      	let id = this.menuType.type;
+	      	this.initialStyle(id);
 	      	executeFromOne({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId: id})
 	      	.then(res=>res.data).then(res=>{
 	      		console.log(res);
+	      		this.$refs.RunLog.clearLog(); 				
+          		this.$refs.RunLog.queryResult();
 	      	})
 	      	.catch(e=>{
 	      		Message.error("运行失败");
 	      	})
 	    },
+	    initialStyle(id){
+	    	let list = this.$store.state.runList;
+	    	if(runList[id].next.length != 0){
+	    		for(let i in runList[id].next){
+	    			this.$refs.diagram.changeClass("initial", id);
+	    			this.initialStyle(runList[id].next[i]);
+	    		}
+	    	}
+	    }
 	    
     },
 	computed :{
