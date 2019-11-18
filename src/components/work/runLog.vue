@@ -13,6 +13,7 @@ export default {
   	return {
       times :0,
       log : {},
+      successList : []
   	}
   },
   mounted(){
@@ -44,6 +45,9 @@ export default {
   methods : {
     clearLog(){
       let space = document.getElementById("log");
+      space.innerHTML = null;
+      this.times = 0;
+      this.successList = [];
     },
   	queryResult(){
       let start = null;
@@ -67,6 +71,7 @@ export default {
   	},
     setLog(){
       let config = this.$store.state.configData;
+      console.log(config);
       let time = new Date().format("yyyy-MM-dd hh:mm:ss");
       let space = document.getElementById("log");
       let content = document.createElement("div");
@@ -84,19 +89,24 @@ export default {
         p.innerHTML = time + "   项目运行成功。"
         content.append(p);
       }
-      for(let i in this.log.operatorStatus){        
-        let s = this.log.operatorStatus[i];
-        this.$emit("changeD", {id : i, state : s.status});
-        // this.$store.commit("changeShowStyle", {id : i, state : s.status});
-        if(s.status == "running"){
-          let p = document.createElement("p");
-          p.innerHTML = time + "   节点"  + config[i].type + "   正在运行。"
-          content.append(p);
-        }else if(s.status == "success"){
-          let p = document.createElement("p");
-          p.innerHTML = time + "   节点"  + config[i].type + "   运行成功。"
-          content.append(p);
-        }
+      for(let i in this.log.operatorStatus){ 
+        console.log(this.successList.indexOf(i));
+        this.$emit("changeD", {id : i, state : this.log.operatorStatus[i].status});
+        if(this.successList.indexOf(i) == -1){       
+          let s = this.log.operatorStatus[i];
+          // this.$emit("changeD", {id : i, state : s.status});
+          // this.$store.commit("changeShowStyle", {id : i, state : s.status});
+          if(s.status == "running"){
+            let p = document.createElement("p");
+            p.innerHTML = time + "   节点"  + config[i].type + "   正在运行。"
+            content.append(p);
+          }else if(s.status == "success"){
+            let p = document.createElement("p");
+            p.innerHTML = time + "   节点"  + config[i].type + "   运行成功。"
+            content.append(p);
+            this.successList.push(i);
+          }
+        }else{}
       }
       space.append(content);
 

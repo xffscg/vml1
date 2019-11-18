@@ -8,7 +8,7 @@
 	        	<algList v-show = "funcType == 4"></algList>
 	        	<dataList v-show = "funcType == 2"></dataList>
 	        	<reportList v-show = "funcType == 6"></reportList>
-	        	<ChooseList v-show = "funcType == 5"></ChooseList>
+	        	<ChooseList v-show = "funcType == 5" ref="ChooseList" @addContent="addContent"></ChooseList>
 	        </div>
 	        <div class="work" v-show = "funcType != 5">
 	        	<div class="workTop">
@@ -20,7 +20,7 @@
 	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="clear">清空画布</el-button>
 	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="getReport">生成报告</el-button>
 	        			</div>
-	        			<diagram ref="diagram"></diagram>
+	        			<diagram ref="diagram" @setLog="setLog"></diagram>
 	        		</div>
 	        		<div class="config"><Config></Config></div>
 	        	</div>
@@ -49,10 +49,10 @@ import reportList from '../function/reportList'
 import diagram from '../work/diagram'
 import Config from '../work/config'
 import RunLog from '../work/runLog'
-import Detail from '../work/detail'
+import Detail from '../detail/detail'
 import Report from '../work/report'
-import ChartDetail from '../work/chartDetail'
-import TableChartDetail from '../work/tableChartDetail'
+import ChartDetail from '../detail/chartDetail'
+import TableChartDetail from '../detail/tableChartDetail'
 import ChooseList from '../report/chooseList'
 export default {
 	components: {
@@ -95,26 +95,37 @@ export default {
 			this.$store.commit("changeResult", {type : "clear"});
 		},
 		getReport(){
-			this.$store.commit('changeReportList', {type : "add", detail : {name : "新建报告"}});
-			this.$refs.Report.createReport();
+			// this.$store.commit('changeReportList', {type : "add", detail : {name : "新建报告"}});
+			// this.$refs.Report.createReport();
+			this.$refs.ChooseList.getNode();
 			this.$store.commit('changeType', 5);
+		},
+		addContent(node){
+			this.$refs.Report.createReport(node);
 		},
 		changeStyle(node){
 			this.$refs.diagram.changeClass(node.state, node.id);
 		},
 		goRun(){
+			let list = this.$store.state.configData;
+			for(let i in list){
+				this.$refs.diagram.changeClass("initial", i);
+			}
 			executeAll({userId : this.$store.state.userId, projectId :32}).then(res=>res.data)
 			.then(res=>{
 				console.log(res);
 				let start = setTimeout(()=>{	
-					this.$refs.RunLog.clearLog(); 				
-	          		this.$refs.RunLog.queryResult(); 
+					 this.$refs.RunLog.clearLog(); 				
+      				this.$refs.RunLog.queryResult();
 				}, 1000);
 				start = null;
 			})
 			.catch(e=>{
 				Message.error(e.error || "运行错误");
 			})
+		},
+		setLog(){				
+      		this.$refs.RunLog.queryResult();
 		},
 		saveProject(){	
 			let project = {userId : 1, projectId : 32, config : {}, relationship : [], startNode : [], configOrder : {}};
@@ -194,30 +205,6 @@ export default {
 			}
 			this.tableData.column[0].fixed = "left";
 		},
-		runFrom(){
-			console.log(9);
-	      	let id = this.menuType.type;
-	      	this.initialStyle(id);
-	      	executeFromOne({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId: id})
-	      	.then(res=>res.data).then(res=>{
-	      		console.log(res);
-	      		this.$refs.RunLog.clearLog(); 				
-          		this.$refs.RunLog.queryResult();
-	      	})
-	      	.catch(e=>{
-	      		Message.error("运行失败");
-	      	})
-	    },
-	    initialStyle(id){
-	    	let list = this.$store.state.runList;
-	    	if(runList[id].next.length != 0){
-	    		for(let i in runList[id].next){
-	    			this.$refs.diagram.changeClass("initial", id);
-	    			this.initialStyle(runList[id].next[i]);
-	    		}
-	    	}
-	    }
-	    
     },
 	computed :{
 		funcType(){
@@ -239,7 +226,7 @@ export default {
 				console.log(t);
 				if(t == "dat"){		
 					let info = this.$store.state.configData[this.menuType.type].config;
-					this.getDataView(info.fileId, info.fileUrl);
+					this.getDataView(info.fileId, info.fileUrl[0][this.menuType.type]);
 				}else if(t == "pre" || t == "fea" || t == "exp"){
 					this.setResult();
 				}
@@ -299,9 +286,10 @@ export default {
 		        .catch(e => {
 		          Message.error(e.error || 'frequencyStatistics接口错误，请重试')
 		        })
-			}else if(newV == 9){
-				this.runFrom();
 			}
+			// else if(newV == 9){
+			// 	this.runFrom();
+			// }
 		},
 	},
 

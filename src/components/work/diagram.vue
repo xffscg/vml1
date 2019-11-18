@@ -1,6 +1,6 @@
 <template>
 	<div id="diagram" @drop="drop($event)" @dragover.prevent="dragover($event)">
-   <RightMenu v-show="showMenu" style="z-index : 3;"></RightMenu>
+   <RightMenu v-show="showMenu" style="z-index : 3;" @runFrom="runFrom"></RightMenu>
    <div class="hover" v-show="showHover">
      <div class="hoverItem" v-for="item in hoverDetail">{{item}}</div>
    </div> 
@@ -11,7 +11,7 @@
 import { Message } from 'element-ui'
 import {jsPlumb} from 'jsplumb'
 import RightMenu from './rightMenu'
-import { getProject, getDataSource, addProject, goRun, queryProject, queryResult } from '@/api/addProject'
+import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne } from '@/api/addProject'
 import { rawDataPreview, currentDataPreview } from '@/api/dataSource'
 import { getColumnNames, getColumnNameWithNumberType, fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 export default {
@@ -153,6 +153,29 @@ export default {
     });
   },
   methods:{
+    runFrom(){
+        let id = this.$store.state.menuType.type;
+        this.initialStyle(id);
+        executeFromOne({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId: id})
+        .then(res=>res.data).then(res=>{
+          console.log(res);
+          this.$emit("setLog");
+        })
+        .catch(e=>{
+          Message.error("运行失败");
+        })
+    },
+    initialStyle(id){
+      console.log(id);
+      let list = this.$store.state.runList;
+      this.changeClass("initial", id);
+      if(list[id].next.length != 0){
+        for(let i in list[id].next){
+          this.changeClass("initial", id);
+          this.initialStyle(list[id].next[i]);
+        }
+      }
+    },
     changeClass(state, currentNode){
       console.log(currentNode);
       if(state == "success"){
@@ -426,6 +449,7 @@ export default {
   watch:{
     clear(newV){
       let all =  this.$store.state.configData;
+      console.log(all);
       for(let i in all){
         this.plumb.remove(i);
       }     
@@ -442,9 +466,6 @@ export default {
           break;
         case "res":
           this.showDetail(newV.slice(3,4));
-          break;
-        case "run":
-          this.showDetail(9);
           break;
         default:
           break;

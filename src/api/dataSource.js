@@ -7,6 +7,7 @@ import qs from 'qs'
 //   return axios.post(url, qs.stringify(params))
 // }
 export function rawDataPreview (params) {
+	console.log(params);
   let url = `${config.visualUrl}${config.rawDataPreviewUrl}`
   return axios.post(url, qs.stringify(params))
 }
