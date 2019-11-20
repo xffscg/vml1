@@ -4,7 +4,7 @@
         <div v-show="funcType == 1">home page</div>        
         <div class="funcPart"  v-show="funcType != 1">
         	<div class="funcGuid">
-	        	<projectList v-show = "funcType == 3"></projectList>
+	        	<projectList v-show = "funcType == 3" ref="projectList" @save="saveProject"></projectList>
 	        	<algList v-show = "funcType == 4"></algList>
 	        	<dataList v-show = "funcType == 2"></dataList>
 	        	<reportList v-show = "funcType == 6"></reportList>
@@ -14,10 +14,11 @@
 	        	<div class="workTop">
 	        		<div class="diagram">
 	        			<div class="header">
-	        				<el-button type="primary" plain icon="el-icon-video-play" @click="saveProject">保存项目</el-button>
+	        				<el-button type="success" plain icon="el-icon-video-play" @click="saveProject">保存项目</el-button>
 	        				<el-button type="primary" plain icon="el-icon-video-play" @click="goRun">运行</el-button>
-	        				<el-button type="primary" plain icon="el-icon-s-operation" >保存模型</el-button>
-	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="clear">清空画布</el-button>
+	        				<el-button type="danger" plain icon="el-icon-video-pause" @click="stopRun">停止运行</el-button>
+	        				<el-button type="success" plain icon="el-icon-s-operation" >保存模型</el-button>
+	        				<el-button type="warning" plain icon="el-icon-s-operation" @click="clear">清空画布</el-button>
 	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="getReport">生成报告</el-button>
 	        			</div>
 	        			<diagram ref="diagram" @setLog="setLog"></diagram>
@@ -32,7 +33,17 @@
 	    </div>
 	    <div class="detail" v-show="showDetail == 1"><Detail  :tableData="tableData.data" :column="tableData.column" :length="tableData.length" :title="tableData.title"></Detail></div>	      
 	    <div class="detail" v-show="showDetail == 2"><ChartDetail ref="ChartDetail"></ChartDetail></div>
-	    <div class="detail" v-show="showDetail == 3"><TableChartDetail ref="TableChartDetail" :tableData="temFrequencyTable" :freName="freName"></TableChartDetail></div>	   
+	    <div class="detail" v-show="showDetail == 3"><TableChartDetail ref="TableChartDetail" :tableData="temFrequencyTable" :freName="freName"></TableChartDetail></div>	
+	    <el-dialog
+  			title="新建项目"
+  			:visible.sync="newProVisible"
+  			width="30%">
+  			<el-input v-model="projectName" placeholder="请输入项目名称"></el-input>
+		  <span slot="footer" class="dialog-footer">
+		    <el-button @click="newProVisible = false">取 消</el-button>
+		    <el-button type="primary" @click="createProject">提交</el-button>
+		  </span>
+		</el-dialog>   
     </div>
 </template>
 
@@ -82,13 +93,28 @@ export default {
 			freName : "",
 			polling : null,
 			times : 0,
-			interval : 1000
+			interval : 1000,
+			newProVisible : false,
+			projectName : ""
 		}
 	},
 	mounted(){
 		this.clear();
 	},
 	methods:{
+		createProject(){
+			addProject({userId : this.$store.state.userId, projectName : this.projectName}).then(res=>res.data)
+			.then(res=>{
+				console.log(res);
+				this.$store.commit("changeProId", res[res.length-1].id);
+				this.$store.commit('getPro', res);
+				this.newProVisible = false;
+			})
+			.catch(e=>{
+				console.log(e);
+				Message.error(e.error || '新建项目失败，请重试')
+			})
+		},
 		clear(){
 			let timestamp = new Date().getTime();
 			this.$store.commit("changeStart", {type : "clear"});
@@ -117,12 +143,12 @@ export default {
 			for(let i in list){
 				this.$refs.diagram.changeClass("initial", i);
 			}
-			executeAll({userId : this.$store.state.userId, projectId :32}).then(res=>res.data)
+			executeAll({userId : this.$store.state.userId, projectId :this.$store.state.projectId}).then(res=>res.data)
 			.then(res=>{
 				console.log(res);
 				let start = setTimeout(()=>{	
 					 this.$refs.RunLog.clearLog(); 				
-      				this.$refs.RunLog.queryResult();
+      				this.$refs.RunLog.queryResult(res.model_execute_id);
 				}, 1000);
 				start = null;
 			})
@@ -130,32 +156,39 @@ export default {
 				Message.error(e.error || "运行错误");
 			})
 		},
-		setLog(){				
-      		this.$refs.RunLog.queryResult();
+		stopRun(){
+			this.$refs.RunLog.start = null;
 		},
-		saveProject(){	
-			let project = {userId : 1, projectId : 32, config : {}, relationship : [], startNode : [], configOrder : {}};
-			let runList = this.$store.state.runList;
-			console.log(runList);
-			let loc = this.$store.state.location;
-			let configer = this.deepCopy(this.$store.state.configData);
-			for(let i in configer){
-				configer[i]["next"] = this.deepCopy(runList[i].next);
-				configer[i]["pre"] = this.deepCopy(runList[i].pre);
-				configer[i]["location"] = this.deepCopy(loc[i]);
-			}
-			project["config"] = JSON.stringify(this.deepCopy(configer));
-			project["relationship"] = JSON.stringify(this.deepCopy(this.$store.state.relationship));
-			project["startNode"] = JSON.stringify(this.deepCopy(this.$store.state.start));
-			project["configOrder"] = JSON.stringify(this.deepCopy(this.$store.state.configOrder));
-			console.log(project);
-            goRun(project).then(res => res.data)
-	        .then(res => {
-	          console.log(res);
-	        })
-	        .catch(e => {
-	          Message.error(e.error || 'run接口错误，请重试')
-	        })
+		setLog(id){				
+      		this.$refs.RunLog.queryResult(id);
+		},
+		saveProject(){
+			if(this.$store.state.projectId == -1){
+				this.newProVisible = true;
+			}else{
+				let project = {userId : this.$store.state.userId, projectId : this.$store.state.projectId, config : {}, relationship : [], startNode : [], configOrder : {}};
+				let runList = this.$store.state.runList;
+				console.log(runList);
+				let loc = this.$store.state.location;
+				let configer = this.deepCopy(this.$store.state.configData);
+				for(let i in configer){
+					configer[i]["next"] = this.deepCopy(runList[i].next);
+					configer[i]["pre"] = this.deepCopy(runList[i].pre);
+					configer[i]["location"] = this.deepCopy(loc[i]);
+				}
+				project["config"] = JSON.stringify(this.deepCopy(configer));
+				project["relationship"] = JSON.stringify(this.deepCopy(this.$store.state.relationship));
+				project["startNode"] = JSON.stringify(this.deepCopy(this.$store.state.start));
+				project["configOrder"] = JSON.stringify(this.deepCopy(this.$store.state.configOrder));
+				console.log(project);
+	            goRun(project).then(res => res.data)
+		        .then(res => {
+		          console.log(res);
+		        })
+		        .catch(e => {
+		          Message.error(e.error || 'run接口错误，请重试')
+		        })
+		    }
 		},		
 		getDataView(id, url){
 		  this.tableData = {

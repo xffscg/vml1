@@ -159,7 +159,7 @@ export default {
         executeFromOne({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId: id})
         .then(res=>res.data).then(res=>{
           console.log(res);
-          this.$emit("setLog");
+          this.$emit("setLog",res.model_execute_id);
         })
         .catch(e=>{
           Message.error("运行失败");

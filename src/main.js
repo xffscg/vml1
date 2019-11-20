@@ -10,10 +10,13 @@ import echarts from "echarts"
 // element-ui组件
 import ElementUI from 'element-ui'
 import gojs from 'gojs'
+import htmlToPdf from '../static/htmlToPdf.js'
 
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
+
+Vue.use(htmlToPdf)
 Vue.prototype.go = gojs
 
 

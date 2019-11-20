@@ -2,7 +2,7 @@ const config = {
   visualUrl: 'http://10.108.211.130:8993', // 需要连接校园网无线
   addData : '/dataSource/upload',
   addProjectUrl: '/project/create',
-  getProjectUrl: '/getProjectList',
+  getProjectUrl: '/project/getAll',
   getDataSourceUrl: '/dataSource/getFiles?userId=1',
   getAlgriListUrl: '/operateType/getAll',
   rawDataPreviewUrl: '/dataSource/dataPreview',

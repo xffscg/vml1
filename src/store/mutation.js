@@ -12,6 +12,7 @@ export const getPro = (state, proN) => {
 	state.proList = deepCopy(proN);
 }
 export const changeProId = (state, proId) => {
+  console.log(proId);
   state.projectId = proId;
 }
 export const getData = (state, dataN) => {

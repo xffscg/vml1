@@ -227,6 +227,7 @@ export default {
         if(this.column.indexOf(this.vector.newColumnName) != -1){
           Message.error(this.vector.newColumnName + "列名已存在")
         }else{  
+          this.vector.columnNames = [];
     			for(let i in this.columnsValue){
     				this.vector.columnNames.push(this.columnsValue[i]);
     			}
@@ -247,6 +248,7 @@ export default {
         if(this.column.indexOf(this.standard.newColumnName) != -1){
           Message.error(this.standard.newColumnName + "列名已存在")
         }else{  
+          this.standard.columnNames = [];
     			for(let i in this.columnsValue){
     				this.standard.columnNames.push(this.columnsValue[i]);
     			}
@@ -267,6 +269,7 @@ export default {
         if(this.column.indexOf(this.pca.newColumnName) != -1){
           Message.error(this.pca.newColumnName + "列名已存在")
         }else{  
+          this.pca.columnNames = [];
     			for(let i in this.columnsValue){
     				this.pca.columnNames.push(this.columnsValue[i]);
     			}
@@ -304,6 +307,7 @@ export default {
         if(this.column.indexOf(this.poly.newColumnName) != -1){
           Message.error(this.poly.newColumnName + "列名已存在")
         }else{  
+          this.poly.columnNames = [];
   	    	for(let i in this.columnsValue){
     				this.poly.columnNames.push(this.columnsValue[i]);
     			}

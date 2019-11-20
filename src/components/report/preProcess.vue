@@ -23,5 +23,6 @@ export default {
 <style scoped>
 .table{
   width: 100%;
+  overflow-x: auto;
 }
 </style>

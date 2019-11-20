@@ -1,11 +1,22 @@
 <template>
-	<div class="report">
+	<div class="report" id="reportPdf">
 		<h3>报告</h3>
 		<div class="content" id="contentList">
 		</div>
 		<div class="footer">
 			<el-button type="primary" plain icon="el-icon-s-operation" @click="saveReport">保存报告</el-button>
+      <el-button type="primary" plain icon="el-icon-s-operation" @click="reportVisible=true">下载报告</el-button>
 		</div>
+     <el-dialog
+        title="新建项目"
+        :visible.sync="reportVisible"
+        width="30%">
+        <el-input v-model="reportTitle" placeholder="请输入报告名称"></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="reportVisible = false">取 消</el-button>
+        <el-button type="primary" @click="getPdf()">提交</el-button>
+      </span>
+    </el-dialog>
 	</div>
 </template>
 
@@ -21,6 +32,12 @@ export default {
   	ChartReport,
   	TableReport,
   	FreReport
+  },
+  data(){
+    return {
+      reportTitle : "",
+      reportVisible : false
+    }
   },
   methods: {
   	close(){
@@ -54,8 +71,7 @@ export default {
   		let space = document.getElementById("contentList");
 			if(id.slice(4,7) == "dat" || id.slice(4,8) == "exp1" || id.slice(4,7) == "pre"){
 				console.log("data");
-				 
-        this.subComponents(id, TableReport);
+				this.setTableData(id, TableReport);
 			}else if(id.slice(4,8) == "exp2"){
 				console.log("fre")
         this.subComponents(id, FeaReport);
@@ -72,7 +88,7 @@ export default {
         space.append(d);
       }
   	},
-    subComponents(id, subName){
+    subComponents(id, subName, tableD){
       // 创建可复用的 Profile 组件构造函数
         let space = document.getElementById("contentList");
         let d = document.createElement("div");
@@ -87,7 +103,7 @@ export default {
       // 创建一个 Profile 组件的实例
       // if(subName == "freReport")
       let configD = this.setConfigData(id);
-      let tableD = this.setTableData(id);
+      console.log(tableD.tableData);
       if(subName == TableReport){
         let profile = new Profile({
           data: {
@@ -209,24 +225,24 @@ export default {
       return k;
       
     },
-    setTableData(id){
+    setTableData(id, subName){
       let result = this.$store.state.runResult;
       let tableD = {};
       tableD["tableData"] = [];
       tableD["columnD"] = [];
-      getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : id, start : 0, end : 10})
+      getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : id, start : 0, end : 5})
       .then(res=>res.data).then(res=>{
-        console.log(res);
-        tableD["tableData"] = this.deepCopy(res.data);
+        console.log(res.data);
+        tableD["tableData"] = res.data;
         for(let item in res.data[0]){
           tableD["columnD"].push({prop : item});
         }
-        tableD["columnD"][0].fixed = "left";
+        this.subComponents(id, subName, tableD);
+               
       })
       .catch(e=>{
         Message.error("请求结果错误")
       })
-      return tableD;
     },
     setChartData(id){}
   },
@@ -237,6 +253,7 @@ export default {
 .report {
 	height: 100%;
 	width: 100%;
+  overflow-x: auto;
 	position: relative;
 	background-color: white;
 }

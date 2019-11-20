@@ -27,6 +27,28 @@
 			</div>
 			<div class="save" @click="addFilter"><el-button icon="el-icon-plus" style="width:90%" type="primary">新增</el-button></div>
 		</div>
+		<div v-show="preType == 6" class="preFunc">
+			<h3>替换</h3>
+			<div class="selectHigh">
+				<h5>列名</h5>				
+			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
+		              <el-checkbox v-for="value in columnsOption" :label="value" :key="value">{{value}}</el-checkbox>
+		          </el-checkbox-group>
+			</div>
+			<div class="preList">
+				<div class="preItem" v-for="(item, index) in replace.replaceCharacters" :key="index">
+					<el-tag type="info">{{item.source}}</el-tag>&nbsp;&nbsp;<el-tag type="info">{{item.target}}</el-tag>&nbsp;&nbsp;<el-link @click="editReplace(index)">编辑</el-link>&nbsp;&nbsp;<el-link @click="delReplace(index)">删除</el-link><br>
+				</div>
+			</div>
+			<div class="select">
+				<el-input v-model="replaceC.source" placeholder="请输入替换目标"></el-input>
+			</div>	
+			<div class="select">
+				<el-input v-model="replaceC.target" placeholder="请输入替换值"></el-input>
+			</div>	
+			<div class="save" @click="addReplace"><el-button icon="el-icon-plus" style="width:90%" type="primary">新增</el-button></div>
+		</div>
 		<div v-show="preType == 7" class="preFunc">
 			<h3>填充空值</h3>
 			<div class="preList">
@@ -149,7 +171,7 @@
 			</div>
 			<div class="select">
 				<h5>连接符</h5>
-				<el-input v-model="connect.connectorn"></el-input>
+				<el-input v-model="connect.connector"></el-input>
 			</div>
 			<div class="select">
 				<h5>新列名</h5>
@@ -206,6 +228,14 @@ export default {
   			columnNames : [],
   			connector : "",
   			newColumnName : ""
+  		},
+  		replace : {
+  			columnNames : [],
+  			replaceCharacters : []
+  		},
+  		replaceC : {
+  			source : "",
+  			target : ""
   		},
   		shadow : {
   			colName_1: '',
@@ -327,6 +357,26 @@ export default {
   			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
 	  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
   			// para = {name : this.configT, config : this.sort};
+  		}else if(this.preType == 6){
+  			this.replace.columnNames = [];
+  			for(let i in this.columnsValue){
+  				this.replace.columnNames.push(this.columnsValue[i]);
+  			}
+	  		if(this.replaceC.source != "" && this.replaceC.target != ""){
+	  			this.replace.replaceCharacters.push({source : this.replaceC.source, target : this.replaceC.target});
+	  			this.replaceC.source = "";
+	  			this.replaceC.target = "";
+	  		}
+	  		for(let i in this.replace){
+  				if(typeof this.replace[i] === "object"){
+  					para.parameter[i] = this.deepCopy(this.replace[i]);
+  				}else{
+  					para.parameter[i] = this.replace[i];
+  				}
+  			}
+	  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+	  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
   		}else if(this.preType == 7){
   			if(this.fill.colName != "" && this.fill.operate != ""){
 	  			this.fillArray.push({colName :this.fill.colName, operate : this.fill.operate});
@@ -397,6 +447,7 @@ export default {
   			if(this.column.indexOf(this.connect.newColumnName) != -1){
   				Message.error(this.connect.newColumnName + "列名已存在");
   			}else{
+  				this.connect.columnNames = [];
 	  			for(let i in this.columnsValue){
 	  				this.connect.columnNames.push(this.columnsValue[i]);
 	  			}
@@ -495,6 +546,15 @@ export default {
   			Message.error("请完善本条填充信息");
   		}
   	},
+  	addReplace(){
+  		if(this.replaceC.source != "" && this.replaceC.target != ""){
+  			this.replace.replaceCharacters.push({source : this.replaceC.source, target : this.replaceC.target});
+  			this.replaceC.source = "";
+  			this.replaceC.target = "";
+  		}else{
+  			Message.error("请完善本条替换信息");
+  		}
+  	},
   	addFilter(){
   		if(this.filter.colName != "" && this.filter.operate != "" && this.filter.value != ""){
   			this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value, relation : this.filter.relation});
@@ -536,6 +596,19 @@ export default {
 	        	this.fillArray = this.fillArray.slice(0, this.fillArray.length-1);
 	        }else{
 	        	this.fillArray = (this.fillArray.slice(0, index)).concat(this.fillArray.slice(index+1, this.fillArray.length));
+	      }
+	    }
+  	},
+  	delReplace(index){
+  		if(this.replace.replaceCharacters.length == 1){
+	        this.replace.replaceCharacters = [];
+	    }else{   
+	        if(index == 0){
+	        	this.replace.replaceCharacters = this.replace.replaceCharacters.slice(1);
+	        }else if(index == this.fillArray.length -1){
+	        	this.replace.replaceCharacters = this.replace.replaceCharacters.slice(0, this.replace.replaceCharacters.length-1);
+	        }else{
+	        	this.replace.replaceCharacters = (this.replace.replaceCharacters.slice(0, index)).concat(this.replace.replaceCharacters.slice(index+1, this.replace.replaceCharacters.length));
 	      }
 	    }
   	},
@@ -599,6 +672,7 @@ export default {
   		let para = this.$store.state.configData[newV];
   		console.log(para);
   		this.columnsOption = this.column;
+  		this.columnsValue = [];
   		
   		if(type == "pre"){  
   			this.filterArray = [];
@@ -607,6 +681,10 @@ export default {
 	  		this.sort = {
 	  			columnName : "",
 	  			sortType: ""
+	  		};
+	  		this.replace = {
+	  			columnNames : [],
+	  			replaceCharacters : []
 	  		};
 	  		this.divide = {
 	  			columnName : "",
@@ -632,10 +710,19 @@ export default {
 	  						this.fillArray.push(this.deepCopy(para.config.parameter.parameter[i]));
 	  					}
 	  				}
+	  			}else if(n == 6){
+	  				for(let i in para.config.parameter.columnNames){
+	  					if(this.column.indexOf(para.config.parameter.columnNames[i]) != -1){
+	  						// this.replace.columnNames.push(para.config.parameter.columnNames[i]);
+	  						this.columnsValue.push(para.config.parameter.columnNames[i]);
+	  					}
+	  				}
+	  				this.replace.replaceCharacters = this.deepCopy(para.config.parameter.replaceCharacters);
 	  			}else if(n == 5){
 	  				for(let i in para.config.parameter.columnNames){
 	  					if(this.column.indexOf(para.config.parameter.columnNames[i]) != -1){
-	  						this.connect.columnNames.push(para.config.parameter.columnNames[i]);
+	  						// this.connect.columnNames.push(para.config.parameter.columnNames[i]);
+	  						this.columnsValue.push(para.config.parameter.columnNames[i]);
 	  					}
 	  				}
 	  				this.connect.connector =  para.config.parameter.connector;
@@ -643,7 +730,7 @@ export default {
 	  			}else if(n == 8){
 	  				for(let i in para.config.parameter.parameter){
 	  					if(this.column.indexOf(para.config.parameter.parameter[i].colName_1) != -1 && this.column.indexOf(para.config.parameter.parameter[i].colName_2) != -1){
-	  						this.shadowArray.push(para.parameter.config.parameter.parameter[i]);
+	  						this.shadowArray.push(para.config.parameter.parameter[i]);
 	  					}
 	  				}
 	  			}else if(n == 3){

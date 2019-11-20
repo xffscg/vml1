@@ -1,6 +1,9 @@
 <template>
 	<div class="runLog" >
-		<div class="title"><h3>日志</h3></div>
+		<div class="title">
+      <h3>日志</h3>
+      <el-button type="primary" plain icon="el-icon-delete" @click="clearLogBoard"></el-button>
+    </div>
     <div class="logContent" id="log"></div>
 	</div>
 </template>
@@ -13,7 +16,8 @@ export default {
   	return {
       times :0,
       log : {},
-      successList : []
+      successList : [],
+      start : null,
   	}
   },
   mounted(){
@@ -49,19 +53,22 @@ export default {
       this.times = 0;
       this.successList = [];
     },
-  	queryResult(){
-      let start = null;
-  		queryResult({userId : 1, projectId : 32, operatorId: ""}).then(res=>res.data)
+    clearLogBoard(){
+      let space = document.getElementById("log");
+      space.innerHTML = null;
+    },
+  	queryResult(id){
+  		queryResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, modelExecuteId: id, }).then(res=>res.data)
         .then(res=>{
 	      	console.log(res);
           this.log = res;
           this.times += 1;
           if(res.modelExecuteStatus == "running" || res.modelExecuteStatus == "initial"){
-            start = setTimeout(()=>{          
-                    this.queryResult(); 
+            this.start = setTimeout(()=>{          
+                    this.queryResult(id); 
             }, 1000);
           }else if(res.modelExecuteStatus == "success"){
-            start = null;
+            this.start = null;
           }
           this.setLog();
 	     })
@@ -129,6 +136,8 @@ export default {
 .title {
   width: 100%;
   background-color: #F0F0EB;
+  display: flex;
+  justify-content: space-between;
   height: 30px;
   padding: 3px;
 }
