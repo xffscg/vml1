@@ -13,6 +13,7 @@
 import ChartReport from '../report/relation'
 import TableReport from '../report/preProcess'
 import FreReport from '../report/freReport'
+import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne, getDataResult } from '@/api/addProject'
 import Vue from 'vue'
 export default {
   name: 'report',
@@ -42,6 +43,9 @@ export default {
         }
         return target;
     },
+    delContent(id){
+      $('#report'+id).remove();
+    },
   	createReport(node){
       console.log(node);
   		let list = this.$store.state.runResult;
@@ -50,8 +54,7 @@ export default {
   		let space = document.getElementById("contentList");
 			if(id.slice(4,7) == "dat" || id.slice(4,8) == "exp1" || id.slice(4,7) == "pre"){
 				console.log("data");
-				let data = document.createElement("TableReport");
-				space.append(data);
+				 
         this.subComponents(id, TableReport);
 			}else if(id.slice(4,8) == "exp2"){
 				console.log("fre")
@@ -62,8 +65,8 @@ export default {
 			}else if(id.slice(0,3) == "txt"){
         console.log("createTxt");
         let d = document.createElement("div");
-        d.id = id;
         d.setAttribute("class", "reportItem");
+        d.setAttribute("id", "report" + id);
         d.style.margin = "10px 5px 10px 5px";
         d.innerHTML = node.content;
         space.append(d);
@@ -71,11 +74,13 @@ export default {
   	},
     subComponents(id, subName){
       // 创建可复用的 Profile 组件构造函数
-      let space = document.getElementById("contentList");
-      let d = document.createElement("div");
-      d.id = id;
-      d.style.margin = "10px 5px 10px 5px";
-      space.append(d);
+        let space = document.getElementById("contentList");
+        let d = document.createElement("div");
+        // d.id = "report" + id;
+        d.setAttribute("id", "report" + id);
+        d.style.margin = "10px 5px 10px 5px";
+
+        space.append(d);
       let list = this.$store.state.runResult;
       let config = this.$store.state.configData;
       let Profile = Vue.extend(subName);
@@ -93,8 +98,9 @@ export default {
             columnC : configD.columnC,
           }  
         })
-        profile.$mount('#' + id)
+        profile.$mount(d)
       }
+
       
       // 挂载到元素上
     },
@@ -114,16 +120,16 @@ export default {
           for(let i in para["parameter"]){
             let obj = {};
             for(let item in para["parameter"][i]){
-              let k = this.transferKey(key);
+              let k = this.transferKey(item);
               obj[k] = para["parameter"][i][item];
             }
             configD["configData"].push(obj);
           }
-          this.tableData.column[0].fixed = 'left';
+          configD["columnC"][0].fixed = 'left';
         }else{
           for(let item in para){
             if(item != "userId" && item != "projectId"){
-              let k = this.transferKey(key);
+              let k = this.transferKey(item);
               configD["columnC"].push({ prop: k });
               let obj = {};
               if(item == "columnNames" || item == "newColumnNames"){
@@ -208,14 +214,19 @@ export default {
       let tableD = {};
       tableD["tableData"] = [];
       tableD["columnD"] = [];
-      if(result[i]){
-        for(let key in result[i][0]){
-          tableD["columnD"].push({prop : key});
+      getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : id, start : 0, end : 10})
+      .then(res=>res.data).then(res=>{
+        console.log(res);
+        tableD["tableData"] = this.deepCopy(res.data);
+        for(let item in res.data[0]){
+          tableD["columnD"].push({prop : item});
         }
-        tableD["tableData"] = this.deepCopy(result[i]);
-      }else{
-        console.log("get from server");
-      }
+        tableD["columnD"][0].fixed = "left";
+      })
+      .catch(e=>{
+        Message.error("请求结果错误")
+      })
+      return tableD;
     },
     setChartData(id){}
   },

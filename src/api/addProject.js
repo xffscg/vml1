@@ -38,3 +38,7 @@ export function executeFromOne (params) {
   let url = `${config.visualUrl}${config.executeFromOneUrl}`
   return axios.post(url, qs.stringify(params))
 }
+export function getDataResult (params) {
+  let url = `${config.visualUrl}${config.getDataResultUrl}`
+  return axios.post(url, qs.stringify(params))
+}

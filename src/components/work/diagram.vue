@@ -213,7 +213,7 @@ export default {
             this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
             this.$store.commit("changeConfig", {type : "addConfig", detail:{name : i, config : r.config[i].config}});
           }//配置数据
-          for(let i in r.start){
+          for(let i in r.startNode){
             this.$store.commit("changeStart", {type:"add", detail:r.startNode[i]});
           }//节点名称数据
           this.$store.commit("changeConfigOrder", {type:"copy", config:r.config_order});

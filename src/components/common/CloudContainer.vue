@@ -8,7 +8,7 @@
 	        	<algList v-show = "funcType == 4"></algList>
 	        	<dataList v-show = "funcType == 2"></dataList>
 	        	<reportList v-show = "funcType == 6"></reportList>
-	        	<ChooseList v-show = "funcType == 5" ref="ChooseList" @addContent="addContent"></ChooseList>
+	        	<ChooseList v-show = "funcType == 5" ref="ChooseList" @addContent="addContent" @delContent="delContent"></ChooseList>
 	        </div>
 	        <div class="work" v-show = "funcType != 5">
 	        	<div class="workTop">
@@ -40,7 +40,7 @@
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 import { filter, fillNullValue, columnMap, columnSplit, columnsMerge, sort, replace } from '@/api/dataProcess'
-import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne } from '@/api/addProject'
+import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne, getDataResult } from '@/api/addProject'
 import { Message } from 'element-ui'
 import projectList from '../function/projectList'
 import algList from '../function/algList'
@@ -85,6 +85,9 @@ export default {
 			interval : 1000
 		}
 	},
+	mounted(){
+		this.clear();
+	},
 	methods:{
 		clear(){
 			let timestamp = new Date().getTime();
@@ -102,6 +105,9 @@ export default {
 		},
 		addContent(node){
 			this.$refs.Report.createReport(node);
+		},
+		delContent(id){
+			this.$refs.Report.delContent(id);
 		},
 		changeStyle(node){
 			this.$refs.diagram.changeClass(node.state, node.id);
@@ -196,14 +202,22 @@ export default {
 				length : 0,
 				title : ""
 			};
-			let res = this.$store.state.runResult[this.menuType.type];
-			this.tableData.data = res.data;
-			this.tableData.length = res.length;
-			for(let item in res.data[0]){
-				console.log(item);
-				this.tableData.column.push({prop : item});
-			}
-			this.tableData.column[0].fixed = "left";
+			getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : this.menuType.type, start : 0, end : 50})
+			.then(res=>res.data).then(res=>{
+				console.log(res);
+				this.tableData.data = res.data;
+				this.tableData.length = res.length;
+				for(let item in res.data[0]){
+					console.log(item);
+					this.tableData.column.push({prop : item});
+				}
+				this.tableData.column[0].fixed = "left";
+				this.$store.commit("changeResult", {type : "add",name : this.menuType.type, config: this.tableData})
+			})
+			.catch(e=>{
+				Message.error("请求结果错误")
+			})
+			
 		},
     },
 	computed :{

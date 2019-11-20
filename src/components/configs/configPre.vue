@@ -322,6 +322,7 @@ export default {
   					para.parameter[i] = this.sort[i];
   				}
   			}
+  			console.log(para);
   			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
   			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
 	  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
@@ -361,7 +362,7 @@ export default {
 		  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
-		  		this.nextVaild(orderPara, this.columnNumberType);
+		  		this.nextVaild(this.$store.state.runList[this.configT].next, orderPara, this.columnNumberType);
 	  		}
   		}else if(this.preType == 8){
   			if(this.shadow.colName_1 != "" && this.shadow.operate_1 != "" && this.shadow.value_1 != "" && this.shadow.operate != "" && this.shadow.colName_2 != "" && this.shadow.operate_2 != "" && this.shadow.value_2 != "" && this.shadow.newName != ""){
@@ -390,7 +391,7 @@ export default {
 		  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : orderParaN}});
-		  		this.nextVaild(orderPara, this.columnNumberType);
+		  		this.nextVaild(this.$store.state.runList[this.configT].next, orderPara, this.columnNumberType);
 	  		}
   		}else if(this.preType == 5){
   			if(this.column.indexOf(this.connect.newColumnName) != -1){
@@ -410,36 +411,51 @@ export default {
 		  		this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
-		  		this.nextVaild(orderPara, this.columnNumberType);
+		  		this.nextVaild(this.$store.state.runList[this.configT].next, orderPara, this.columnNumberType);
 	  		}
   		}
   	},
-  	nextVaild(col, colN){
-  		let nextNode = this.$store.state.runList[this.configT].next;
+  	nextVaild(nextNode, col, colN){
+  		// 采用逐步提示的方式，如果下一个分支上的节点合法，则继续向下找直到第一个出错的点，或者直到底部；必须包含所有分支
+  		// let nextNode = this.$store.state.runList[this.configT].next;
   		console.log(nextNode);
+  		let order = this.$store.state.configOrder;
   		if(nextNode.length == 0){
-  			console.log("valid");
-  		}else{
+  			console.log("valid");//无后续节点 安全
+  		}else{  			
+	  		let flag = Array(nextNode.length);
+	  		flag.fill(1);
   			for(let i in nextNode){
+  				console.log(this.$store.state.configData[nextNode[i]]);
   				let config = this.$store.state.configData[nextNode[i]].config;
   				let name = this.$store.state.configData[nextNode[i]].type;
   				console.log(config);
   				if(JSON.stringify(config) == "{}"){
-  					console.log("valid");
+  					console.log("valid");//下一个节点无配置，下一个节点安全，但是要考虑下一个节点的子节点
+
   				}else{
   					if(config.parameter["parameter"]){
+  						console.log("fill")
   						if(typeof config.parameter["parameter"] === "object"){
   							console.log("filter或者fill或者shadow")
-  							if(config.parameter["parameter"]["colName"] && col.indexOf(config.parameter["parameter"]["colName"]) == -1){
-  								Message.warning(name + "配置中包含的" + config.parameter["parameter"]["colName"] +"可能出现错误，请检查");
-  							}else if(config.parameter["parameter"]["colName_1"] && col.indexOf(config.parameter["parameter"]["colName_1"]) == -1){
-  								Message.warning(name + "配置中包含的" + config.parameter["parameter"]["colName_1"] +"可能出现错误，请检查");
-  							}else if(config.parameter["parameter"]["colName_2"] && col.indexOf(config.parameter["parameter"]["colName_2"]) == -1){
-  								Message.warning(name + "配置中包含的" + config.parameter["parameter"]["colName_2"] +"可能出现错误，请检查");
+  							console.log(config);
+  							for(let u in config.parameter["parameter"]){  								
+	  							if(config.parameter["parameter"][u]["colName"] && col.indexOf(config.parameter["parameter"][u]["colName"]) == -1){
+	  								console.log("fill filter")
+	  								flag[i] = 0;
+	  								Message.warning(name + "配置中包含的" + config.parameter["parameter"][u]["colName"] +"可能出现错误，请检查");
+	  							}else if(config.parameter["parameter"][u]["colName_1"] && col.indexOf(config.parameter["parameter"][u]["colName_1"]) == -1){
+	  								flag[i] = 0;
+	  								Message.warning(name + "配置中包含的" + config.parameter["parameter"][u]["colName_1"] +"可能出现错误，请检查");
+	  							}else if(config.parameter["parameter"][u]["colName_2"] && col.indexOf(config.parameter["parameter"][u]["colName_2"]) == -1){
+	  								flag[i] = 0;
+	  								Message.warning(name + "配置中包含的" + config.parameter["parameter"][u]["colName_2"] +"可能出现错误，请检查");
+	  							}
   							}
   						}
   					}else if(config.parameter["columnName"] && col.indexOf(config.parameter["columnName"]) == -1){
   						console.log("feature或者sort")
+  						flag[i] = 0;
 						Message.warning(name + "配置中包含的" + config.parameter["columnName"] +"可能出现错误，请检查");
 					}else if(config.parameter["columnNames"]){
 						console.log("feature或者connect")
@@ -447,10 +463,25 @@ export default {
 						for(let j in config.parameter["columnNames"]){
 							console.log(col.indexOf(config.parameter["columnNames"][j]));
 							if(col.indexOf(config.parameter["columnNames"][j]) == -1){
+								flag[i] = 0;
 								Message.warning(name + "配置中包含的" + config.parameter["columnNames"][j] +"可能出现错误，请检查");
 							}
 						}
 					}
+  				}
+  			}
+  			for(let i in nextNode){
+  				if(flag[i] == 1){
+  					if(order[nextNode[i]]){  						
+	  					let columnOrder = [];
+	  					for(let  u in order[nextNode[i]].column){
+	  						if(col.indexOf(order[nextNode[i]].column[u]) != -1){
+	  							columnOrder.push(order[nextNode[i]].column[u]);
+	  						}
+	  					}
+  						this.$store.commit("changeConfigOrder", {type : "addColumn", config:{name : nextNode[i], column : columnOrder}});
+  					}
+  					this.nextVaild(this.$store.state.runList[nextNode[i]], col, colN);
   				}
   			}
   		}

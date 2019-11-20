@@ -1,5 +1,5 @@
 <template>
-	<div>		
+	<div class="table">		
 		<h3>分析方法： {{title}}</h3>
     <p>配置列表：</p>
     <el-table :data="configData" style="width: 100%" height="200">
@@ -20,5 +20,8 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.table{
+  width: 100%;
+}
 </style>

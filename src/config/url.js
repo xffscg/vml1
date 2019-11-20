@@ -42,5 +42,6 @@ const config = {
   queryResultUrl :'/model/getRunStatus',
   executeAllUrl :'/model/executeAll',
   executeFromOneUrl :'/model/executeFromOne',
+  getDataResultUrl :'/operate/getOperateResultData'
 }
 export { config }
