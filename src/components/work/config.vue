@@ -8,10 +8,11 @@
               <el-checkbox v-for="value in expOption" :label="value" :key="value">{{value}}</el-checkbox>
           </el-checkbox-group>
     	</div>       
-    <div class="save" @click="save"><el-button icon="el-icon-plus" style="width:90%" type="primary">保存</el-button></div>
+    <div class="save" @click="save"><el-button icon="el-icon-plus" style="width:90%" type="primary" v-show="configType != 4">保存</el-button></div>
 		</div>
 		<ConfigPre v-show="configType == 2" :column="dataColumns" :columnNumberType="dataColumnsNumber"></ConfigPre>
     <ConfigFea v-show="configType == 3" :column="dataColumns" :columnNumberType="dataColumnsNumber"></ConfigFea>
+    <ConfigData v-show="configType == 4" :info="dataInfo"></ConfigData>
 	</div>
 
 </template>
@@ -21,11 +22,13 @@ import { getColumnNames, getColumnNameWithNumberType, fullTableStatistics, frequ
 // import {  } from '@/api/dataExploration'
 import ConfigPre from '../configs/configPre'
 import ConfigFea from '../configs/configFea'
+import ConfigData from '../configs/configData'
 export default {
   name: 'config',
   components :{
     ConfigPre,
-    ConfigFea
+    ConfigFea,
+    ConfigData
   },
   data(){
   	return {
@@ -39,6 +42,7 @@ export default {
       	expValue : [],
         min : 0,
         max : 0,
+        dataInfo : {}
   	}
   },
   methods :{
@@ -163,6 +167,15 @@ export default {
           this.configType = 2;
         }else if(type == "fea"){
           this.configType = 3;
+        }else if(type == "dat"){
+          let data = this.$store.state.configData[newV];
+          let col = this.$store.state.configOrder[newV];
+          this.dataInfo["name"] = data.type;
+          this.dataInfo["url"] = data.config.fileUrl[0][newV];
+          this.dataInfo["id"] = data.config.fileId;
+          this.dataInfo["column"] = col.column.join(",");
+          this.dataInfo["columnNumber"] = col.columnNumber.join(",");
+          this.configType = 4;
         }
       })
   		// if(type == "exp"){    

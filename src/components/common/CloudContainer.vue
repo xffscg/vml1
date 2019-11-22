@@ -8,18 +8,18 @@
 	        	<algList v-show = "funcType == 4"></algList>
 	        	<dataList v-show = "funcType == 2"></dataList>
 	        	<reportList v-show = "funcType == 6"></reportList>
-	        	<ChooseList v-show = "funcType == 5" ref="ChooseList" @addContent="addContent" @delContent="delContent"></ChooseList>
+	        	<ChooseList v-show = "funcType == 5" ref="ChooseList" @addContent="addContent" @delContent="delContent"  @reflow="reflowContent"></ChooseList>
 	        </div>
 	        <div class="work" v-show = "funcType != 5">
 	        	<div class="workTop">
 	        		<div class="diagram">
 	        			<div class="header">
-	        				<el-button type="success" plain icon="el-icon-video-play" @click="saveProject">保存项目</el-button>
+	        				<el-button type="success" plain icon="el-icon-document-checked" @click="saveProject">保存项目</el-button>
 	        				<el-button type="primary" plain icon="el-icon-video-play" @click="goRun">运行</el-button>
 	        				<el-button type="danger" plain icon="el-icon-video-pause" @click="stopRun">停止运行</el-button>
 	        				<el-button type="success" plain icon="el-icon-s-operation" >保存模型</el-button>
-	        				<el-button type="warning" plain icon="el-icon-s-operation" @click="clear">清空画布</el-button>
-	        				<el-button type="primary" plain icon="el-icon-s-operation" @click="getReport">生成报告</el-button>
+	        				<el-button type="warning" plain icon="el-icon-delete" @click="clear">清空画布</el-button>
+	        				<el-button type="primary" plain icon="el-icon-document" @click="getReport">生成报告</el-button>
 	        			</div>
 	        			<diagram ref="diagram" @setLog="setLog"></diagram>
 	        		</div>
@@ -132,8 +132,11 @@ export default {
 		addContent(node){
 			this.$refs.Report.createReport(node);
 		},
-		delContent(id){
-			this.$refs.Report.delContent(id);
+		delContent(node){
+			this.$refs.Report.delContent(node);
+		},
+		reflowContent(node){
+			this.$refs.Report.reflow(node);
 		},
 		changeStyle(node){
 			this.$refs.diagram.changeClass(node.state, node.id);
@@ -353,7 +356,7 @@ export default {
 		width: 100%;
 	    display :flex;
 		.funcGuid {
-			width : 20%;		
+			width : 15%;		
 			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 		}
 		.work {
@@ -386,7 +389,7 @@ export default {
 			}
 		}
 		.reportPart {
-			flex : 1;
+			width : 80%;
 			position :relative;
 			margin:5px;
 			height : 700px;	

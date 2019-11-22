@@ -1,12 +1,13 @@
 <template>
 	<div class="report" id="reportPdf">
+    <div class="header">
+      <el-button type="primary" plain icon="el-icon-s-operation">保存报告</el-button>
+      <el-button type="primary" plain icon="el-icon-s-operation" @click="reportVisible=true">下载报告</el-button>
+    </div>
 		<h3>报告</h3>
 		<div class="content" id="contentList">
 		</div>
-		<div class="footer">
-			<el-button type="primary" plain icon="el-icon-s-operation" @click="saveReport">保存报告</el-button>
-      <el-button type="primary" plain icon="el-icon-s-operation" @click="reportVisible=true">下载报告</el-button>
-		</div>
+		
      <el-dialog
         title="新建项目"
         :visible.sync="reportVisible"
@@ -36,16 +37,14 @@ export default {
   data(){
     return {
       reportTitle : "",
-      reportVisible : false
+      reportVisible : false,
+      flagReflow : true,
+      listNode : []
     }
   },
+  mounted(){
+  },
   methods: {
-  	close(){
-  		this.$store.commit("changeShow", 0);
-  	},
-  	saveReport(){
-  		this.$store.commit("changeShow", 0);
-  	},
   	deepCopy(oldVal){
         let target = oldVal.constructor === Array?[]:{};
         for(let key in oldVal){
@@ -60,11 +59,35 @@ export default {
         }
         return target;
     },
-    delContent(id){
-      $('#report'+id).remove();
+    delContent(node){
+      let space = document.getElementById("contentList");
+      let d = document.getElementById("report" + node.id);
+      space.removeChild(d);
+      if(this.listNode.length == 1){
+        this.listNode = [];
+      }else{
+        let i = node.index;
+        if(i == 0){
+          this.listNode = this.listNode.slice(1);
+        }else if(i == this.listNode.length-1){
+          this.listNode = this.listNode.slice(0, this.listNode.length-1);
+        }else{
+          this.listNode = this.listNode.slice(0, i).concat(this.listNode.slice(i+1, this.listNode.length));
+        }
+      }
+    },
+    reflow(node){
+      let space = document.getElementById("contentList");
+      let d = document.getElementById("report" + node.id);
+      space.removeChild(d);
+      if(node.before == ""){
+        space.append(d);
+      }else{
+        let b = document.getElementById("report" + node.before);
+        space.insertBefore(d, b);
+      }
     },
   	createReport(node){
-      console.log(node);
   		let list = this.$store.state.runResult;
       let config = this.$store.state.configData;
       let id = node.id;
@@ -78,8 +101,8 @@ export default {
 			}else if(id.slice(4,8) == "exp3" || id.slice(4,8) == "exp4"){
 				console.log("relation")
         this.subComponents(id, ChartReport);
-			}else if(id.slice(0,3) == "txt"){
-        console.log("createTxt");
+			}else if(id.slice(4,7) == "txt"){
+        console.log("txt")
         let d = document.createElement("div");
         d.setAttribute("class", "reportItem");
         d.setAttribute("id", "report" + id);
@@ -91,19 +114,18 @@ export default {
     subComponents(id, subName, tableD){
       // 创建可复用的 Profile 组件构造函数
         let space = document.getElementById("contentList");
+        let dOutside = document.createElement("div");
+        dOutside.id = "report" + id
+        dOutside.setAttribute("class", "reportItem");
         let d = document.createElement("div");
-        // d.id = "report" + id;
-        d.setAttribute("id", "report" + id);
         d.style.margin = "10px 5px 10px 5px";
-
-        space.append(d);
+        dOutside.append(d);        
       let list = this.$store.state.runResult;
       let config = this.$store.state.configData;
       let Profile = Vue.extend(subName);
       // 创建一个 Profile 组件的实例
       // if(subName == "freReport")
       let configD = this.setConfigData(id);
-      console.log(tableD.tableData);
       if(subName == TableReport){
         let profile = new Profile({
           data: {
@@ -114,10 +136,10 @@ export default {
             columnC : configD.columnC,
           }  
         })
-        profile.$mount(d)
+        profile.$mount(d);
       }
-
-      
+      space.append(dOutside); 
+      this.flagReflow = true;     
       // 挂载到元素上
     },
     setConfigData(id){
@@ -232,7 +254,6 @@ export default {
       tableD["columnD"] = [];
       getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : id, start : 0, end : 5})
       .then(res=>res.data).then(res=>{
-        console.log(res.data);
         tableD["tableData"] = res.data;
         for(let item in res.data[0]){
           tableD["columnD"].push({prop : item});
@@ -262,17 +283,16 @@ export default {
   margin: 10px 5px 10px 5px; 
 }
 .content {
-	height: 650;
+	min-height: 650;
 	width: 100%;
 	margin-bottom: 10px;
-	overflow-y: auto;
 }
-.footer {
+.header {
 	height: 50px;
 	width: 100%;
-	bottom: 0;
+	top: 0;
 	padding-bottom: 10px;
-	position: absolute;
+	/*position: absolute;*/
 	display: flex;
 	justify-content: center;
 }

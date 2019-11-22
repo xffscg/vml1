@@ -5,8 +5,7 @@
             <template v-for="(item,i) in nodeArr">
 	        	<div class="dragItem"  :id="item.id" @click="toContent($event)">
 	                <span>{{item.name}}</span>
-                  <div class="addStyle"><i style="color:#409EFF" class="el-icon-plus"></i></div>
-                  
+                  <div class="addStyle"><i style="color:#409EFF" class="el-icon-plus"></i></div>                  
 	           </div>
 	        </template>          
           <div class="dragItem"  id="txt" @click="newTxtVisible=true">
@@ -16,12 +15,14 @@
 	    </el-menu>
 	    <h3>已有节点</h3>
 	    <el-menu background-color="#F9F9F5" text-color="#000" active-text-color router>	    	
+        <draggable v-model="contentArr" v-bind="{group:{name:'report', pull:'clone', put:false }}" @start="isDragging=true" @end="update($event)">
             <template v-for="(item,i) in contentArr">
-	        	<div class="dragItem" :id="item.id" @click="delNode(i, item.id)">
+	        	<div class="dragItem" :id="item.id" @click="delNode(i, item.id)" dra>
 	                <span>{{item.name}}</span>
                   <div class="addStyle"><i style="color:#409EFF" class="el-icon-minus"></i></div>
 	            </div>
 	        </template>
+        </draggable>
 	    </el-menu>
       <el-dialog
           title="新建文本框"
@@ -45,6 +46,7 @@
 
 <script>
 import { Message } from 'element-ui'
+ import draggable from "vuedraggable";
 export default {
   name: 'chooseList',
   data(){
@@ -53,8 +55,13 @@ export default {
       nodeArr : [],
       contentArr : [],
       newTxtVisible : false,
-      newTxt : {name : "", content:""}
+      newTxt : {name : "", content:""},
+      isDragging: false,
+      delayedDragging: false,
   	}
+  },
+  components : {
+    draggable
   },
   methods :{
   	deepCopy(oldVal){
@@ -71,22 +78,32 @@ export default {
         }
         return target;
     },
+    update(e){
+      this.isDragging = true;
+      let obj = {id : this.contentArr[e.newIndex].id.slice(3), before : ""};
+      if(e.newIndex < this.contentArr.length-1){
+        obj.before = this.contentArr[e.newIndex+1].id.slice(3);
+      }
+      this.$emit("reflow", obj);
+    },
     getNode(){
       let nodeList = this.$store.state.configData;
       this.nodeArr = [];
       for(let i in nodeList){
-        this.nodeArr.push({name :nodeList[i].type, id: i});
+        this.nodeArr.push({name :nodeList[i].type, id: "i"+i});
       }
       console.log(this.nodeArr);
     },
     toContent(e){
+      console.log("add");
       console.log(e.currentTarget.id);
-      let id = e.currentTarget.id;
-      this.$emit("addContent", {id : id});
-      let config = this.$store.state.configData;
-      this.contentArr.push({name : config[id].type, id : "in" + id});
+      let id = e.currentTarget.id.slice(1);
+      let config = this.$store.state.configData;      
+      this.$emit("addContent", {id : id, content : ""});
+      this.contentArr.push({name : config[id].type, id : "ini" + id, content : ""});
     },
     createTxt(){
+      console.log("add")
       let flag = true;
       for(let i in this.contentArr){
         if(this.contentArr[i].name == this.newTxt.name){
@@ -97,14 +114,15 @@ export default {
       }
       if(flag == true){
         let timestamp = new Date().getTime(); 
-        this.$emit("addContent", {id : "txt" + timestamp, content : this.newTxt.content});
-        this.contentArr.push({name : this.newTxt.name, id: "txt" + timestamp, content : this.newTxt.content});
+        this.$emit("addContent", {id : "droptxt" + timestamp, content : this.newTxt.content});
+        this.contentArr.push({name : this.newTxt.name, id: "inidroptxt" + timestamp, content : this.newTxt.content});
         this.newTxtVisible = false;
       }
       
     },
     delNode(i,id){
-      this.$emit("delContent", id);
+      console.log(id);
+      this.$emit("delContent", {id : id.slice(3), index : i});
       if(this.contentArr.length == 1){
         this.contentArr = [];
       }else{
@@ -121,7 +139,20 @@ export default {
   computed :{
   },
   watch:{
-    
+    isDragging(newValue) {
+      if (newValue) {
+        console.log(this.contentArr);
+        this.delayedDragging = true;
+        return;
+      }
+      this.$nextTick(() => {
+        this.delayedDragging = false;
+      });
+    },
+    // contentArr(newValue, oldVal) {
+    //   console.log(newValue);
+    //     this.$emit("reflow", newValue);
+    // }
   }
 
 };

@@ -3,7 +3,7 @@
     <div class="ttable">
       <h5>频率表格统计</h5>
         <el-table :data="configData" style="width: 100%" min-height="200px">
-            <el-table-column v-for="col in columnC" :fixed="col.fixed" :prop="col.prop" :label="col.prop" :key="col.prop">
+            <el-table-column v-for="col in columnC" :prop="col.prop" :label="col.prop" :key="col.prop">
             </el-table-column>
       </el-table>
         <el-table border :data="tableData">
