@@ -95,6 +95,10 @@ export default {
         let p = document.createElement("p");
         p.innerHTML = time + "   项目运行成功。"
         content.append(p);
+      }else if(this.log.modelExecuteStatus == "error"){
+        let p = document.createElement("p");
+        p.innerHTML = time + "   项目运行失败。"
+        content.append(p);
       }
       for(let i in this.log.operatorStatus){ 
         console.log(this.successList.indexOf(i));
@@ -112,8 +116,12 @@ export default {
             p.innerHTML = time + "   节点"  + config[i].type + "   运行成功。"
             content.append(p);
             this.successList.push(i);
+          }else if(s.status == "error"){
+            let p = document.createElement("p");
+            p.innerHTML = time + "   节点"  + config[i].type + "   运行失败。\n 失败原因 ： " + s.log;
+            content.append(p);
           }
-        }else{}
+        }
       }
       space.append(content);
 

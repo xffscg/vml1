@@ -197,6 +197,7 @@ export default {
   },
   data(){
   	return {
+  		configT : "",
   		preType : 0,
   		chooseType : "1",
   		checkAll: false,
@@ -470,6 +471,7 @@ export default {
   		// 采用逐步提示的方式，如果下一个分支上的节点合法，则继续向下找直到第一个出错的点，或者直到底部；必须包含所有分支
   		// let nextNode = this.$store.state.runList[this.configT].next;
   		console.log(nextNode);
+  		console.log(nextNode.length);
   		let order = this.$store.state.configOrder;
   		if(nextNode.length == 0){
   			console.log("valid");//无后续节点 安全
@@ -478,13 +480,12 @@ export default {
 	  		flag.fill(1);
   			for(let i in nextNode){
   				console.log(this.$store.state.configData[nextNode[i]]);
-  				let config = this.$store.state.configData[nextNode[i]].config;
+  					let config = this.$store.state.configData[nextNode[i]].config;
   				let name = this.$store.state.configData[nextNode[i]].type;
-  				console.log(config);
-  				if(JSON.stringify(config) == "{}"){
+  				if(JSON.stringify(this.$store.state.configData[nextNode[i]].config) == "{}"){
   					console.log("valid");//下一个节点无配置，下一个节点安全，但是要考虑下一个节点的子节点
-
   				}else{
+
   					if(config.parameter["parameter"]){
   						console.log("fill")
   						if(typeof config.parameter["parameter"] === "object"){
@@ -532,7 +533,7 @@ export default {
 	  					}
   						this.$store.commit("changeConfigOrder", {type : "addColumn", config:{name : nextNode[i], column : columnOrder}});
   					}
-  					this.nextVaild(this.$store.state.runList[nextNode[i]], col, colN);
+  					this.nextVaild(this.$store.state.runList[nextNode[i]].next, col, colN);
   				}
   			}
   		}
@@ -659,14 +660,8 @@ export default {
 	        }
 	    }
   	},
-  },
-  computed:{
-  	configT(){
-  		return this.$store.state.configType;
-  	},
-  },
-  watch: {
-  	configT(newV){
+  	setConfig(newV){
+  		this.configT = newV;
   		let type = newV.slice(4,7);
   		let preT = newV.slice(7,8);
   		let para = this.$store.state.configData[newV];
@@ -752,6 +747,100 @@ export default {
   			this.preType = n;
   		}
   	},
+
+  },
+  computed:{
+  	// configT(){
+  	// 	return this.$store.state.configType;
+  	// },
+  },
+  watch: {
+  	// configT(newV){
+  	// 	let type = newV.slice(4,7);
+  	// 	let preT = newV.slice(7,8);
+  	// 	let para = this.$store.state.configData[newV];
+  	// 	console.log(para);
+  	// 	this.columnsOption = this.column;
+  	// 	this.columnsValue = [];
+  		
+  	// 	if(type == "pre"){  
+  	// 		this.filterArray = [];
+	  // 		this.fillArray = [];
+	  // 		this.shadowArray = [];
+	  // 		this.sort = {
+	  // 			columnName : "",
+	  // 			sortType: ""
+	  // 		};
+	  // 		this.replace = {
+	  // 			columnNames : [],
+	  // 			replaceCharacters : []
+	  // 		};
+	  // 		this.divide = {
+	  // 			columnName : "",
+	  // 			delimiter : "",
+	  // 			newColumnNames : []
+	  // 		};
+	  // 		this.connect = {
+	  // 			columnNames : [],
+	  // 			connector : "",
+	  // 			newColumnName : ""
+	  // 		};
+  	// 		let n = Number(preT);
+  	// 		if(JSON.stringify(para.config) != "{}"){  				
+	  // 			if(n == 1){
+	  // 				for(let i in para.config.parameter.parameter){
+	  // 					if(this.column.indexOf(para.config.parameter.parameter[i].colName) != -1){
+	  // 						this.filterArray.push(this.deepCopy(para.config.parameter.parameter[i]));
+	  // 					}
+	  // 				}
+	  // 			}else if(n == 7){
+	  // 				for(let i in para.config.parameter.parameter){
+	  // 					if(this.column.indexOf(para.config.parameter.parameter[i].colName) != -1){
+	  // 						this.fillArray.push(this.deepCopy(para.config.parameter.parameter[i]));
+	  // 					}
+	  // 				}
+	  // 			}else if(n == 6){
+	  // 				for(let i in para.config.parameter.columnNames){
+	  // 					if(this.column.indexOf(para.config.parameter.columnNames[i]) != -1){
+	  // 						// this.replace.columnNames.push(para.config.parameter.columnNames[i]);
+	  // 						this.columnsValue.push(para.config.parameter.columnNames[i]);
+	  // 					}
+	  // 				}
+	  // 				this.replace.replaceCharacters = this.deepCopy(para.config.parameter.replaceCharacters);
+	  // 			}else if(n == 5){
+	  // 				for(let i in para.config.parameter.columnNames){
+	  // 					if(this.column.indexOf(para.config.parameter.columnNames[i]) != -1){
+	  // 						// this.connect.columnNames.push(para.config.parameter.columnNames[i]);
+	  // 						this.columnsValue.push(para.config.parameter.columnNames[i]);
+	  // 					}
+	  // 				}
+	  // 				this.connect.connector =  para.config.parameter.connector;
+	  // 				this.connect.newColumnName =  para.config.parameter.newColumnName;
+	  // 			}else if(n == 8){
+	  // 				for(let i in para.config.parameter.parameter){
+	  // 					if(this.column.indexOf(para.config.parameter.parameter[i].colName_1) != -1 && this.column.indexOf(para.config.parameter.parameter[i].colName_2) != -1){
+	  // 						this.shadowArray.push(para.config.parameter.parameter[i]);
+	  // 					}
+	  // 				}
+	  // 			}else if(n == 3){
+  	// 				if(this.column.indexOf(para.config.parameter.columnName) != -1){
+  	// 					this.divide.columnName = para.config.parameter.columnName;
+  	// 					this.divide.delimiter = para.config.parameter.delimiter;
+  	// 					this.divide.newColumnNames = this.deepCopy(para.config.parameter.newColumnNames);
+  	// 				}
+	  // 			}else if(n == 2){
+	  // 				if(this.column.indexOf(para.config.parameter.columnName) != -1){
+  	// 					this.sort.columnName = para.config.parameter.columnName;
+  	// 					this.sort.sortType = para.config.parameter.sortType;
+  	// 				}else{
+  	// 					this.sort.sortType = "";
+  	// 					this.sort.columnName = "";
+  	// 				}
+	  // 			}	
+  	// 		}	
+  	// 		this.preType = n;
+  	// 	}
+  	// },
   }
 };
 </script>

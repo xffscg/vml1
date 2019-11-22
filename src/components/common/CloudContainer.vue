@@ -21,9 +21,9 @@
 	        				<el-button type="warning" plain icon="el-icon-delete" @click="clear">清空画布</el-button>
 	        				<el-button type="primary" plain icon="el-icon-document" @click="getReport">生成报告</el-button>
 	        			</div>
-	        			<diagram ref="diagram" @setLog="setLog"></diagram>
+	        			<diagram ref="diagram" @setLog="setLog" @goConfig="goConfig"></diagram>
 	        		</div>
-	        		<div class="config"><Config></Config></div>
+	        		<div class="config"><Config ref="Config"></Config></div>
 	        	</div>
 	        	<div class="log"><RunLog ref="RunLog" @changeD="changeStyle"></RunLog></div>	        	
 	        </div>
@@ -114,6 +114,9 @@ export default {
 				console.log(e);
 				Message.error(e.error || '新建项目失败，请重试')
 			})
+		},
+		goConfig(id){
+			this.$refs.Config.setConfig(id);
 		},
 		clear(){
 			let timestamp = new Date().getTime();

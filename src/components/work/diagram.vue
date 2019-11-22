@@ -184,7 +184,7 @@ export default {
         // $("#" + currentNode).css("border","3px dashed #fff")
         // $("#" + currentNode).css("background","linear-gradient(to bottom, #34538b, #cd0000)");
         // $("#" + currentNode).css("backgroundOrigin","border-box");
-      }else if(state == "fail"){
+      }else if(state == "error"){
         console.log("fail");
         $("#" + currentNode).css("border","solid 3px #F56C6C");
       }else if(state == "running"){
@@ -331,8 +331,9 @@ export default {
         console.log(event.currentTarget);   
         console.log(event.currentTarget.style.left);     
         let connections = that.plumb.getAllConnections();
-        that.$store.commit("changeConfigType", "forChange");
-        that.$store.commit("changeConfigType", event.currentTarget.id);
+        // that.$store.commit("changeConfigType", "forChange");
+        // that.$store.commit("changeConfigType", event.currentTarget.id);
+        that.$emit("goConfig", event.currentTarget.id);
         that.$store.commit("changeLoc", {name : event.currentTarget.id, x : event.currentTarget.style.left, y : event.currentTarget.style.top});
       }, false);
       // this.dragContent.addEventListener("mouseover",function(event){

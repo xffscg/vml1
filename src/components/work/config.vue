@@ -10,9 +10,9 @@
     	</div>       
     <div class="save" @click="save"><el-button icon="el-icon-plus" style="width:90%" type="primary" v-show="configType != 4">保存</el-button></div>
 		</div>
-		<ConfigPre v-show="configType == 2" :column="dataColumns" :columnNumberType="dataColumnsNumber"></ConfigPre>
-    <ConfigFea v-show="configType == 3" :column="dataColumns" :columnNumberType="dataColumnsNumber"></ConfigFea>
-    <ConfigData v-show="configType == 4" :info="dataInfo"></ConfigData>
+		<ConfigPre v-show="configType == 2" :column="dataColumns" :columnNumberType="dataColumnsNumber" ref="ConfigPre"></ConfigPre>
+    <ConfigFea v-show="configType == 3" :column="dataColumns" :columnNumberType="dataColumnsNumber" ref="ConfigFea"></ConfigFea>
+    <ConfigData v-show="configType == 4" ref="ConfigData"></ConfigData>
 	</div>
 
 </template>
@@ -42,10 +42,63 @@ export default {
       	expValue : [],
         min : 0,
         max : 0,
-        dataInfo : {}
+        dataInfo : {},
+        configT : ""
   	}
   },
   methods :{
+    setConfig(newV){
+      this.configT = newV;
+      this.expValue = [];
+      this.checkAll = false;
+      this.isIndeterminate = true;
+      let type = newV.slice(4,7);
+      let run = this.$store.state.runList;
+      if(run[newV] && type!= "dat"){
+        this.getColumns(newV);
+      }
+      this.$nextTick(()=>{
+        if(type == "exp"){    
+          let para = this.$store.state.configData[newV]; 
+          if(JSON.stringify(para.config) != "{}"){
+            for(let i in para.config.parameter.columnNames){
+              if(this.dataColumns.indexOf(para.config.parameter.columnNames[i]) != -1){
+                this.expValue.push(para.config.parameter.columnNames[i]);
+              }
+            }
+          }    
+          this.configType = 1;
+        }else if(type == "pre"){
+          this.$refs.ConfigPre.setConfig(newV);
+          this.configType = 2;
+        }else if(type == "fea"){
+          this.$refs.ConfigFea.setConfig(newV);
+          this.configType = 3;
+        }else if(type == "dat"){
+          // let data = this.$store.state.configData[newV];
+          // let col = this.$store.state.configOrder[newV];
+          // this.dataInfo["name"] = data.type;
+          // this.dataInfo["url"] = data.config.fileUrl[0][newV];
+          // this.dataInfo["id"] = data.config.fileId;
+          // this.dataInfo["column"] = col.column.join(",");
+          // this.dataInfo["columnNumber"] = col.columnNumber.join(",");
+          // console.log(this.dataInfo);
+          this.$refs.ConfigData.getDetail(newV);
+          this.configType = 4;
+        }
+      })
+      // if(type == "exp"){    
+    //     let para = this.$store.state.configData[newV]; 
+    //     if(para.config != null){
+    //       this.expValue = this.deepCopy(para.config);
+    //     }    
+    //     this.configType = 1;
+      // }else if(type == "pre"){
+      //  this.configType = 2;
+      // }else if(type == "fea"){
+    //     this.configType = 3;
+    //   }
+    },
     deepCopy(oldVal){
         let target = oldVal.constructor === Array?[]:{};
         for(let key in oldVal){
@@ -138,58 +191,60 @@ export default {
     },//类似于事件的冒泡原理
   },
   computed:{
-  	configT(){
-  		return this.$store.state.configType;
-  	},
+  	// configT(){
+  	// 	return this.$store.state.configType;
+  	// },
   },
   watch: {
-  	configT(newV){
-      this.expValue = [];
-      this.checkAll = false;
-      this.isIndeterminate = true;
-  		let type = newV.slice(4,7);
-      let run = this.$store.state.runList;
-      if(run[newV] && type!= "dat"){
-        this.getColumns(newV);
-      }
-      this.$nextTick(()=>{
-        if(type == "exp"){    
-          let para = this.$store.state.configData[newV]; 
-          if(JSON.stringify(para.config) != "{}"){
-            for(let i in para.config.parameter.columnNames){
-              if(this.dataColumns.indexOf(para.config.parameter.columnNames[i]) != -1){
-                this.expValue.push(para.config.parameter.columnNames[i]);
-              }
-            }
-          }    
-          this.configType = 1;
-        }else if(type == "pre"){
-          this.configType = 2;
-        }else if(type == "fea"){
-          this.configType = 3;
-        }else if(type == "dat"){
-          let data = this.$store.state.configData[newV];
-          let col = this.$store.state.configOrder[newV];
-          this.dataInfo["name"] = data.type;
-          this.dataInfo["url"] = data.config.fileUrl[0][newV];
-          this.dataInfo["id"] = data.config.fileId;
-          this.dataInfo["column"] = col.column.join(",");
-          this.dataInfo["columnNumber"] = col.columnNumber.join(",");
-          this.configType = 4;
-        }
-      })
-  		// if(type == "exp"){    
-    //     let para = this.$store.state.configData[newV]; 
-    //     if(para.config != null){
-    //       this.expValue = this.deepCopy(para.config);
-    //     }    
-    //     this.configType = 1;
-  		// }else if(type == "pre"){
-  		// 	this.configType = 2;
-  		// }else if(type == "fea"){
-    //     this.configType = 3;
-    //   }
-  	},
+  	// configT(newV){
+   //    this.expValue = [];
+   //    this.checkAll = false;
+   //    this.isIndeterminate = true;
+  	// 	let type = newV.slice(4,7);
+   //    let run = this.$store.state.runList;
+   //    if(run[newV] && type!= "dat"){
+   //      this.getColumns(newV);
+   //    }
+   //    this.$nextTick(()=>{
+   //      if(type == "exp"){    
+   //        let para = this.$store.state.configData[newV]; 
+   //        if(JSON.stringify(para.config) != "{}"){
+   //          for(let i in para.config.parameter.columnNames){
+   //            if(this.dataColumns.indexOf(para.config.parameter.columnNames[i]) != -1){
+   //              this.expValue.push(para.config.parameter.columnNames[i]);
+   //            }
+   //          }
+   //        }    
+   //        this.configType = 1;
+   //      }else if(type == "pre"){
+   //        this.configType = 2;
+   //      }else if(type == "fea"){
+   //        this.configType = 3;
+   //      }else if(type == "dat"){
+   //        // let data = this.$store.state.configData[newV];
+   //        // let col = this.$store.state.configOrder[newV];
+   //        // this.dataInfo["name"] = data.type;
+   //        // this.dataInfo["url"] = data.config.fileUrl[0][newV];
+   //        // this.dataInfo["id"] = data.config.fileId;
+   //        // this.dataInfo["column"] = col.column.join(",");
+   //        // this.dataInfo["columnNumber"] = col.columnNumber.join(",");
+   //        // console.log(this.dataInfo);
+   //        this.$refs.ConfigData.getDetail(newV);
+   //        this.configType = 4;
+   //      }
+   //    })
+  	// 	// if(type == "exp"){    
+   //  //     let para = this.$store.state.configData[newV]; 
+   //  //     if(para.config != null){
+   //  //       this.expValue = this.deepCopy(para.config);
+   //  //     }    
+   //  //     this.configType = 1;
+  	// 	// }else if(type == "pre"){
+  	// 	// 	this.configType = 2;
+  	// 	// }else if(type == "fea"){
+   //  //     this.configType = 3;
+   //  //   }
+  	// },
   }
 };
 </script>

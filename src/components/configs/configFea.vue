@@ -72,6 +72,23 @@
 				<el-input v-model="indexer.newColumnName" placeholder="请输入新列名"></el-input>
 			</div>			
 		</div>
+    <div v-show="feaType == 6" class="feaFunc">
+      <h3>独热编码</h3>
+      <div class="feaList">
+        <div class="feaItem" v-for="(item, index) in oneHotList" :key="index">
+          <el-tag type="info">{{item.columnName}}</el-tag><el-tag type="info">{{item.newColumnName}}</el-tag>&nbsp;&nbsp;<el-link @click="editHot(index)">编辑</el-link>&nbsp;&nbsp;<el-link @click="delHot(index)">删除</el-link><br>
+        </div>
+      </div>
+      <div class="select">
+        <el-select v-model="oneHot.columnName">
+          <el-option v-for="(value,i) in columnNumberType" :label="value" :key="i" :value="value"></el-option>
+        </el-select>
+      </div>
+      <div class="select">
+        <el-input v-model="oneHot.newColumnName" placeholder="请输入新列名"></el-input>
+      </div>     
+      <div class="save" @click="addHot"><el-button icon="el-icon-plus" style="width:90%" type="primary">新增</el-button></div> 
+    </div>
 		<div v-show="feaType == 7" class="feaFunc">
 			<h3>多项式扩展</h3>
 			<div class="selectHigh">
@@ -99,11 +116,13 @@
 				<el-input v-model="chi.newColumnName" placeholder="请输入新列名"></el-input>
 			</div>
 			<div class="select">
-				<el-input v-model="chi.numTopFeatures"></el-input>
+				<el-input v-model="chi.numTopFeatures" type="number"></el-input>
 			</div>	
-			<div class="select">
-				<el-input v-model="chi.label"></el-input>
-			</div>		
+      <div class="select">
+        <el-select v-model="chi.columnName_label">
+          <el-option v-for="(value,i) in columnNumberType" :label="value" :key="i" :value="value"></el-option>
+        </el-select>
+      </div>		
 		</div>
 		<div class="save" @click="save"><el-button icon="el-icon-plus" style="width:90%" type="primary">保存</el-button></div>
 	</div>
@@ -124,11 +143,13 @@ export default {
   },
   data(){
   	return {
+      configT : "",
   		feaType : 0,
   		chooseType : "1",
   		checkAll: false,
       isIndeterminate: true,
-      columnsOption : [],
+      columnsOption : [],//数值类型
+      colOption: [],//非数值类型
       columnsValue : [],
   		quantile : {
   			columnName : "",
@@ -153,6 +174,15 @@ export default {
   			columnName : "",
   			newColumnName : ""
   		},
+      oneHot : {
+        columnName : "",
+        newColumnName : ""
+      },
+      oneHotArray : {
+        columnNames : [],
+        newColumnNames : []
+      },
+      oneHotList : [],
   		poly : {
   			columnNames : [],
   			newColumnName : ""
@@ -161,7 +191,7 @@ export default {
   			columnNames : [],
   			newColumnName : "",
   			numTopFeatures : 0,
-  			label : ""
+  			columnName_label : ""
   		},
   		
   	}
@@ -228,6 +258,7 @@ export default {
           Message.error(this.vector.newColumnName + "列名已存在")
         }else{  
           this.vector.columnNames = [];
+          console.log(this.columnsValue);
     			for(let i in this.columnsValue){
     				this.vector.columnNames.push(this.columnsValue[i]);
     			}
@@ -286,7 +317,28 @@ export default {
             this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
             this.nextVaild(this.$store.state.runList[this.configT].next,orderPara, this.columnNumberType);
           }
-  		}else if(this.feaType == 5){
+  		}else if(this.feaType == 8){
+        if(this.column.indexOf(this.chi.newColumnName) != -1){
+          Message.error(this.chi.newColumnName + "列名已存在")
+        }else{  
+          this.chi.columnNames = [];
+          for(let i in this.columnsValue){
+            this.chi.columnNames.push(this.columnsValue[i]);
+          }
+          for(let i in this.chi){
+              if(typeof this.chi[i] === "object"){
+                para.parameter[i] = this.deepCopy(this.chi[i]);
+              }else{
+                para.parameter[i] = this.chi[i];
+              }
+            }
+          this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+          let orderPara = this.column.concat([this.chi.newColumnName]);
+            this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+            this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+            this.nextVaild(this.$store.state.runList[this.configT].next,orderPara, this.columnNumberType);
+          }
+      }else if(this.feaType == 5){
         if(this.column.indexOf(this.indexer.newColumnName) != -1){
           Message.error(this.indexer.newColumnName + "列名已存在")
         }else{  
@@ -303,7 +355,32 @@ export default {
             this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
             this.nextVaild(this.$store.state.runList[this.configT].next,orderPara, this.columnNumberType);
           }
-	    }else if(this.feaType == 7){
+	    }else if(this.feaType == 6){
+        if(this.oneHot.columnName != "" && this.oneHot.newColumnName != ""){
+          let orderPara = this.column.concat(this.oneHotArray.newColumnNames);
+          if(orderPara.indexOf(this.oneHot.newColumnName) != -1){
+            Message.error(this.oneHot.newColumnName + "列名已存在")
+          }else{            
+            this.oneHotList.push({columnName :this.oneHot.columnName, newColumnName : this.oneHot.newColumnName});
+            this.oneHotArray.columnNames.push(this.oneHot.columnName);
+            this.oneHotArray.newColumnNames.push(this.oneHot.newColumnName);
+            this.oneHot.columnName = "";
+            this.oneHot.newColumnName = "";
+          }
+        }  
+        for(let i in this.oneHotArray){
+            if(typeof this.oneHotArray[i] === "object"){
+              para.parameter[i] = this.deepCopy(this.oneHotArray[i]);
+            }else{
+              para.parameter[i] = this.oneHotArray[i];
+            }
+          }
+          this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+          let orderPara = this.column.concat(this.oneHotArray.newColumnNames);
+          this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
+          this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+          this.nextVaild(this.$store.state.runList[this.configT].next,orderPara, this.columnNumberType);
+      }else if(this.feaType == 7){
         if(this.column.indexOf(this.poly.newColumnName) != -1){
           Message.error(this.poly.newColumnName + "列名已存在")
         }else{  
@@ -392,25 +469,62 @@ export default {
               }
               this.$store.commit("changeConfigOrder", {type : "addColumn", config:{name : nextNode[i], column : columnOrder}});
             }
-            this.nextVaild(this.$store.state.runList[nextNode[i]], col, colN);
+            this.nextVaild(this.$store.state.runList[nextNode[i]].next, col, colN);
           }
         }
       }
     },
-  },
-  computed:{
-  	configT(){
-  		return this.$store.state.configType;
-  	},
-  },
-  watch: {
-  	configT(newV){
-  		let type = newV.slice(4,7);
-  		let feaT = newV.slice(7,8);
-  		let para = this.$store.state.configData[newV]; 
-  		this.columnsOption = this.column;
+    addHot(){
+      if(this.oneHot.columnName != "" && this.oneHot.newColumnName != ""){
+        let orderPara = this.column.concat(this.oneHotArray.newColumnNames);
+        if(orderPara.indexOf(this.oneHot.newColumnName) != -1){
+          Message.error(this.oneHot.newColumnName + "列名已存在")
+        }else{            
+          this.oneHotList.push({columnName :this.oneHot.columnName, newColumnName : this.oneHot.newColumnName});
+          this.oneHotArray.columnNames.push(this.oneHot.columnName);
+          this.oneHotArray.newColumnNames.push(this.oneHot.newColumnName);
+          this.oneHot.columnName = "";
+          this.oneHot.newColumnName = "";
+        }
+      }else{
+        Message.error("请完善本条独热编码信息");
+      }
+    },
+    editHot(index){
+      console.log(inde + " wait edit");
+      // this.fill.colName = this.fillArray[index].colName;
+      // this.fill.operate = this.fillArray[index].operate;
+    },
+    delHot(index){
+      if(this.oneHotList.length == 1){
+          this.oneHotList = [];
+          this.oneHotArray.columnNames = [];
+          this.oneHotArray.newColumnNames = [];
+      }else{   
+          if(index == 0){
+            this.oneHotList = this.oneHotList.slice(1);
+            this.oneHotArray.columnNames = this.oneHotArray.columnNames.slice(1);
+            this.oneHotArray.newColumnNames = this.oneHotArray.newColumnNames.slice(1);
+          }else if(index == this.oneHotList.length -1){
+            this.oneHotList = this.oneHotList.slice(0, this.oneHotList.length-1);
+            this.oneHotArray.columnNames = this.oneHotArray.columnNames.slice(0, this.oneHotList.length-1);
+            this.oneHotArray.newColumnNames = this.oneHotArray.newColumnNames.slice(0, this.oneHotList.length-1);
+          }else{
+            this.oneHotList = (this.oneHotList.slice(0, index)).concat(this.oneHotList.slice(index+1, this.oneHotList.length));
+            this.oneHotArray.columnNames = (this.oneHotArray.columnNames.slice(0, index)).concat(this.oneHotArray.columnNames.slice(index+1, this.oneHotList.length));
+            this.oneHotArray.newColumnNames = (this.oneHotArray.newColumnNames.slice(0, index)).concat(this.oneHotArray.newColumnNames.slice(index+1, this.oneHotList.length));
+        }
+      }
+    },
+    setConfig(newV){
+      this.configT = newV;
+      let type = newV.slice(4,7);
+      let feaT = newV.slice(7,8);
+      let para = this.$store.state.configData[newV]; 
+      this.columnsOption = this.columnNumberType;
+      this.colOption = this.column;
       this.columnsValue = [];
-  		if(type == "fea"){  
+      if(type == "fea"){  
         this.quantile = {
           columnName : "",
           newColumnName : "",
@@ -444,7 +558,18 @@ export default {
           numTopFeatures : 0,
           label : ""
         };
-  			let n = Number(feaT)
+        this.chi ={
+          columnNames : [],
+          newColumnName : "",
+          numTopFeatures : 0,
+          columnName_label : ""
+        };
+        this.oneHotArray = {
+          columnNames : [],
+          newColumnNames : []
+        };
+        this.oneHotList = [];
+        let n = Number(feaT)
         if(JSON.stringify(para.config) != "{}"){
           if(para.config.parameter["columnNames"]){
             for(let i in para.config.parameter.columnNames){
@@ -455,6 +580,14 @@ export default {
           }           
           if(n == 7){
               this.poly.newColumnName = para.config.parameter.newColumnName;
+          }else if(n == 6){
+            for(let i in para.config.parameter.columnNames){
+              if(this.column.indexOf(ppara.config.parameter.columnNames[i]) != -1){
+                this.oneHotList.push = {columnName : para.config.parameter.columnNames[i], newColumnName :para.config.parameter.newColumnNames[i]};
+                this.oneHotArray.columnNames.push(para.config.parameter.columnNames[i]);
+                this.oneHotArray.newColumnNames.push(para.config.parameter.newColumnNames[i]);
+              }
+            }
           }else if(n == 3){
               this.standard.newColumnName = para.config.parameter.newColumnName;
           }else if(n == 4){
@@ -466,18 +599,129 @@ export default {
             if(this.column.indexOf(para.config.parameter.columnName) != -1){
               this.indexer.columnName = para.config.parameter.columnName;
             }
-            this.indexer.newColumnName = para.parameter.config.newColumnName;          }else if(n == 1){
+            this.indexer.newColumnName = para.parameter.config.newColumnName;          
+          }else if(n == 8){
+            this.chi.newColumnName = para.parameter.config.newColumnName;
+            this.chi.columnName_label = para.parameter.config.columnName_label;
+            this.chi.numTopFeatures = para.parameter.config.numTopFeatures;          
+          }else if(n == 1){
             if(this.column.indexOf(para.config.parameter.columnName) != -1){
               this.quantile.columnName = para.config.parameter.columnName;
             }
             this.quantile.newColumnName = para.config.parameter.newColumnName;
             this.quantile.numBuckets = para.config.parameter.numBuckets;
           } 
-        } 			
+        }       
 
-  			this.feaType = n;
-  		}
-  	},
+        this.feaType = n;
+      }
+    },
+  },
+  computed:{
+  	// configT(){
+  	// 	return this.$store.state.configType;
+  	// },
+  },
+  watch: {
+  	// configT(newV){
+  	// 	let type = newV.slice(4,7);
+  	// 	let feaT = newV.slice(7,8);
+  	// 	let para = this.$store.state.configData[newV]; 
+  	// 	this.columnsOption = this.columnNumberType;
+   //    this.colOption = this.column;
+   //    this.columnsValue = [];
+  	// 	if(type == "fea"){  
+   //      this.quantile = {
+   //        columnName : "",
+   //        newColumnName : "",
+   //        numBuckets : 5,
+   //      };
+   //      this.vector = {
+   //        columnNames : [],
+   //        newColumnName : "",
+   //        maxCategories : 0
+   //      };
+   //      this.standard = {
+   //        columnNames : [],
+   //        newColumnName : ""
+   //      };
+   //      this.pca = {
+   //        columnNames : [],
+   //        newColumnName : "",
+   //        k : 0
+   //      };
+   //      this.indexer = {
+   //        columnName : "",
+   //        newColumnName : ""
+   //      };
+   //      this.poly = {
+   //        columnNames : [],
+   //        newColumnName : ""
+   //      };
+   //      this.chi ={
+   //        columnNames : [],
+   //        newColumnName : "",
+   //        numTopFeatures : 0,
+   //        label : ""
+   //      };
+   //      this.chi ={
+   //        columnNames : [],
+   //        newColumnName : "",
+   //        numTopFeatures : 0,
+   //        columnName_label : ""
+   //      };
+   //      this.oneHotArray = {
+   //        columnNames : [],
+   //        newColumnNames : []
+   //      };
+   //      this.oneHotList = [];
+  	// 		let n = Number(feaT)
+   //      if(JSON.stringify(para.config) != "{}"){
+   //        if(para.config.parameter["columnNames"]){
+   //          for(let i in para.config.parameter.columnNames){
+   //            if(this.column.indexOf(para.config.parameter.columnNames[i]) != -1){
+   //              this.columnsValue.push(para.config.parameter.columnNames[i]);
+   //            }
+   //          } 
+   //        }           
+   //        if(n == 7){
+   //            this.poly.newColumnName = para.config.parameter.newColumnName;
+   //        }else if(n == 6){
+   //          for(let i in para.config.parameter.columnNames){
+   //            if(this.column.indexOf(ppara.config.parameter.columnNames[i]) != -1){
+   //              this.oneHotList.push = {columnName : para.config.parameter.columnNames[i], newColumnName :para.config.parameter.newColumnNames[i]};
+   //              this.oneHotArray.columnNames.push(para.config.parameter.columnNames[i]);
+   //              this.oneHotArray.newColumnNames.push(para.config.parameter.newColumnNames[i]);
+   //            }
+   //          }
+   //        }else if(n == 3){
+   //            this.standard.newColumnName = para.config.parameter.newColumnName;
+   //        }else if(n == 4){
+   //            this.pca.newColumnName = para.config.parameter.newColumnName;
+   //        }else if(n == 2){   
+   //            this.vector.newColumnName = para.config.parameter.newColumnName;
+   //            this.vector.maxCategories = para.config.parameter.maxCategories;
+   //        }else if(n == 5){
+   //          if(this.column.indexOf(para.config.parameter.columnName) != -1){
+   //            this.indexer.columnName = para.config.parameter.columnName;
+   //          }
+   //          this.indexer.newColumnName = para.parameter.config.newColumnName;          
+   //        }else if(n == 8){
+   //          this.chi.newColumnName = para.parameter.config.newColumnName;
+   //          this.chi.columnName_label = para.parameter.config.columnName_label;
+   //          this.chi.numTopFeatures = para.parameter.config.numTopFeatures;          
+   //        }else if(n == 1){
+   //          if(this.column.indexOf(para.config.parameter.columnName) != -1){
+   //            this.quantile.columnName = para.config.parameter.columnName;
+   //          }
+   //          this.quantile.newColumnName = para.config.parameter.newColumnName;
+   //          this.quantile.numBuckets = para.config.parameter.numBuckets;
+   //        } 
+   //      } 			
+
+  	// 		this.feaType = n;
+  	// 	}
+  	// },
   }
 };
 </script>

@@ -4,21 +4,21 @@
 			<h3>数据详情</h3>
 		</div>
 		<div class="dataItem">
-			<span>数据名称： {{info.name}}</span>
+			<span>数据名称： {{dataInfo.name}}</span>
 		</div>
 		<div class="dataItem">
-			<span>数据路径： {{info.url}}</span>
+			<span>数据路径： {{dataInfo.url}}</span>
 		</div>
 		<div class="dataItem">
-			<span>数据Id： {{info.id}}</span>
+			<span>数据Id： {{dataInfo.id}}</span>
 		</div>
 		<div class="dataItem">
 			<span>数据列名： </span><br>
-			<span>{{info.column}}</span>
+			<span>{{dataInfo.column}}</span>
 		</div>
 		<div class="dataItem">
 			<span>数值类型数据列名： </span><br>
-			<span>{{info.columnNumber}}</span>
+			<span>{{dataInfo.columnNumber}}</span>
 		</div>
 	</div>
 </template>
@@ -26,11 +26,29 @@
 <script>
 export default {
 	name : "configData",
-	props : {
-		info : {
-			type : Object
+	data(){
+		return {
+			dataInfo : {}
 		}
-	}
+	},
+	methods : {
+		getDetail(newV){
+			console.log("dtata")
+		  let data = this.$store.state.configData[newV];
+          let col = this.$store.state.configOrder[newV];
+          this.dataInfo["name"] = data.type;
+          this.dataInfo["url"] = data.config.fileUrl[0][newV];
+          this.dataInfo["id"] = data.config.fileId;
+          this.dataInfo["column"] = col.column.join(",");
+          this.dataInfo["columnNumber"] = col.columnNumber.join(",");
+          console.log(this.dataInfo);
+		}
+	},
+	// props : {
+	// 	info : {
+	// 		type : Object
+	// 	}
+	// }
 };
 </script>
 
