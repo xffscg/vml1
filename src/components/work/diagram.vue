@@ -331,8 +331,6 @@ export default {
         console.log(event.currentTarget);   
         console.log(event.currentTarget.style.left);     
         let connections = that.plumb.getAllConnections();
-        // that.$store.commit("changeConfigType", "forChange");
-        // that.$store.commit("changeConfigType", event.currentTarget.id);
         that.$emit("goConfig", event.currentTarget.id);
         that.$store.commit("changeLoc", {name : event.currentTarget.id, x : event.currentTarget.style.left, y : event.currentTarget.style.top});
       }, false);

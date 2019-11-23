@@ -32,8 +32,8 @@ export default {
         this.getDataSource();
       }else if(n == 4){
         let alg = this.$store.state.algList;
-        console.log(alg.length)
-        if(alg.length == 0){
+        console.log(typeof alg)
+        if(!alg.length){
           this.getAlgri();
         }
       }

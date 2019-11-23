@@ -57,16 +57,20 @@ export default {
         let indexY = 0
         let temPlot = []
         let allPlots = []
-        Object.keys(res).forEach(function (key1) {
-            xyAxis.push(key1)
-            Object.keys(res[key1]).forEach(function (key2) {
-              temPlot = [indexY, indexX, res[key1][key2]]
+        for(let i in res){
+          xyAxis.push(res[i]["Unnamed: 0"]);
+        }
+        for(let i in res){
+          Object.keys(res[i]).forEach(function (key2) {
+            if(key2 != "Unnamed: 0"){              
+              temPlot = [indexY, indexX, res[i][xyAxis[indexX]]]
               allPlots.push(temPlot)
               indexX++
-            })
-            indexX = 0
-            indexY++
-        })
+            }
+          })
+          indexX = 0
+          indexY++
+        }
         let correlationDatas = this.deepCopy(xyAxis);
         allPlots = allPlots.map(function (item) {
             return [item[1], item[0], item[2] || '-']
@@ -129,7 +133,7 @@ export default {
       chart.clear();
       let option = {};
       if( n == "3"){        
-        option = this.getCoeOption(res);
+        option = this.getCoeOption(res.data);
       }else{
         option = this.scatterPlotData(res);
       }

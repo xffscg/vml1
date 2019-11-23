@@ -75,29 +75,10 @@ export default {
           this.$refs.ConfigFea.setConfig(newV);
           this.configType = 3;
         }else if(type == "dat"){
-          // let data = this.$store.state.configData[newV];
-          // let col = this.$store.state.configOrder[newV];
-          // this.dataInfo["name"] = data.type;
-          // this.dataInfo["url"] = data.config.fileUrl[0][newV];
-          // this.dataInfo["id"] = data.config.fileId;
-          // this.dataInfo["column"] = col.column.join(",");
-          // this.dataInfo["columnNumber"] = col.columnNumber.join(",");
-          // console.log(this.dataInfo);
           this.$refs.ConfigData.getDetail(newV);
           this.configType = 4;
         }
       })
-      // if(type == "exp"){    
-    //     let para = this.$store.state.configData[newV]; 
-    //     if(para.config != null){
-    //       this.expValue = this.deepCopy(para.config);
-    //     }    
-    //     this.configType = 1;
-      // }else if(type == "pre"){
-      //  this.configType = 2;
-      // }else if(type == "fea"){
-    //     this.configType = 3;
-    //   }
     },
     deepCopy(oldVal){
         let target = oldVal.constructor === Array?[]:{};
@@ -126,7 +107,11 @@ export default {
     save(){
     	let para = {parameter : {}, fileUrl : []};
       console.log(this.expValue);
-      para.parameter["columnNames"] = this.expValue;
+      if(this.configT.slice(4,8) == "exp2"){
+        para.parameter["columnName"] = this.expValue[0];
+      }else{
+        para.parameter["columnNames"] = this.expValue;
+      }
       para.parameter["userId"] = this.$store.state.userId;
       para.parameter["projectId"] = this.$store.state.projectId;
       let list = this.$store.state.runList;
@@ -191,60 +176,8 @@ export default {
     },//类似于事件的冒泡原理
   },
   computed:{
-  	// configT(){
-  	// 	return this.$store.state.configType;
-  	// },
   },
   watch: {
-  	// configT(newV){
-   //    this.expValue = [];
-   //    this.checkAll = false;
-   //    this.isIndeterminate = true;
-  	// 	let type = newV.slice(4,7);
-   //    let run = this.$store.state.runList;
-   //    if(run[newV] && type!= "dat"){
-   //      this.getColumns(newV);
-   //    }
-   //    this.$nextTick(()=>{
-   //      if(type == "exp"){    
-   //        let para = this.$store.state.configData[newV]; 
-   //        if(JSON.stringify(para.config) != "{}"){
-   //          for(let i in para.config.parameter.columnNames){
-   //            if(this.dataColumns.indexOf(para.config.parameter.columnNames[i]) != -1){
-   //              this.expValue.push(para.config.parameter.columnNames[i]);
-   //            }
-   //          }
-   //        }    
-   //        this.configType = 1;
-   //      }else if(type == "pre"){
-   //        this.configType = 2;
-   //      }else if(type == "fea"){
-   //        this.configType = 3;
-   //      }else if(type == "dat"){
-   //        // let data = this.$store.state.configData[newV];
-   //        // let col = this.$store.state.configOrder[newV];
-   //        // this.dataInfo["name"] = data.type;
-   //        // this.dataInfo["url"] = data.config.fileUrl[0][newV];
-   //        // this.dataInfo["id"] = data.config.fileId;
-   //        // this.dataInfo["column"] = col.column.join(",");
-   //        // this.dataInfo["columnNumber"] = col.columnNumber.join(",");
-   //        // console.log(this.dataInfo);
-   //        this.$refs.ConfigData.getDetail(newV);
-   //        this.configType = 4;
-   //      }
-   //    })
-  	// 	// if(type == "exp"){    
-   //  //     let para = this.$store.state.configData[newV]; 
-   //  //     if(para.config != null){
-   //  //       this.expValue = this.deepCopy(para.config);
-   //  //     }    
-   //  //     this.configType = 1;
-  	// 	// }else if(type == "pre"){
-  	// 	// 	this.configType = 2;
-  	// 	// }else if(type == "fea"){
-   //  //     this.configType = 3;
-   //  //   }
-  	// },
   }
 };
 </script>

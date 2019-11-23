@@ -41,9 +41,6 @@ export const changeOp = (state, op) => {
 export const changeShow = (state, b) => {
   state.showDetail = b;
 }
-export const changeConfigType = (state, configType) => {
-  state.configType = configType;
-}
 export const changeRelation = (state, relation) => {
   state.relationship = [];
   state.relationship = deepCopy(relation);

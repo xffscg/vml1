@@ -750,97 +750,9 @@ export default {
 
   },
   computed:{
-  	// configT(){
-  	// 	return this.$store.state.configType;
-  	// },
   },
   watch: {
-  	// configT(newV){
-  	// 	let type = newV.slice(4,7);
-  	// 	let preT = newV.slice(7,8);
-  	// 	let para = this.$store.state.configData[newV];
-  	// 	console.log(para);
-  	// 	this.columnsOption = this.column;
-  	// 	this.columnsValue = [];
-  		
-  	// 	if(type == "pre"){  
-  	// 		this.filterArray = [];
-	  // 		this.fillArray = [];
-	  // 		this.shadowArray = [];
-	  // 		this.sort = {
-	  // 			columnName : "",
-	  // 			sortType: ""
-	  // 		};
-	  // 		this.replace = {
-	  // 			columnNames : [],
-	  // 			replaceCharacters : []
-	  // 		};
-	  // 		this.divide = {
-	  // 			columnName : "",
-	  // 			delimiter : "",
-	  // 			newColumnNames : []
-	  // 		};
-	  // 		this.connect = {
-	  // 			columnNames : [],
-	  // 			connector : "",
-	  // 			newColumnName : ""
-	  // 		};
-  	// 		let n = Number(preT);
-  	// 		if(JSON.stringify(para.config) != "{}"){  				
-	  // 			if(n == 1){
-	  // 				for(let i in para.config.parameter.parameter){
-	  // 					if(this.column.indexOf(para.config.parameter.parameter[i].colName) != -1){
-	  // 						this.filterArray.push(this.deepCopy(para.config.parameter.parameter[i]));
-	  // 					}
-	  // 				}
-	  // 			}else if(n == 7){
-	  // 				for(let i in para.config.parameter.parameter){
-	  // 					if(this.column.indexOf(para.config.parameter.parameter[i].colName) != -1){
-	  // 						this.fillArray.push(this.deepCopy(para.config.parameter.parameter[i]));
-	  // 					}
-	  // 				}
-	  // 			}else if(n == 6){
-	  // 				for(let i in para.config.parameter.columnNames){
-	  // 					if(this.column.indexOf(para.config.parameter.columnNames[i]) != -1){
-	  // 						// this.replace.columnNames.push(para.config.parameter.columnNames[i]);
-	  // 						this.columnsValue.push(para.config.parameter.columnNames[i]);
-	  // 					}
-	  // 				}
-	  // 				this.replace.replaceCharacters = this.deepCopy(para.config.parameter.replaceCharacters);
-	  // 			}else if(n == 5){
-	  // 				for(let i in para.config.parameter.columnNames){
-	  // 					if(this.column.indexOf(para.config.parameter.columnNames[i]) != -1){
-	  // 						// this.connect.columnNames.push(para.config.parameter.columnNames[i]);
-	  // 						this.columnsValue.push(para.config.parameter.columnNames[i]);
-	  // 					}
-	  // 				}
-	  // 				this.connect.connector =  para.config.parameter.connector;
-	  // 				this.connect.newColumnName =  para.config.parameter.newColumnName;
-	  // 			}else if(n == 8){
-	  // 				for(let i in para.config.parameter.parameter){
-	  // 					if(this.column.indexOf(para.config.parameter.parameter[i].colName_1) != -1 && this.column.indexOf(para.config.parameter.parameter[i].colName_2) != -1){
-	  // 						this.shadowArray.push(para.config.parameter.parameter[i]);
-	  // 					}
-	  // 				}
-	  // 			}else if(n == 3){
-  	// 				if(this.column.indexOf(para.config.parameter.columnName) != -1){
-  	// 					this.divide.columnName = para.config.parameter.columnName;
-  	// 					this.divide.delimiter = para.config.parameter.delimiter;
-  	// 					this.divide.newColumnNames = this.deepCopy(para.config.parameter.newColumnNames);
-  	// 				}
-	  // 			}else if(n == 2){
-	  // 				if(this.column.indexOf(para.config.parameter.columnName) != -1){
-  	// 					this.sort.columnName = para.config.parameter.columnName;
-  	// 					this.sort.sortType = para.config.parameter.sortType;
-  	// 				}else{
-  	// 					this.sort.sortType = "";
-  	// 					this.sort.columnName = "";
-  	// 				}
-	  // 			}	
-  	// 		}	
-  	// 		this.preType = n;
-  	// 	}
-  	// },
+  	
   }
 };
 </script>

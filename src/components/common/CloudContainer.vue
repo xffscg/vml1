@@ -289,25 +289,38 @@ export default {
 
 				// 为暂时替代
 				let that = this;
-				if(this.menuType.type.slice(7,8) == "3"){
-					correlationCoefficient({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["数量", "销售额", "折扣"]) }).then(res => res.data) // 列名的传送和处理待定
-			        .then(res => {
-			          console.log(res)
-					that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
-			        })
-			        .catch(e => {
-			          Message.error(e.error || 'correlationCoefficient接口错误，请重试')
-			        })
-				}else{
-					scatterPlot({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["数量", "销售额"]) }).then(res => res.data)
-			        .then(res => {
-			          console.log(res);
-			         that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
-			        })
-			        .catch(e => {
-			          Message.error(e.error || '接口错误，请重试')
-			        })
-				}
+				getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : this.menuType.type, start : 0, end : 50})
+				.then(res=>res.data).then(res=>{
+					console.log(res);
+					if(this.menuType.type.slice(7,8) == "3"){
+						that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
+					}else{
+						that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
+					}
+					
+				})
+				.catch(e=>{
+					Message.error("请求结果错误")
+				})
+				// if(this.menuType.type.slice(7,8) == "3"){
+				// 	correlationCoefficient({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["数量", "销售额", "折扣"]) }).then(res => res.data) // 列名的传送和处理待定
+			 //        .then(res => {
+			 //          console.log(res)
+				// 	that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
+			 //        })
+			 //        .catch(e => {
+			 //          Message.error(e.error || 'correlationCoefficient接口错误，请重试')
+			 //        })
+				// }else{
+				// 	scatterPlot({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["数量", "销售额"]) }).then(res => res.data)
+			 //        .then(res => {
+			 //          console.log(res);
+			 //         that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
+			 //        })
+			 //        .catch(e => {
+			 //          Message.error(e.error || '接口错误，请重试')
+			 //        })
+				// }
 				// 暂时替代
 				
 			}else if(newV == 3){

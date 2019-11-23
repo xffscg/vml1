@@ -32,7 +32,6 @@ const state = {
 	menuType : {},//右键点击的内容
 	menuOp : "",//右键点击的操作
 	showDetail : 0,//点击右键知道要展示的数据类型
-	configType : "",//点击之后配置的类型
 	configData : {},//配置的数据
 	relationship : [],//图中连线
 	start : [],//开始的数据节点
