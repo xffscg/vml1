@@ -56,7 +56,7 @@ export default {
         connector: 'Flowchart',
         endpoint: 'Dot',
         maxConnections: -1,
-        endpointStyle: { fill: 'lightgray', outlineStroke: 'darkblue', outlineWidth: 1, radius: 6},
+        endpointStyle: { fill: '#EBF5FA', outlineStroke: 'darkblue', outlineWidth: 1, radius: 6},
         paintStyle: {
           fill: 'white',
           outlineStroke: 'black',
@@ -75,7 +75,7 @@ export default {
       },
       defaultConfig :{
         endpoint : "Dot",
-        endpointStyle: { fill: 'lightgray', outlineStroke: 'darkblue', outlineWidth: 1, radius: 6},
+        endpointStyle: { fill: '#EBF5FA', outlineStroke: 'darkblue', outlineWidth: 1, radius: 6},
         connector: 'Flowchart',
         connectorStyle: {
           outlineStroke: 'gray',
@@ -235,7 +235,7 @@ export default {
         let timestamp = new Date().getTime();  
         this.dragContent.removeAttribute("class");
         console.log(this.dragContent);
-        if(this.dragContent.id.slice(0,3) == "100" || this.dragContent.id.slice(0,3) == "200" || this.dragContent.id.slice(0,3) == "300" || this.dragContent.id.slice(0,3) == "400"){
+        if(this.dragContent.id.slice(0,3) == "100" || this.dragContent.id.slice(0,3) == "200" || this.dragContent.id.slice(0,3) == "300" || this.dragContent.id.slice(0,3) == "400" || this.dragContent.id.slice(0,3) == "500" || this.dragContent.id.slice(0,3) == "600"){
           this.dragContent.id = "drop"+this.dragContent.id.slice(4)+timestamp;
           isType = "alg";
         }else{
@@ -245,7 +245,10 @@ export default {
         this.dragContent.style.position = "absolute";
         this.dragContent.style.width = "150px";
         this.dragContent.style.height = "30px";
-        this.dragContent.style.border = "solid 1px black";        
+        this.dragContent.style.border = "solid 1px #C0C4CC";
+        this.dragContent.style.backgroundColor = "#F2F6FC";
+
+        this.dragContent.style.borderRadius = "2px";         
         this.dragContent.style.left = e.offsetX+"px";
         this.dragContent.style.top = e.offsetY+"px"; 
         space.append(this.dragContent);
@@ -284,7 +287,10 @@ export default {
         d.style.position = "absolute";
         d.style.width = "130px";
         d.style.height = "30px";
-        d.style.border = "solid 1px black";
+        d.style.border = "solid 1px #C0C4CC";
+        d.style.backgroundColor = "#F2F6FC";
+        
+        d.style.borderRadius = "2px";   
         let s = document.createElement("span");
         s.innerHTML = config[i].type;
         this.$store.commit("changeLoc", {name : i, x : config[i].location.x, y : config[i].location.y});

@@ -12,6 +12,7 @@
 		</div>
 		<ConfigPre v-show="configType == 2" :column="dataColumns" :columnNumberType="dataColumnsNumber" ref="ConfigPre"></ConfigPre>
     <ConfigFea v-show="configType == 3" :column="dataColumns" :columnNumberType="dataColumnsNumber" ref="ConfigFea"></ConfigFea>
+    <ConfigMln v-show="configType == 5" :column="dataColumns" :columnNumberType="dataColumnsNumber" ref="ConfigMln"></ConfigMln>
     <ConfigData v-show="configType == 4" ref="ConfigData"></ConfigData>
 	</div>
 
@@ -23,12 +24,14 @@ import { getColumnNames, getColumnNameWithNumberType, fullTableStatistics, frequ
 import ConfigPre from '../configs/configPre'
 import ConfigFea from '../configs/configFea'
 import ConfigData from '../configs/configData'
+import ConfigMln from '../configs/configMln'
 export default {
   name: 'config',
   components :{
     ConfigPre,
     ConfigFea,
-    ConfigData
+    ConfigData,
+    ConfigMln
   },
   data(){
   	return {
@@ -48,6 +51,7 @@ export default {
   },
   methods :{
     setConfig(newV){
+      console.log(newV)
       this.configT = newV;
       this.expValue = [];
       this.checkAll = false;
@@ -77,6 +81,9 @@ export default {
         }else if(type == "dat"){
           this.$refs.ConfigData.getDetail(newV);
           this.configType = 4;
+        }else if(type == "mln"){
+          this.$refs.ConfigMln.setConfig(newV);
+          this.configType = 5;
         }
       })
     },

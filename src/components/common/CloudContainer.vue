@@ -109,6 +109,7 @@ export default {
 				this.$store.commit("changeProId", res[res.length-1].id);
 				this.$store.commit('getPro', res);
 				this.newProVisible = false;
+				this.saveProject();
 			})
 			.catch(e=>{
 				console.log(e);
@@ -280,7 +281,7 @@ export default {
 				if(t == "dat"){		
 					let info = this.$store.state.configData[this.menuType.type].config;
 					this.getDataView(info.fileId, info.fileUrl[0][this.menuType.type]);
-				}else if(t == "pre" || t == "fea" || t == "exp"){
+				}else if(t == "pre" || t == "fea" || t == "exp" || t == "mln"){
 					this.setResult();
 				}
 			}else if(newV == 2){
@@ -302,26 +303,6 @@ export default {
 				.catch(e=>{
 					Message.error("请求结果错误")
 				})
-				// if(this.menuType.type.slice(7,8) == "3"){
-				// 	correlationCoefficient({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["数量", "销售额", "折扣"]) }).then(res => res.data) // 列名的传送和处理待定
-			 //        .then(res => {
-			 //          console.log(res)
-				// 	that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
-			 //        })
-			 //        .catch(e => {
-			 //          Message.error(e.error || 'correlationCoefficient接口错误，请重试')
-			 //        })
-				// }else{
-				// 	scatterPlot({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["数量", "销售额"]) }).then(res => res.data)
-			 //        .then(res => {
-			 //          console.log(res);
-			 //         that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
-			 //        })
-			 //        .catch(e => {
-			 //          Message.error(e.error || '接口错误，请重试')
-			 //        })
-				// }
-				// 暂时替代
 				
 			}else if(newV == 3){
 				// let res = this.$store.state.runResult[newV];
@@ -336,22 +317,26 @@ export default {
 				// this.freName = config.columnNames[0];
 				// this.$refs.TableChartDetail.setChart(this.temFrequencyTable);
 				let that = this;
-				frequencyStatistics({ projectName: "特征工程测试项目", columnNames: JSON.stringify(["产品名称"]) }).then(res => res.data)
-		        .then(res => {
-		          console.log(res)
-		          that.temFrequencyTable = []
-		          for (let index in res) {
-		          	let obj = {}
-		            obj.columnName = index
-		            obj.rate = res[index]
-		            that.temFrequencyTable.push(obj)
-		          }
-		          that.freName = "产品名称"
-		          that.$refs.TableChartDetail.setChart(that.temFrequencyTable);
-		        })
-		        .catch(e => {
-		          Message.error(e.error || 'frequencyStatistics接口错误，请重试')
-		        })
+				getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : this.menuType.type, start : 0, end : 50})
+				.then(res=>res.data).then(res=>{
+					that.temFrequencyTable = [];
+					for(let i in res.data){
+						if(i == 0){
+							for(let key in res.data[i]){
+								if(key != "elm" && key != "频率" && key != "isRootInsert"){
+									that.freName = key;
+								}
+							}
+						}
+						let obj = {columnName : res.data[i][that.freName], rate : res.data[i]["频率"]};
+						that.temFrequencyTable.push(obj);
+
+					}
+					that.$refs.TableChartDetail.setChart(that.temFrequencyTable);					
+				})
+				.catch(e=>{
+					Message.error("请求结果错误")
+				})
 			}
 			// else if(newV == 9){
 			// 	this.runFrom();

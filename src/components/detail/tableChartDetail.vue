@@ -1,7 +1,7 @@
 <template>
 	<div class="tcDetail">
     <div class="ttable">
-      <h5>频率表格统计</h5>
+      <h3>频率表格统计</h3>
         <el-table border :data="tableData">
           <el-table-column prop="columnName" v-bind:label="freName+'取值'">
           </el-table-column>
@@ -31,8 +31,7 @@ export default {
   		this.$store.commit("changeShow", 0);
   	},
     getOption(res){
-      console.log("iiii")
-      console.log(res)
+      console.log(res);
       let xName = [];
       let yName = [];
       for (let i = 0; i < res.length; i++) {
