@@ -2,7 +2,8 @@
 	<div class="runLog" >
 		<div class="title">
       <h3>日志</h3>
-      <el-button type="primary" plain icon="el-icon-delete" @click="clearLogBoard"></el-button>
+      <el-button type="primary" icon="el-icon-delete" @click="clearLogBoard"></el-button>
+      <!-- <el-button type="primary" plain icon="el-icon-delete" @click="clearLogBoard"></el-button> -->
     </div>
     <div class="logContent" id="log"></div>
 	</div>
@@ -14,7 +15,7 @@ export default {
   name: 'runLog',
   data(){
   	return {
-      times :0,
+      times :1000,
       log : {},
       successList : [],
       start : null,
@@ -48,6 +49,7 @@ export default {
   },
   methods : {
     clearLog(){
+      this.times = 1000;
       let space = document.getElementById("log");
       space.innerHTML = null;
       this.times = 0;
@@ -66,7 +68,12 @@ export default {
           if(res.modelExecuteStatus == "running" || res.modelExecuteStatus == "initial"){
             this.start = setTimeout(()=>{          
                     this.queryResult(id); 
-            }, 1000);
+                    if(this.times < 5000){
+                      this.times += 1000;
+                    }else{
+                      this.times = 1000;
+                    }
+            }, this.times);
           }else if(res.modelExecuteStatus == "success"){
             this.start = null;
           }
@@ -102,8 +109,9 @@ export default {
       }
       for(let i in this.log.operatorStatus){ 
         console.log(this.successList.indexOf(i));
-        this.$emit("changeD", {id : i, state : this.log.operatorStatus[i].status});
-        if(this.successList.indexOf(i) == -1){       
+        // this.$emit("changeD", {id : i, state : this.log.operatorStatus[i].status});
+        if(this.successList.indexOf(i) == -1){  
+          this.$emit("changeD", {id : i, state : this.log.operatorStatus[i].status});     
           let s = this.log.operatorStatus[i];
           // this.$emit("changeD", {id : i, state : s.status});
           // this.$store.commit("changeShowStyle", {id : i, state : s.status});

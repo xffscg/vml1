@@ -4,10 +4,10 @@
 			<h3>数据详情</h3>
 		</div>
 		<div class="dataItem">
-			<span>数据名称： {{dataInfo.name}}</span>
+			<span>数据名称： {{name}}</span>
 		</div>
 		<div class="dataItem">
-			<span>数据路径： {{dataInfo.url}}</span>
+			<span>数据路径： {{url}}</span>
 		</div>
 		<div class="dataItem">
 			<span>数据Id： {{dataInfo.id}}</span>
@@ -28,15 +28,18 @@ export default {
 	name : "configData",
 	data(){
 		return {
-			dataInfo : {}
+			dataInfo : {},
+			name : "",
+			url : "",
 		}
 	},
 	methods : {
 		getDetail(newV){
-			console.log("dtata")
 		  let data = this.$store.state.configData[newV];
           let col = this.$store.state.configOrder[newV];
           this.dataInfo["name"] = data.type;
+          this.name = data.type;
+          this.url = data.config.fileUrl[0][newV]
           this.dataInfo["url"] = data.config.fileUrl[0][newV];
           this.dataInfo["id"] = data.config.fileId;
           this.dataInfo["column"] = col.column.join(",");
@@ -44,11 +47,6 @@ export default {
           console.log(this.dataInfo);
 		}
 	},
-	// props : {
-	// 	info : {
-	// 		type : Object
-	// 	}
-	// }
 };
 </script>
 

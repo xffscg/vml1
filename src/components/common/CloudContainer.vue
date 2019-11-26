@@ -330,7 +330,6 @@ export default {
 						}
 						let obj = {columnName : res.data[i][that.freName], rate : res.data[i]["频率"]};
 						that.temFrequencyTable.push(obj);
-
 					}
 					that.$refs.TableChartDetail.setChart(that.temFrequencyTable);					
 				})
@@ -390,7 +389,7 @@ export default {
 			}
 		}
 		.reportPart {
-			width : 80%;
+			width : 84%;
 			position :relative;
 			margin:5px;
 			height : 700px;	

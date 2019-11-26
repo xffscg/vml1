@@ -13,7 +13,7 @@
           </el-table-column>
         </el-table> 
     </div>
-		<div id="tcChart" class="cchart"></div>
+		<!-- <div id="tcChart" class="cchart"></div> -->
 	</div>
 </template>
 
@@ -22,20 +22,9 @@ import echarts from 'echarts'
 export default {
   name: 'freReport',
   mounted(){
-  	  let chart = echarts.init(document.getElementById("tcChart"));
-	  chart.clear();
-	  chart.setOption(option);
   },
   methods : {  	
-    // setChart(res){      
-    //   console.log(res);
-    //   let chart = echarts.init(document.getElementById("tcChart"));
-    //   chart.clear();
-    //   let option = {};
-    //   option = this.getOption(res);
-    //   chart.setOption(option);
-    // },
-
+    
   }
 };
 </script>

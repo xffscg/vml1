@@ -179,20 +179,28 @@ export default {
     changeClass(state, currentNode){
       console.log(currentNode);
       if(state == "success"){
-        console.log("s");
+         $("#" + currentNode +' i').remove();
+        let i = document.createElement("i");
+        i.setAttribute("class", "el-icon-check");
+        $("#" + currentNode).append(i);
         $("#" + currentNode).css("border","solid 3px #409EFF");
-        // $("#" + currentNode).css("border","3px dashed #fff")
-        // $("#" + currentNode).css("background","linear-gradient(to bottom, #34538b, #cd0000)");
-        // $("#" + currentNode).css("backgroundOrigin","border-box");
       }else if(state == "error"){
-        console.log("fail");
+        $("#" + currentNode +' i').remove();
+        let i = document.createElement("i");
+        i.setAttribute("class", "el-icon-close");
+        $("#" + currentNode).append(i);
         $("#" + currentNode).css("border","solid 3px #F56C6C");
       }else if(state == "running"){
+        $("#" + currentNode +' i').remove();
+        let i = document.createElement("i");
+        i.setAttribute("class", "el-icon-loading");
+        $("#" + currentNode).append(i);
         $("#" + currentNode).css("border","3px dashed #67C23A")
         // $("#" + currentNode).css("background","linear-gradient(to bottom, #34538b, #cd0000)");
         // $("#" + currentNode).css("background-origin","border-box");
       }else if(state == "initial"){
-        $("#" + currentNode).css("border","solid 1px black");
+        $("#" + currentNode +' i').remove();
+        $("#" + currentNode).css("border","solid 1px #C0C4CC");
       }
     },
   	drop(e){
@@ -247,10 +255,11 @@ export default {
         this.dragContent.style.height = "30px";
         this.dragContent.style.border = "solid 1px #C0C4CC";
         this.dragContent.style.backgroundColor = "#F2F6FC";
-
         this.dragContent.style.borderRadius = "2px";         
         this.dragContent.style.left = e.offsetX+"px";
         this.dragContent.style.top = e.offsetY+"px"; 
+        this.dragContent.style.display = "flex";
+        // this.dragContent.style.justifyContent = "spaceAro"
         space.append(this.dragContent);
         //添加dom事件 
         this.$store.commit("changeLoc", {name : this.dragContent.id, x : this.dragContent.style.left, y : this.dragContent.style.top});
@@ -289,7 +298,7 @@ export default {
         d.style.height = "30px";
         d.style.border = "solid 1px #C0C4CC";
         d.style.backgroundColor = "#F2F6FC";
-        
+        d.style.display = "flex";
         d.style.borderRadius = "2px";   
         let s = document.createElement("span");
         s.innerHTML = config[i].type;
