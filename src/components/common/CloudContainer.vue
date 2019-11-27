@@ -305,17 +305,6 @@ export default {
 				})
 				
 			}else if(newV == 3){
-				// let res = this.$store.state.runResult[newV];
-				// this.temFrequencyTable = []
-		  //       for (let index in res) {
-		  //         	let obj = {}
-		  //           obj.columnName = index
-		  //           obj.rate = res[index]
-		  //           this.temFrequencyTable.push(obj)
-		  //       }
-				// let config = this.$store.state.configData[newV].config;
-				// this.freName = config.columnNames[0];
-				// this.$refs.TableChartDetail.setChart(this.temFrequencyTable);
 				let that = this;
 				getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : this.menuType.type, start : 0, end : 50})
 				.then(res=>res.data).then(res=>{
@@ -337,9 +326,6 @@ export default {
 					Message.error("请求结果错误")
 				})
 			}
-			// else if(newV == 9){
-			// 	this.runFrom();
-			// }
 		},
 	},
 

@@ -128,6 +128,7 @@ export default {
     });
     this.plumb.bind('connection', function (conn, originalEvent) {
       let c = that.plumb.getAllConnections();
+      console.log(c[0].endpoints[0].getUuid());
       let r = [];
       let list = {}
       for(let i = 0; i < c.length; i++){
@@ -228,6 +229,7 @@ export default {
           // this.$store.commit("changeRelation", r.relationship);
           for(let i in r.relationship){
             let item = r.relationship[i];
+            // if(item[0])
             this.plumb.connect({
               source : item[0],
               target : item[1],
@@ -393,7 +395,13 @@ export default {
     },
     addJsPlumb(node){
       this.plumb.addEndpoint(node.id,{anchor : ['Top'], uuid: "to" + node.id}, this.endConfig);
-      this.plumb.addEndpoint(node.id,{anchor : ['Bottom'], uuid :"from"+ node.id}, this.startConfig) ; 
+      if(node.id.slice(4,8) == "pre9"){
+        this.plumb.addEndpoint(node.id,{anchor : [[0.3, 1, 0, 1]], uuid :"from1"+ node.id}, this.startConfig) ;
+        this.plumb.addEndpoint(node.id,{anchor : [[0.7, 1, 0, 1]], uuid :"from2"+ node.id}, this.startConfig);
+      }else{
+        this.plumb.addEndpoint(node.id,{anchor : ['Bottom'], uuid :"from"+ node.id}, this.startConfig) ;
+      }
+      // this.plumb.addEndpoint(node.id,{anchor : ['Bottom'], uuid :"from"+ node.id}, this.startConfig) ; 
       this.plumb.draggable(node.id,{containment: 'parent'});
       
     },

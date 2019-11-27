@@ -178,6 +178,21 @@
 				<el-input v-model="connect.newColumnName"></el-input>
 			</div>
 		</div>
+		<div v-show="preType == 9" class="preFunc">
+			<h3>数据划分</h3>
+			<div class="select">
+				<h5>划分比例1</h5>
+				<el-input v-model="divideRow.proportion1"></el-input>
+			</div>
+			<div class="select">
+				<h5>划分比例2</h5>
+				<el-input v-model="divideRow.proportion2"></el-input>
+			</div>
+			<div class="select">
+				<h5>随机数种子</h5>
+				<el-input v-model="divideRow.seed"></el-input>
+			</div>
+		</div>
 		<div class="save" @click="save"><el-button icon="el-icon-plus" style="width:90%" type="primary">保存</el-button></div>
 	</div>
 </template>
@@ -250,6 +265,11 @@ export default {
   		},
   		shadowNewNameArray : [],
   		shadowArray : [],
+  		divideRow: {
+  			proportion1 : "",
+  			proportion2 : "",
+  			seed : 0
+  		},
 		newColumnN: "",
 		shadowRuleList: ['+', '-', '*', '/'],
 		dataSymbolList: [
@@ -444,6 +464,19 @@ export default {
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : orderParaN}});
 		  		this.nextVaild(this.$store.state.runList[this.configT].next, orderPara, this.columnNumberType);
 	  		}
+  		}else if(this.preType == 9){
+  			for(let i in this.divideRow){
+  				if(typeof this.divideRow[i] === "object"){
+  					para.parameter[i] = this.deepCopy(this.divideRow[i]);
+  				}else{
+  					para.parameter[i] = this.divideRow[i];
+  				}
+  			}
+  			console.log(para);
+  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+	  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+  			// para = {name : this.configT, config : this.sort};
   		}else if(this.preType == 5){
   			if(this.column.indexOf(this.connect.newColumnName) != -1){
   				Message.error(this.connect.newColumnName + "列名已存在");
@@ -691,6 +724,11 @@ export default {
 	  			connector : "",
 	  			newColumnName : ""
 	  		};
+	  		this.divideRow= {
+	  			proportion1 : "",
+	  			proportion2 : "",
+	  			seed : ""
+	  		};
   			let n = Number(preT);
   			if(JSON.stringify(para.config) != "{}"){  				
 	  			if(n == 1){
@@ -742,6 +780,10 @@ export default {
   						this.sort.sortType = "";
   						this.sort.columnName = "";
   					}
+	  			}else if(n == 9){
+	  				this.divideRow.proportion1 = para.config.parameter.proportion1;
+	  				this.divideRow.proportion2 = para.config.parameter.proportion2;
+	  				this.divideRow.seed = para.config.parameter.seed;
 	  			}	
   			}	
   			this.preType = n;
