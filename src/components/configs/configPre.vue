@@ -340,12 +340,18 @@ export default {
   		let list = this.$store.state.runList;
 	    let pre = list[this.configT].pre;
 	    let fileUrl = [];
+	    let r = this.$store.state.relationship;
       // 可以后续加判断，如果父节点是分数据的就另外写
       for(let i in pre){
         let obj = {};
-        obj[pre[i]] = 0;
+        for(let index in r){
+        	if(r[index][1].slice(2) == this.configT && r[index][0].slice(5) == pre[i]){
+        		obj[pre[i]] = Number(r[index][0].slice(4,5));
+        	}
+        }
         fileUrl.push(obj);
       }
+      console.log(fileUrl);
 	    para["fileUrl"] = fileUrl;
 	    para.parameter["userId"] = this.$store.state.userId;
 	    para.parameter["projectId"] = this.$store.state.projectId;

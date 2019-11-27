@@ -8,6 +8,11 @@
 		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
 		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
 		          </el-checkbox-group>
+			</div>
+			<div class="select">
+				<el-select v-model="predict.label">
+					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
+				</el-select>
 			</div>			
 		</div>
 		<div class="mlnFunc" v-show="mlnType==1">
@@ -76,7 +81,10 @@ export default {
 				regParam : 0,
 				regType : 0,
 			},//支持向量机
-			predict : [],
+			predict : {
+				features : [],
+				label : ""
+			},
 			columnsOption : [],//数值型
 			colOption : [],//非数值型
 			columnsValue : []
@@ -112,10 +120,15 @@ export default {
 	  		let list = this.$store.state.runList;
 		    let pre = list[this.configT].pre;
 		    let fileUrl = [];
-	      // 可以后续加判断，如果父节点是分数据的就另外写
+	         let r = this.$store.state.relationship;
+		      // 可以后续加判断，如果父节点是分数据的就另外写
 		      for(let i in pre){
 		        let obj = {};
-		        obj[pre[i]] = 0;
+		        for(let index in r){
+		        	if(r[index][1].slice(2) == this.configT && r[index][0].slice(5) == pre[i]){
+		        		obj[pre[i]] = Number(r[index][0].slice(4,5));
+		        	}
+		        }
 		        fileUrl.push(obj);
 		      }
 		    para["fileUrl"] = fileUrl;
@@ -137,11 +150,17 @@ export default {
 	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
 	  		}else if(this.mlnType == 0){
-	  			this.predict = [];
+	  			this.predict.features = [];
 	  			for(let i in this.columnsValue){
-	  				this.predict.push(this.columnsValue[i]);
+	  				this.predict.features.push(this.columnsValue[i]);
 	  			}
-	  			para.parameter["features"] = this.deepCopy(this.predict);
+	  			for(let i in this.predict){
+			    	if(typeof this.predict[i] === "object"){
+	  					para.parameter[i] = this.deepCopy(this.predict[i]);
+	  				}else{
+	  					para.parameter[i] = this.predict[i];
+	  				}
+			    }
 	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
 	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
@@ -166,6 +185,10 @@ export default {
 				regParam : 0,
 				regType : 0,
 			};
+			this.predict = {
+				features : [],
+				label : ""
+			};
 	        if(JSON.stringify(para.config) != "{}"){  
 	          if(n == 1){
 	              for(let i in para.config.parameter.features){
@@ -186,7 +209,10 @@ export default {
 		              if(this.column.indexOf(para.config.parameter.features[i]) != -1){
 		                this.columnsValue.push(para.config.parameter.features[i]);
 		              }
-		          } 		        
+		          } 
+		          if(this.column.indexOf(para.config.parameter.label) != -1){
+		          	this.predict.label = para.config.parameter.label;
+		          }		        
 	          }
 	        }       
 

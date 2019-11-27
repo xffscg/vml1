@@ -34,7 +34,7 @@ export default {
   data(){
   	return {
   		currentPage:1,
-  		pageSize:20,
+  		pageSize:10,
   	}
   },
   methods :{

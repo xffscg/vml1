@@ -53,7 +53,6 @@
 </template>
 
 <script>
-import ChartReport from '../report/relation'
 import TableReport from '../report/preProcess'
 import FreReport from '../report/freReport'
 import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne, getDataResult } from '@/api/addProject'
@@ -62,7 +61,6 @@ import echarts from 'echarts'
 export default {
   name: 'report',
   components : {
-  	ChartReport,
   	TableReport,
   	FreReport
   },
@@ -217,54 +215,99 @@ export default {
   	},
     subComponents(id, subName, tableD){
       // 创建可复用的 Profile 组件构造函数
-      console.log("iii")
+      console.log(tableD);
         let space = document.getElementById("contentList");
         let dOutside = document.createElement("div");
         dOutside.id = "report" + id;
         dOutside.setAttribute("class", "reportItem");
+      let t = document.createElement("h3");
+          t.innerHTML = "配置内容 ："  
+          dOutside.append(t)  
         let d = document.createElement("div");
         d.style.margin = "10px 5px 10px 5px";                        
         dOutside.append(d); 
+        console.log(dOutside);
       let list = this.$store.state.runResult;
-      let config = this.$store.state.configData;
+      let config = this.$store.state.configData;  
+      let ProfileTable = Vue.extend(TableReport);
       let Profile = Vue.extend(subName);
       // 创建一个 Profile 组件的实例
-      // if(subName == "freReport")
       let configD = this.setConfigData(id);
-      if(subName == TableReport){        
-        let profile = new Profile({
+      let profile1 = new ProfileTable({
           data: {
-            title : configD.title,
-            tableData : tableD.tableData,
-            columnD : tableD.columnD,
-            configData : configD.configData,
-            columnC : configD.columnC,
+            tableData : configD.configData,
+            columnD : configD.columnC,
           }  
         })
-        profile.$mount(d);
+        profile1.$mount(d);
+      if(subName == TableReport){ 
+        if(id.slice(4,8) == "pre9"){
+          let t1 = document.createElement("h3");
+          t1.innerHTML = "数据结果1 ："  
+          dOutside.append(t1)    
+          let d1 = document.createElement("div");
+          d1.style.margin = "10px 5px 10px 5px";                        
+          dOutside.append(d1);  
+          console.log(dOutside);
+          let profile = new Profile({
+            data: {
+              tableData : tableD[0].tableData,
+              columnD : tableD[0].columnD,
+            }  
+          })
+          profile.$mount(d1);
+          let t2 = document.createElement("h3");
+          t2.innerHTML = "数据结果2 ："  
+          dOutside.append(t2)    
+          let d2 = document.createElement("div");
+          d2.style.margin = "10px 5px 10px 5px";                        
+          dOutside.append(d2); 
+          let profile0 = new Profile({
+            data: {
+              tableData : tableD[1].tableData,
+              columnD : tableD[1].columnD,
+            }  
+          })
+          profile0.$mount(d2);
+        }else{
+          let t1 = document.createElement("h3");
+          t1.innerHTML = "数据结果 ："  
+          dOutside.append(t1)    
+          let d1 = document.createElement("div");
+          d1.style.margin = "10px 5px 10px 5px";                        
+          dOutside.append(d1);  
+          let profile = new Profile({
+            data: {
+              configData : configD.configData,
+              columnC : configD.columnC,
+            }  
+          })
+          profile.$mount(d1);
+        }
       }else if(subName == FreReport){
-
-        console.log("fre")
+        console.log(tableD)
         let chart = document.createElement("div");
         chart.setAttribute("id", "chart"+id);
         chart.style.height="200px";
         chart.style.width = "100%";              
-        dOutside.prepend(chart);
-
-        console.log(dOutside);               
+        dOutside.append(chart);           
+        let d1 = document.createElement("div");
+        d1.style.margin = "10px 5px 10px 5px";                        
+        dOutside.append(d1);         
         let profile = new Profile({
           data: {
-            title : configD.title,
-            tableData : tableD.tableData,
-            freName : tableD.freName,
-            configData : configD.configData,
-            columnC : configD.columnC,
+            tableData : tableD[0].tableData,
+            freName : tableD[0].freName,
           },
         })
-        profile.$mount(d);
+        profile.$mount(d1);
+ 
+        console.log(dOutside);
       }
-      space.append(dOutside);     
-      this.setChart(tableD.tableData, "chart"+id);    
+      space.append(dOutside);    
+      if(id.slice(4,8) == "exp2"){        
+        this.setChart(tableD[0].tableData, "chart"+id);
+      } 
 
       // 挂载到元素上
     },
@@ -289,7 +332,6 @@ export default {
             }
             configD["configData"].push(obj);
           }
-          configD["columnC"][0].fixed = 'left';
         }else{
 
           let obj = {};
@@ -306,8 +348,6 @@ export default {
             }
           }
           configD["configData"].push(obj);
-          console.log(configD["columnC"]);
-          console.log(configD["configData"]);
         }
       }
       return configD;
@@ -393,39 +433,59 @@ export default {
         case "label":
           k = "标签列";
           break;
+        case "proportion1":
+          k = "比例1";
+          break;
+        case "proportion2":
+          k = "比例2";
+          break;
+        case "seed":
+          k = "随机数种子";
+          break;
       }
       return k;
       
     },
     setTableData(id, subName){
-      let tableD = {};
-      tableD["tableData"] = [];
-      tableD["columnD"] = [];
-      tableD["freName"] = "";
+      let tableAll = [];
       if(id.slice(4,8) == "mln1"){
-        this.subComponents(id, subName, tableD);
+        // this.subComponents(id, subName, tableD);
       }else{
         getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : id, start : 0, end : 5})
         .then(res=>res.data).then(res=>{
-          if(id.slice(4,8) == "exp2"){
-            for(let i in res.data){
+          console.log(res)
+          console.log(id);
+          if(id.slice(4,8) == "exp2"){        
+          console.log("exp2")    
+            let tableD = {};
+            tableD["tableData"] = [];
+            tableD["columnD"] = [];
+            tableD["freName"] = "";
+            for(let i=0; i <res[0].data.length; i++){
               if(i == 0){
-                for(let key in res.data[i]){
+                console.log("0");
+                for(let key in res[0].data[i]){
                   if(key != "elm" && key != "频率" && key != "isRootInsert"){
                     tableD.freName = key;
                   }
                 }
               }
-              let obj = {columnName : res.data[i][tableD.freName], rate : res.data[i]["频率"]};
+              let obj = {columnName : res[0].data[i][tableD.freName], rate : res[0].data[i]["频率"]};
               tableD.tableData.push(obj);
             }
+            tableAll.push(tableD);
           }else{
-            tableD["tableData"] = res.data;
-            for(let item in res.data[0]){
-              tableD["columnD"].push({prop : item});
+            for(let index = 0; index < res.length; index ++){
+               let tableD = {};
+              tableD["columnD"] = [];
+              tableD["tableData"] = res[index].data;
+              for(let item in res[index].data[0]){
+                tableD["columnD"].push({prop : item});
+              }
+              tableAll.push(tableD);
             }
-          }          
-          this.subComponents(id, subName, tableD);
+          }     
+          this.subComponents(id, subName, tableAll);
                  
         })
         .catch(e=>{
@@ -433,7 +493,6 @@ export default {
         })
       }
     },
-    setChartData(id){}
   },
 };
 </script>
@@ -445,6 +504,7 @@ export default {
   overflow-x: auto;
 	position: relative;
 	background-color: white;
+  padding: 5px;
 }
 .title {
   width: 60%;

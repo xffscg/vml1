@@ -235,23 +235,23 @@ export default {
 		    }
 		    return target;
 		},
-		setResult(){
+		setResult(n){
 			this.tableData = {
 				data : [],
 				column : [],
 				length : 0,
 				title : ""
 			};
+			console.log(n);
 			getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : this.menuType.type, start : 0, end : 50})
 			.then(res=>res.data).then(res=>{
 				console.log(res);
-				this.tableData.data = res.data;
-				this.tableData.length = res.length;
-				for(let item in res.data[0]){
+				this.tableData.data = res[n].data;
+				this.tableData.length = res[n].length;
+				for(let item in res[n].data[0]){
 					console.log(item);
 					this.tableData.column.push({prop : item});
 				}
-				this.tableData.column[0].fixed = "left";
 				this.$store.commit("changeResult", {type : "add",name : this.menuType.type, config: this.tableData})
 			})
 			.catch(e=>{
@@ -275,14 +275,21 @@ export default {
 	watch :{
 		showDetail(newV){		
 		    console.log(newV);		
-			let t = this.menuType.type.slice(4,7)
+			let t = this.menuType.type.slice(4,7);
+			let op = this.$store.state.menuOp;
+			console.log(op.slice(0,3));
 			if(newV == 1){
-				console.log(t);
-				if(t == "dat"){		
-					let info = this.$store.state.configData[this.menuType.type].config;
-					this.getDataView(info.fileId, info.fileUrl[0][this.menuType.type]);
-				}else if(t == "pre" || t == "fea" || t == "exp" || t == "mln"){
-					this.setResult();
+				if(op.slice(0,4) == "dat1"){
+					this.setResult(0);
+				}else if(op.slice(0,4) == "dat2"){
+					this.setResult(1);
+				}else{
+					if(t == "dat"){		
+						let info = this.$store.state.configData[this.menuType.type].config;
+						this.getDataView(info.fileId, info.fileUrl[0][this.menuType.type]);
+					}else if(t == "pre" || t == "fea" || t == "exp" || t == "mln"){
+						this.setResult(0);
+					}
 				}
 			}else if(newV == 2){
 				// let res = this.$store.state.runResult[newV];
@@ -293,10 +300,10 @@ export default {
 				getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : this.menuType.type, start : 0, end : 50})
 				.then(res=>res.data).then(res=>{
 					console.log(res);
-					if(this.menuType.type.slice(7,8) == "3"){
-						that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
+					if(that.menuType.type.slice(7,8) == "3"){
+						that.$refs.ChartDetail.setChart(res[0], that.menuType.type.slice(7,8));
 					}else{
-						that.$refs.ChartDetail.setChart(res, this.menuType.type.slice(7,8));
+						that.$refs.ChartDetail.setChart(res[0], that.menuType.type.slice(7,8));
 					}
 					
 				})
@@ -309,15 +316,15 @@ export default {
 				getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : this.menuType.type, start : 0, end : 50})
 				.then(res=>res.data).then(res=>{
 					that.temFrequencyTable = [];
-					for(let i in res.data){
+					for(let i in res[0].data){
 						if(i == 0){
-							for(let key in res.data[i]){
+							for(let key in res[0].data[i]){
 								if(key != "elm" && key != "频率" && key != "isRootInsert"){
 									that.freName = key;
 								}
 							}
 						}
-						let obj = {columnName : res.data[i][that.freName], rate : res.data[i]["频率"]};
+						let obj = {columnName : res[0].data[i][that.freName], rate : res[0].data[i]["频率"]};
 						that.temFrequencyTable.push(obj);
 					}
 					that.$refs.TableChartDetail.setChart(that.temFrequencyTable);					

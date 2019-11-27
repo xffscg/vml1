@@ -22,6 +22,12 @@ export default {
       },{
         id : 3,
         name : "查看结果"
+      },{
+        id : 4,
+        name : "查看数据1"
+      },{
+        id : 5,
+        name : "查看数据2"
       }],
   		menuArr : {
   			alg:[0,1,3],
@@ -30,7 +36,8 @@ export default {
         exp:[0,1,3],
         fea:[0,1,3],
         ana:[0,1,3],
-        mln:[0,1,3]
+        mln:[0,1,3],
+        pre9:[0,1,4,5]
   		},
   		mType : "",
   		mId : ""
@@ -43,7 +50,11 @@ export default {
   },
   watch: {
   	menuType(newV){
-  		this.mType = newV.type.slice(4,7);
+      if(newV.type.slice(4,8) == "pre9"){
+        this.mType = newV.type.slice(4,8);
+      }else{
+        this.mType = newV.type.slice(4,7);
+      }
   		this.mId = newV.type;
 		$('.rightMenu').css('left',newV.left);
 		$('.rightMenu').css('top',newV.top);
@@ -76,6 +87,18 @@ export default {
         }//保证可以多次查看
       }else if(e.target.id == 1){
         this.$emit("runFrom");
+      }else if(e.target.id == 4){
+        if(this.$store.state.menuOp == "dat1"+this.mId){
+          this.$store.commit('changeShow', 1);
+        }else{          
+          this.$store.commit('changeOp', "dat1"+this.mId);
+        }//保证可以多次查看
+      }else if(e.target.id == 5){
+        if(this.$store.state.menuOp == "dat2"+this.mId){
+          this.$store.commit('changeShow', 1);
+        }else{          
+          this.$store.commit('changeOp', "dat2"+this.mId);
+        }//保证可以多次查看
       }
   	},
   },

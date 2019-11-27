@@ -1,17 +1,6 @@
 <template>
 	<div class="table">		
-		<h3>分析方法： {{title}}</h3>
-    <p>配置内容：</p>
-    <!-- <div class="config">
-      <div class="configItem" v-for="item in configData">
-        <span>{{item.key}} : {{item.para}}</span>
-      </div>
-    </div> -->
-    <el-table :data="configData" style="width: 100%" height="200">
-          <el-table-column v-for="col in columnC" :prop="col.prop" :label="col.prop" :key="col.prop">
-          </el-table-column>
-    </el-table>
-    <el-table :data="tableData" style="width: 100%" height="600">
+    <el-table :data="tableData" style="width: 100%" min-height="200">
           <el-table-column v-for="col in columnD" :prop="col.prop" :label="col.prop" :key="col.prop">
           </el-table-column>
     </el-table> 

@@ -120,7 +120,7 @@ export default {
           }         
           list[c[i].sourceId].next.push(c[i].targetId); 
           list[c[i].targetId].pre.push(c[i].sourceId); 
-          r.push([c[i].sourceId, c[i].targetId]);
+          r.push([c[i].endpoints[0].getUuid(), c[i].endpoints[1]].getUuid());
 
         }
         that.$store.commit("changeRun", list);
@@ -128,7 +128,6 @@ export default {
     });
     this.plumb.bind('connection', function (conn, originalEvent) {
       let c = that.plumb.getAllConnections();
-      console.log(c[0].endpoints[0].getUuid());
       let r = [];
       let list = {}
       for(let i = 0; i < c.length; i++){
@@ -140,7 +139,9 @@ export default {
           }         
           list[c[i].sourceId].next.push(c[i].targetId); 
           list[c[i].targetId].pre.push(c[i].sourceId); 
-          r.push([c[i].sourceId, c[i].targetId]);
+          let n1 = c[i].endpoints[0].getUuid();
+          let n2 = c[i].endpoints[1].getUuid();
+          r.push([n1, n2]);
 
         }
       that.$store.commit("changeRelation", r);
@@ -231,9 +232,9 @@ export default {
             let item = r.relationship[i];
             // if(item[0])
             this.plumb.connect({
-              source : item[0],
-              target : item[1],
-              uuids : ["from"+item[0], "to"+item[1]],
+              source : item[0].slice(5),
+              target : item[1].slice(2),
+              uuids : [item[0], item[1]],
             },this.defaultConfig);
           }//连接线
           // this.$store.commit("changeRelation", r.relationship);
@@ -347,7 +348,6 @@ export default {
       node.addEventListener("click", function(event) { 
         console.log(event.currentTarget);   
         console.log(event.currentTarget.style.left);     
-        let connections = that.plumb.getAllConnections();
         that.$emit("goConfig", event.currentTarget.id);
         that.$store.commit("changeLoc", {name : event.currentTarget.id, x : event.currentTarget.style.left, y : event.currentTarget.style.top});
       }, false);
@@ -396,10 +396,10 @@ export default {
     addJsPlumb(node){
       this.plumb.addEndpoint(node.id,{anchor : ['Top'], uuid: "to" + node.id}, this.endConfig);
       if(node.id.slice(4,8) == "pre9"){
-        this.plumb.addEndpoint(node.id,{anchor : [[0.3, 1, 0, 1]], uuid :"from1"+ node.id}, this.startConfig) ;
-        this.plumb.addEndpoint(node.id,{anchor : [[0.7, 1, 0, 1]], uuid :"from2"+ node.id}, this.startConfig);
+        this.plumb.addEndpoint(node.id,{anchor : [[0.3, 1, 0, 1]], uuid :"from0"+ node.id}, this.startConfig) ;
+        this.plumb.addEndpoint(node.id,{anchor : [[0.7, 1, 0, 1]], uuid :"from1"+ node.id}, this.startConfig);
       }else{
-        this.plumb.addEndpoint(node.id,{anchor : ['Bottom'], uuid :"from"+ node.id}, this.startConfig) ;
+        this.plumb.addEndpoint(node.id,{anchor : ['Bottom'], uuid :"from0"+ node.id}, this.startConfig) ;
       }
       // this.plumb.addEndpoint(node.id,{anchor : ['Bottom'], uuid :"from"+ node.id}, this.startConfig) ; 
       this.plumb.draggable(node.id,{containment: 'parent'});
@@ -427,7 +427,7 @@ export default {
           }         
           list[c[i].sourceId].next.push(c[i].targetId); 
           list[c[i].targetId].pre.push(c[i].sourceId); 
-          r.push([c[i].sourceId, c[i].targetId]);
+          r.push([c[i].endpoints[0].getUuid(), c[i].endpoints[1].getUuid()]);
 
         }
         this.$store.commit("changeRun", list);
