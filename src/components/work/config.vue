@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { Message } from 'element-ui'
 import { getColumnNames, getColumnNameWithNumberType, fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 // import {  } from '@/api/dataExploration'
 import ConfigPre from '../configs/configPre'
@@ -81,7 +82,7 @@ export default {
         }else if(type == "dat"){
           this.$refs.ConfigData.getDetail(newV);
           this.configType = 4;
-        }else if(type == "mln"){
+        }else if(type == "mln" || type == "eva"){
           this.$refs.ConfigMln.setConfig(newV);
           this.configType = 5;
         }
@@ -134,6 +135,7 @@ export default {
     	this.$store.commit("changeConfig", {type : "addConfig", detail : {name : this.configT, config : para}});
       this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.dataColumns}});
       this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.dataColumnsNumber}});
+      Message.success("配置保存成功")
     },
     getColumns(id){
       // let path = this.popPart(id); 

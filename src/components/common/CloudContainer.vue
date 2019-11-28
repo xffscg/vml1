@@ -153,6 +153,7 @@ export default {
 			executeAll({userId : this.$store.state.userId, projectId :this.$store.state.projectId}).then(res=>res.data)
 			.then(res=>{
 				console.log(res);
+				Message.success("项目开始运行")
 				let start = setTimeout(()=>{	
 					 this.$refs.RunLog.clearLog(); 				
       				this.$refs.RunLog.queryResult(res.model_execute_id);
@@ -196,6 +197,7 @@ export default {
 		          Message.error(e.error || 'run接口错误，请重试')
 		        })
 		    }
+		    Message.success("项目已保存")
 		},		
 		getDataView(id, url){
 		  this.tableData = {

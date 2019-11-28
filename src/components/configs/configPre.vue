@@ -4,7 +4,7 @@
 			<h3>过滤数据</h3>
 			<div class="preList">
 				<div class="preItem" v-for="(item, index) in filterArray" :key="index">
-					<el-tag type="info">{{item.colName}}</el-tag><el-tag type="info">{{item.operate}}</el-tag><el-tag type="info">{{item.value}}</el-tag>&nbsp;&nbsp;<el-link @click="editFill(index)">编辑</el-link>&nbsp;&nbsp;<el-link @click="delFilter(index)">删除</el-link><br>
+					<el-tag type="info">{{item.colName}}</el-tag><el-tag>{{item.operate}}</el-tag><el-tag type="success">{{item.value}}</el-tag><br><el-tag>{{item.relation}}</el-tag>&nbsp;&nbsp;<el-link type="primary" @click="editFilter(index)">编辑</el-link>&nbsp;&nbsp;<el-link type="danger" @click="delFilter(index)">删除</el-link><br>
 				</div>
 			</div>
 			<div class="select">
@@ -38,7 +38,7 @@
 			</div>
 			<div class="preList">
 				<div class="preItem" v-for="(item, index) in replace.replaceCharacters" :key="index">
-					<el-tag type="info">{{item.source}}</el-tag>&nbsp;&nbsp;<el-tag type="info">{{item.target}}</el-tag>&nbsp;&nbsp;<el-link @click="editReplace(index)">编辑</el-link>&nbsp;&nbsp;<el-link @click="delReplace(index)">删除</el-link><br>
+					<el-tag type="info">{{item.source}}</el-tag>&nbsp;&nbsp;<el-tag type="success">{{item.target}}</el-tag>&nbsp;&nbsp;<el-link type="primary" @click="editReplace(index)">编辑</el-link>&nbsp;&nbsp;<el-link type="danger" @click="delReplace(index)">删除</el-link><br>
 				</div>
 			</div>
 			<div class="select">
@@ -53,7 +53,7 @@
 			<h3>填充空值</h3>
 			<div class="preList">
 				<div class="preItem" v-for="(item, index) in fillArray" :key="index">
-					<el-tag type="info">{{item.colName}}</el-tag>&nbsp;&nbsp;<el-link @click="editFill(index)">编辑</el-link>&nbsp;&nbsp;<el-link @click="delFill(index)">删除</el-link><br>
+					<el-tag type="info">{{item.colName}}</el-tag><el-tag>{{item.operate}}</el-tag>&nbsp;&nbsp;<el-link type="primary" @click="editFill(index)">编辑</el-link>&nbsp;&nbsp;<el-link type="danger" @click="delFill(index)">删除</el-link><br>
 				</div>
 			</div>
 			<div class="select">
@@ -84,7 +84,7 @@
 			</div>
 			<div class="preList">
 				<div class="preItem" v-for="(item, index) in divide.newColumnNames">
-					<el-tag type="info">{{item}}</el-tag>&nbsp;&nbsp;&nbsp;&nbsp;<el-link @click="delDivideName(index)">删除</el-link><br>
+					<el-tag type="info">{{item}}</el-tag>&nbsp;&nbsp;&nbsp;&nbsp;<el-link type="danger" @click="delDivideName(index)">删除</el-link><br>
 				</div>
 			</div>
 			<div class="select">
@@ -111,9 +111,9 @@
 			<h3>数据列投影</h3>
 			<div class="preList">
 				<div class="preItem" v-for="(item, index) in shadowArray" :key="index">
-					<el-tag type="info">{{item.colName_1}}</el-tag><el-tag type="info">{{item.operate_1}}</el-tag><el-tag type="info">{{item.value_1}}</el-tag><el-tag type="info">{{item.operate}}</el-tag><br>
-					<el-tag type="info">{{item.colName_2}}</el-tag><el-tag type="info">{{item.operate_2}}</el-tag><el-tag type="info">{{item.value_2}}</el-tag><el-tag type="info">{{item.newName}}</el-tag><br>
-					<el-link @click="editFill(index)">编辑</el-link>&nbsp;&nbsp;<el-link @click="delShadow(index)">删除</el-link><br>
+					<el-tag type="info">{{item.colName_1}}</el-tag><el-tag>{{item.operate_1}}</el-tag><el-tag type="success">{{item.value_1}}</el-tag><el-tag>{{item.operate}}</el-tag><br>
+					<el-tag type="info">{{item.colName_2}}</el-tag><el-tag>{{item.operate_2}}</el-tag><el-tag type="success">{{item.value_2}}</el-tag><el-tag type="success">{{item.newName}}</el-tag><br>
+					<el-link type="primary" @click="editShadow(index)">编辑</el-link>&nbsp;&nbsp;<el-link type="danger" @click="delShadow(index)">删除</el-link><br>
 				</div>
 			</div>
 			<div class="select">
@@ -283,7 +283,7 @@ export default {
         },
         {
           id: 2,
-          value: ''
+          value: 'None'
         }],
   		filterRuleList: [
         {
@@ -357,10 +357,16 @@ export default {
 	    para.parameter["projectId"] = this.$store.state.projectId;
   		if(this.preType == 1){ 
 	  		if(this.filter.colName != "" && this.filter.operate != "" && this.filter.value != ""){
-	  			this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value, relation : this.filter.relation});
+	  			if(this.filter.relation != "None"){
+	  				this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value, relation : this.filter.relation});
+	  			}else{
+
+	  				this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value, relation : ""});
+	  			}
 	  			this.filter.colName = "";
 	  			this.filter.operate = "";
 	  			this.filter.value = "";
+	  			this.filter.relation = "";
 	  		}		
   			para.parameter["parameter"] = this.filterArray;
   			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
@@ -505,6 +511,7 @@ export default {
 		  		this.nextVaild(this.$store.state.runList[this.configT].next, orderPara, this.columnNumberType);
 	  		}
   		}
+  		Message.success("配置保存成功")
   	},
   	nextVaild(nextNode, col, colN){
   		// 采用逐步提示的方式，如果下一个分支上的节点合法，则继续向下找直到第一个出错的点，或者直到底部；必须包含所有分支
@@ -597,10 +604,16 @@ export default {
   	},
   	addFilter(){
   		if(this.filter.colName != "" && this.filter.operate != "" && this.filter.value != ""){
-  			this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value, relation : this.filter.relation});
+  			if(this.filter.relation != "None"){
+  				this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value, relation : this.filter.relation});
+  			}else{
+
+  				this.filterArray.push({colName :this.filter.colName, operate : this.filter.operate, value : this.filter.value, relation : ""});
+  			}
   			this.filter.colName = "";
   			this.filter.operate = "";
   			this.filter.value = "";
+  			this.filter.relation = "";
   		}else{
   			Message.error("请完善本条过滤信息");
   		}
@@ -622,9 +635,32 @@ export default {
   		}
   	},
   	editFill(index){
-  		console.log(inde + " wait edit");
-  		// this.fill.colName = this.fillArray[index].colName;
-  		// this.fill.operate = this.fillArray[index].operate;
+  		this.fill.colName = this.fillArray[index].colName;
+  		this.fill.operate = this.fillArray[index].operate;
+  		this.delFill(index);
+  	},
+  	editFilter(index){
+  		this.filter.colName = this.filterArray[index].colName;
+  		this.filter.operate = this.filterArray[index].operate;
+  		this.filter.value = this.filterArray[index].value;
+  		this.filter.relation = this.filterArray[index].relation;
+  		this.delFilter(index);
+  	},
+  	editShadow(index){
+  		this.shadow.colName_1 = this.shadowArray[index].colName_1;
+		this.shadow.operate_1 = this.shadowArray[index].operate_1;
+		this.shadow.value_1 = this.shadowArray[index].value_1;
+		this.shadow.operate = this.shadowArray[index].operate;
+		this.shadow.colName_2 = this.shadowArray[index].colName_2;
+		this.shadow.operate_2 = this.shadowArray[index].operate_2;
+		this.shadow.value_2 = this.shadowArray[index].value_2;
+		this.shadow.newName = this.shadowArray[index].newName;
+  		this.delShadow(index);
+  	},
+  	editRepalce(index){
+  		this.replaceC.source = this.replace.replaceCharacters[index].source;
+		this.replaceC.target = this.replace.replaceCharacters[index].target;
+  		this.delReplace(index);
   	},
   	delFill(index){
   		if(this.fillArray.length == 1){

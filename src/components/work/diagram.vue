@@ -178,30 +178,27 @@ export default {
         }
       }
     },
-    changeClass(state, currentNode){
+    changeClass(state, currentNode){      
+      $("#" + currentNode +' i').remove();
       console.log(currentNode);
       if(state == "success"){
-         $("#" + currentNode +' i').remove();
         let i = document.createElement("i");
         i.setAttribute("class", "el-icon-check");
         $("#" + currentNode).append(i);
-        $("#" + currentNode).css("border","solid 3px #409EFF");
+        $("#" + currentNode).css("border","solid 2px #409EFF");
       }else if(state == "error"){
-        $("#" + currentNode +' i').remove();
         let i = document.createElement("i");
         i.setAttribute("class", "el-icon-close");
         $("#" + currentNode).append(i);
-        $("#" + currentNode).css("border","solid 3px #F56C6C");
+        $("#" + currentNode).css("border","solid 2px #F56C6C");
       }else if(state == "running"){
-        $("#" + currentNode +' i').remove();
         let i = document.createElement("i");
         i.setAttribute("class", "el-icon-loading");
         $("#" + currentNode).append(i);
-        $("#" + currentNode).css("border","3px dashed #67C23A")
+        $("#" + currentNode).css("border","2px dashed #67C23A")
         // $("#" + currentNode).css("background","linear-gradient(to bottom, #34538b, #cd0000)");
         // $("#" + currentNode).css("background-origin","border-box");
       }else if(state == "initial"){
-        $("#" + currentNode +' i').remove();
         $("#" + currentNode).css("border","solid 1px #C0C4CC");
       }
     },
@@ -246,7 +243,7 @@ export default {
         let timestamp = new Date().getTime();  
         this.dragContent.removeAttribute("class");
         console.log(this.dragContent);
-        if(this.dragContent.id.slice(0,3) == "100" || this.dragContent.id.slice(0,3) == "200" || this.dragContent.id.slice(0,3) == "300" || this.dragContent.id.slice(0,3) == "400" || this.dragContent.id.slice(0,3) == "500" || this.dragContent.id.slice(0,3) == "600"){
+        if(this.dragContent.id.slice(0,3) == "100" || this.dragContent.id.slice(0,3) == "200" || this.dragContent.id.slice(0,3) == "300" || this.dragContent.id.slice(0,3) == "400" || this.dragContent.id.slice(0,3) == "500" || this.dragContent.id.slice(0,3) == "600" || this.dragContent.id.slice(0,3) == "700"){
           this.dragContent.id = "drop"+this.dragContent.id.slice(4)+timestamp;
           isType = "alg";
         }else{
@@ -261,7 +258,7 @@ export default {
         this.dragContent.style.borderRadius = "2px";         
         this.dragContent.style.left = e.offsetX+"px";
         this.dragContent.style.top = e.offsetY+"px"; 
-        this.dragContent.style.display = "flex";
+        // this.dragContent.style.display = "flex";
         // this.dragContent.style.justifyContent = "spaceAro"
         space.append(this.dragContent);
         //添加dom事件 
@@ -301,7 +298,7 @@ export default {
         d.style.height = "30px";
         d.style.border = "solid 1px #C0C4CC";
         d.style.backgroundColor = "#F2F6FC";
-        d.style.display = "flex";
+        // d.style.display = "flex";
         d.style.borderRadius = "2px";   
         let s = document.createElement("span");
         s.innerHTML = config[i].type;

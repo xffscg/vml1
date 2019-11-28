@@ -137,6 +137,80 @@ export default {
         space.insertBefore(d, b);
       }
     },
+    getCoeOption(res){
+        let xyAxis = []
+        let indexX = 0
+        let indexY = 0
+        let temPlot = [];
+        let allPlots = [];
+        for(let i in res){
+          xyAxis.push(res[i]["Unnamed: 0"]);
+        }
+        for(let i in res){
+          Object.keys(res[i]).forEach(function (key2) {
+            if(key2 != "Unnamed: 0"){              
+              temPlot = [indexY, indexX, res[i][xyAxis[indexX]]]
+              allPlots.push(temPlot)
+              indexX++
+            }
+          })
+          indexX = 0
+          indexY++
+        }
+        let correlationDatas = this.deepCopy(xyAxis);
+        allPlots = allPlots.map(function (item) {
+            return [item[1], item[0], item[2] || '-']
+          });
+          let option = {
+            tooltip: {
+              position: 'top'
+            },
+            animation: false,
+            grid: {
+              height: '50%',
+              y: '10%'
+            },
+            xAxis: {
+              type: 'category',
+              data: xyAxis,
+              splitArea: {
+                show: true
+              }
+            },
+            yAxis: {
+              type: 'category',
+              data: xyAxis,
+              splitArea: {
+                show: true
+              }
+            },
+            visualMap: {
+              min: -1,
+              max: 1,
+              calculable: true,
+              orient: 'horizontal',
+              left: 'center',
+              bottom: '15%'
+            },
+            series: [{
+              name: '相关系数',
+              type: 'heatmap',
+              data: allPlots,
+              label: {
+                normal: {
+                  show: true
+                }
+              },
+              itemStyle: {
+                emphasis: {
+                  shadowBlur: 10,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+              }
+            }]
+          }
+          return option;
+      },
     getOption(res){
       console.log(res);
       let xName = [];
@@ -173,7 +247,11 @@ export default {
       console.log(chart);
       chart.clear();
       let option = {};
-      option = this.getOption(res);
+      if(c.slice(9,13) == "exp2"){        
+        option = this.getOption(res);
+      }else if(c.slice(9,13) == "exp3"){
+        option = this.getCoeOption(res);
+      }
 
       chart.setOption(option);
     },
@@ -191,7 +269,7 @@ export default {
         this.setTableData(id, FreReport);
 			}else if(id.slice(4,8) == "exp3" || id.slice(4,8) == "exp4"){
 				console.log("relation")
-        this.subComponents(id, ChartReport);
+        this.setTableData(id, "relation");
 			}else if(id.slice(4,7) == "txt"){
         let d = document.createElement("div");
         d.setAttribute("class", "reportItem")
@@ -230,7 +308,11 @@ export default {
       let list = this.$store.state.runResult;
       let config = this.$store.state.configData;  
       let ProfileTable = Vue.extend(TableReport);
-      let Profile = Vue.extend(subName);
+      let Profile = null;
+      if(id.slice(4,8) != "exp3"){
+        Profile = Vue.extend(subName);
+      }
+      
       // 创建一个 Profile 组件的实例
       let configD = this.setConfigData(id);
       let profile1 = new ProfileTable({
@@ -284,6 +366,15 @@ export default {
           })
           profile.$mount(d1);
         }
+      }else if(subName == "relation"){
+        let t1 = document.createElement("h3");
+          t1.innerHTML = "相关系数视图"  
+          dOutside.append(t1)    
+        let chart = document.createElement("div");
+        chart.setAttribute("id", "chart"+id);
+        chart.style.height="200px";
+        chart.style.width = "100%";              
+        dOutside.append(chart);  
       }else if(subName == FreReport){
         console.log(tableD)
         let chart = document.createElement("div");
@@ -305,9 +396,9 @@ export default {
         console.log(dOutside);
       }
       space.append(dOutside);    
-      if(id.slice(4,8) == "exp2"){        
+      if(id.slice(4,8) == "exp2" || id.slice(4,8) == "exp3"){        
         this.setChart(tableD[0].tableData, "chart"+id);
-      } 
+      }
 
       // 挂载到元素上
     },
@@ -474,6 +565,10 @@ export default {
               tableD.tableData.push(obj);
             }
             tableAll.push(tableD);
+          }else if(id.slice(4,8) == "exp3"){
+             let tableD = {};
+              tableD["tableData"] = res[0].data;
+              tableAll.push(tableD);
           }else{
             for(let index = 0; index < res.length; index ++){
                let tableD = {};

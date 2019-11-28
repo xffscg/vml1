@@ -37,7 +37,8 @@ export default {
         fea:[0,1,3],
         ana:[0,1,3],
         mln:[0,1,3],
-        pre9:[0,1,4,5]
+        pre9:[0,1,4,5],
+        eva:[0,1,3]
   		},
   		mType : "",
   		mId : ""
@@ -78,7 +79,7 @@ export default {
           this.$store.commit('changeShow', 2);
         }else if(this.$store.state.menuOp == "res3"+this.mId){
           this.$store.commit('changeShow', 3);
-        }else if(this.mId.slice(4,8) == "exp1" || this.mId.slice(4,7) == "pre" || this.mId.slice(4,7) == "fea" || this.mId.slice(4,7) == "mln"){          
+        }else if(this.mId.slice(4,8) == "exp1" || this.mId.slice(4,7) == "pre" || this.mId.slice(4,7) == "fea" || this.mId.slice(4,7) == "mln" || this.mId.slice(4,7) == "eva"){        
           this.$store.commit('changeOp', "res1"+this.mId);
         }else if(this.mId.slice(4,8) == "exp3" || this.mId.slice(4,8) == "exp4"){          
           this.$store.commit('changeOp', "res2"+this.mId);

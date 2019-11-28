@@ -50,7 +50,41 @@
 				<el-input v-model="svm.convergenceTol"></el-input>
 			</div>
 		</div>
-		
+		<div class="mlnFunc" v-show="mlnType==9">
+			<h5>评估</h5>
+			<div class="selectHigh">
+				<h5>列名</h5>			
+			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
+		          </el-checkbox-group>
+			</div>
+			<div class="select">
+				<el-select v-model="svm.label">
+					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
+				</el-select>
+			</div>
+			<div class="select">
+				<label>迭代次数</label>
+				<el-input v-model="svm.iterations"></el-input>
+			</div>	
+			<div class="select">
+				<label>步长</label>
+				<el-input v-model="svm.step"></el-input>
+			</div>
+			<div class="select">
+				<label>正则化</label>
+				<el-input v-model="svm.regType"></el-input>
+			</div>		
+			<div class="select">
+				<label>正则化系数</label>
+				<el-input v-model="svm.regParam"></el-input>
+			</div>	
+			<div class="select">
+				<label>收敛系数</label>
+				<el-input v-model="svm.convergenceTol"></el-input>
+			</div>
+		</div>
 		<div class="save" @click="save"><el-button icon="el-icon-plus" style="width:90%" type="primary">保存</el-button></div>	
 	</div>
 </template>
@@ -118,7 +152,9 @@ export default {
 		save(){
 			let para = {parameter : {}, fileUrl : []};
 	  		let list = this.$store.state.runList;
+	  		console.log(list)
 		    let pre = list[this.configT].pre;
+		    console.log(pre);
 		    let fileUrl = [];
 	         let r = this.$store.state.relationship;
 		      // 可以后续加判断，如果父节点是分数据的就另外写
@@ -134,7 +170,7 @@ export default {
 		    para["fileUrl"] = fileUrl;
 		    para.parameter["userId"] = this.$store.state.userId;
 		    para.parameter["projectId"] = this.$store.state.projectId;
-		    if(this.mlnType == 1){ 
+		    if(this.mlnType == 1 || this.mlnType == 9){ 
 		    	this.svm.features = [];
 	  			for(let i in this.columnsValue){
 	  				this.svm.features.push(this.columnsValue[i]);
@@ -174,7 +210,7 @@ export default {
 	      this.columnsOption = this.columnNumberType;
 	      this.colOption = this.column;
 	      this.columnsValue = [];
-	      if(type == "mln"){  
+	      if(type == "mln" || type == "eva"){  
 	        let n = Number(mlnT);
 	        this.svm = {
 				features : [],
@@ -215,8 +251,12 @@ export default {
 		          }		        
 	          }
 	        }       
-
-	        this.mlnType = n;
+	        console.log(type+mlnT)
+	        if(type+mlnT == "eva1"){
+	        	this.mlnType = 9;
+	        }else {
+	        	this.mlnType = n;
+	        }
 	      }
 	    },
 	},

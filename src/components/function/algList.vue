@@ -48,6 +48,8 @@ export default {
 				newId = String(id) + "ana" + String(id).slice(3);
 			}else if(String(id).slice(0,3) == "600"){
 				newId = String(id) + "mln" + String(id).slice(3);
+			}else if(String(id).slice(0,3) == "700"){
+				newId = String(id) + "eva" + String(id).slice(3);
 			}
 			return newId;
 		}

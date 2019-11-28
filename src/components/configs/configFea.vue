@@ -76,7 +76,7 @@
       <h3>独热编码</h3>
       <div class="feaList">
         <div class="feaItem" v-for="(item, index) in oneHotList" :key="index">
-          <el-tag type="info">{{item.columnName}}</el-tag><el-tag type="info">{{item.newColumnName}}</el-tag>&nbsp;&nbsp;<el-link @click="editHot(index)">编辑</el-link>&nbsp;&nbsp;<el-link @click="delHot(index)">删除</el-link><br>
+          <el-tag type="info">{{item.columnName}}</el-tag><el-tag type="success">{{item.newColumnName}}</el-tag>&nbsp;&nbsp;<el-link type="primary" @click="editHot(index)">编辑</el-link>&nbsp;&nbsp;<el-link type="danger" @click="delHot(index)">删除</el-link><br>
         </div>
       </div>
       <div class="select">
@@ -407,6 +407,7 @@ export default {
             this.nextVaild(this.$store.state.runList[this.configT].next,orderPara, this.columnNumberType);
           }
 	    }
+      Message.success("配置保存成功")
   	},
     nextVaild(nextNode, col, colN){
       // 采用逐步提示的方式，如果下一个分支上的节点合法，则继续向下找直到第一个出错的点，或者直到底部；必须包含所有分支
@@ -496,9 +497,9 @@ export default {
       }
     },
     editHot(index){
-      console.log(inde + " wait edit");
-      // this.fill.colName = this.fillArray[index].colName;
-      // this.fill.operate = this.fillArray[index].operate;
+      this.oneHot.columnName = this.oneHotArray.columnNames[index];
+      this.oneHot.newColumnName = this.oneHotArray.newColumnNames[index];
+      this.delHot(index);
     },
     delHot(index){
       if(this.oneHotList.length == 1){

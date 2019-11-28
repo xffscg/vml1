@@ -32,7 +32,7 @@ export default {
         this.getDataSource();
       }else if(n == 4){
         let alg = this.$store.state.algList;
-        console.log(typeof alg)
+        console.log(alg)
         if(!alg.length){
           this.getAlgri();
         }
