@@ -64,6 +64,12 @@ export default {
     draggable
   },
   methods :{
+    setChooseData(data){
+      this.nodeArr = [];
+      this.contentArr = [];
+      this.nodeArr = this.deepCopy(data.na);
+      this.contentArr = this.deepCopy(data.ca);
+    },
   	deepCopy(oldVal){
         let target = oldVal.constructor === Array?[]:{};
         for(let key in oldVal){
@@ -80,7 +86,7 @@ export default {
     },
     update(e){
       this.isDragging = true;
-      let obj = {id : this.contentArr[e.newIndex].id.slice(3), before : ""};
+      let obj = {id : this.contentArr[e.newIndex].id.slice(3), before : "", list : this.contentArr};
       if(e.newIndex < this.contentArr.length-1){
         obj.before = this.contentArr[e.newIndex+1].id.slice(3);
       }
@@ -114,7 +120,7 @@ export default {
       }
       if(flag == true){
         let timestamp = new Date().getTime(); 
-        this.$emit("addContent", {id : "droptxt" + timestamp, content : this.newTxt.content});
+        this.$emit("addContent", {id : "droptxt" + timestamp, content : {title : this.newTxt.name, txt : this.newTxt.content, fontSize : "15px", textAlign : "left", backgroundColor : "", color : ""}});
         this.contentArr.push({name : this.newTxt.name, id: "inidroptxt" + timestamp, content : this.newTxt.content});
         this.newTxtVisible = false;
       }

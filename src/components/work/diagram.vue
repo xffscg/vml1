@@ -157,7 +157,8 @@ export default {
   methods:{
     runFrom(){
         let id = this.$store.state.menuType.type;
-        this.initialStyle(id);
+        this.initialStyle(id);        
+        this.$emit("clearSuccess",id);
         executeFromOne({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId: id})
         .then(res=>res.data).then(res=>{
           console.log(res);
@@ -173,7 +174,6 @@ export default {
       this.changeClass("initial", id);
       if(list[id].next.length != 0){
         for(let i in list[id].next){
-          this.changeClass("initial", id);
           this.initialStyle(list[id].next[i]);
         }
       }

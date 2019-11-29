@@ -5,15 +5,17 @@
  * @version $Id$
  */
 export const changeType = (state, funcType) => {
-  console.log(funcType);
 	state.funcType = funcType;
 }
 export const getPro = (state, proN) => {
 	state.proList = deepCopy(proN);
 }
 export const changeProId = (state, proId) => {
-  console.log(proId);
   state.projectId = proId;
+}
+export const changeReportId = (state, Id) => {
+  console.log(Id);
+  state.reportId = Id;
 }
 export const getData = (state, dataN) => {
   state.dataList = deepCopy(dataN);
@@ -21,10 +23,8 @@ export const getData = (state, dataN) => {
 export const getAlg = (state, alg) => {
 	state.algList = deepCopy(alg);
 }
-export const changeReportList = (state, content) => {
-  if(content.type = "add"){
-    state.reportList.push(content.detail);
-  }
+export const getReport = (state, content) => {
+  state.reportList = deepCopy(content);
 }
 export const changeDrag = (state, content) => {
 	state.dragContent = content;

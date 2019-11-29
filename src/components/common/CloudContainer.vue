@@ -7,7 +7,7 @@
 	        	<projectList v-show = "funcType == 3" ref="projectList" @save="saveProject"></projectList>
 	        	<algList v-show = "funcType == 4"></algList>
 	        	<dataList v-show = "funcType == 2"></dataList>
-	        	<reportList v-show = "funcType == 6"></reportList>
+	        	<reportList v-show = "funcType == 6" @delR="yesDialog"></reportList>
 	        	<ChooseList v-show = "funcType == 5" ref="ChooseList" @addContent="addContent" @delContent="delContent"  @reflow="reflowContent"></ChooseList>
 	        </div>
 	        <div class="work" v-show = "funcType != 5">
@@ -19,15 +19,15 @@
 	        				<el-button type="danger" plain icon="el-icon-video-pause" @click="stopRun">停止运行</el-button>
 	        				<el-button type="success" plain icon="el-icon-s-operation" >保存模型</el-button>
 	        				<el-button type="warning" plain icon="el-icon-delete" @click="clear">清空画布</el-button>
-	        				<el-button type="primary" plain icon="el-icon-document" @click="getReport">生成报告</el-button>
+	        				<el-button type="primary" plain icon="el-icon-document" @click="getCreateReport">生成报告</el-button>
 	        			</div>
-	        			<diagram ref="diagram" @setLog="setLog" @goConfig="goConfig"></diagram>
+	        			<diagram ref="diagram" @setLog="setLog" @goConfig="goConfig" @clearSuccess="clearSuccess"></diagram>
 	        		</div>
 	        		<div class="config"><Config ref="Config"></Config></div>
 	        	</div>
 	        	<div class="log"><RunLog ref="RunLog" @changeD="changeStyle"></RunLog></div>	        	
 	        </div>
-	        <div class="reportPart" v-show = "funcType == 5"><Report ref="Report"></Report></div>
+	        <div class="reportPart" v-show = "funcType == 5"><Report ref="Report" @setChooseData="setChooseData"></Report></div>
         </div>
         <div class="detailPop"  v-show="showDetail !=0 && showDetail !=9">	          
 	    </div>
@@ -52,6 +52,7 @@ import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSour
 import { fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 import { filter, fillNullValue, columnMap, columnSplit, columnsMerge, sort, replace } from '@/api/dataProcess'
 import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne, getDataResult } from '@/api/addProject'
+import { getReport, deleteReport, updateReport, saveReport } from '@/api/reportOp'
 import { Message } from 'element-ui'
 import projectList from '../function/projectList'
 import algList from '../function/algList'
@@ -95,13 +96,39 @@ export default {
 			times : 0,
 			interval : 1000,
 			newProVisible : false,
-			projectName : ""
+			projectName : "",
 		}
 	},
 	mounted(){
 		this.clear();
 	},
 	methods:{
+		setChooseData(data){
+			this.$refs.ChooseList.setChooseData(data);
+		},
+		yesDialog(id){
+	        this.$confirm('此操作将永久删除该报告, 是否继续?', '提示', {
+	          confirmButtonText: '确定',
+	          cancelButtonText: '取消',
+	          type: 'warning'
+	        }).then(() => {
+	          deleteReport({reportId : id}).then(res=>res.data)
+	          .then(res=>{
+	          	console.log(res);
+	          	getReport({params :{userId : this.$store.state.userId}}).then(res => res.data)
+			      .then(res => {
+			        console.log(res);
+			        this.$store.commit('getReport', res);
+          			Message.success("报告删除成功");
+			      })
+			      .catch(e => {
+			          Message.error(e.errors || '算法接口错误，请重试')
+			        })
+	          })
+	        }).catch(() => {
+	          Message.info("已取消")         
+	        });
+		  },
 		createProject(){
 			addProject({userId : this.$store.state.userId, projectName : this.projectName}).then(res=>res.data)
 			.then(res=>{
@@ -119,6 +146,9 @@ export default {
 		goConfig(id){
 			this.$refs.Config.setConfig(id);
 		},
+		clearSuccess(id){
+			this.$refs.RunLog.fromOne(id);
+		},
 		clear(){
 			let timestamp = new Date().getTime();
 			this.$store.commit("changeStart", {type : "clear"});
@@ -127,10 +157,11 @@ export default {
 			this.$store.commit("changeClear", timestamp);
 			this.$store.commit("changeResult", {type : "clear"});
 		},
-		getReport(){
+		getCreateReport(){
 			// this.$store.commit('changeReportList', {type : "add", detail : {name : "新建报告"}});
 			// this.$refs.Report.createReport();
 			this.$refs.ChooseList.getNode();
+			this.$store.commit("changeReportId", -1);
 			this.$store.commit('changeType', 5);
 		},
 		addContent(node){
@@ -273,8 +304,16 @@ export default {
 		menuType(){
 	  		return this.$store.state.menuType;
 	  	},
+	  	reportId(){
+	  		return this.$store.state.reportId;
+	  	}
 	},
 	watch :{
+		reportId(newV){
+			if(newV != -1){
+				this.$store.commit('changeType', 5);
+			}
+		},
 		showDetail(newV){		
 		    console.log(newV);		
 			let t = this.menuType.type.slice(4,7);
@@ -289,7 +328,7 @@ export default {
 					if(t == "dat"){		
 						let info = this.$store.state.configData[this.menuType.type].config;
 						this.getDataView(info.fileId, info.fileUrl[0][this.menuType.type]);
-					}else if(t == "pre" || t == "fea" || t == "exp" || t == "mln"){
+					}else if(t == "pre" || t == "fea" || t == "exp" || t == "mln" || t == "eva"){
 						this.setResult(0);
 					}
 				}

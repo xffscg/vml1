@@ -59,6 +59,30 @@ export default {
       let space = document.getElementById("log");
       space.innerHTML = null;
     },
+    fromOne(id){
+      let list = this.$store.state.runList;
+      this.clearSuccess(id);
+      if(list[id].next.length != 0){
+        for(let i in list[id].next){
+          this.fromOne(list[id].next[i]);
+        }
+      }     
+
+    },
+    clearSuccess(id){
+      let index = this.successList.indexOf(id);
+      if(this.successList.length == 1){
+        this.successList = [];
+      }else{   
+        if(index == 0){
+          this.successList = this.successList.slice(1);
+        }else if(index == this.successList.length -1){
+          this.successList = this.successList.slice(0, this.successList.length-1);
+        }else{
+          this.successList = (this.successList.slice(0, index)).concat(this.successList.slice(index+1, this.successList.length));
+        }
+      }
+    },
   	queryResult(id){
   		queryResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, modelExecuteId: id, }).then(res=>res.data)
         .then(res=>{

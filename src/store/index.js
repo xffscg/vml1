@@ -23,11 +23,12 @@ Vue.use(Vuex)
 const state = {
 	userId : 1,
 	projectId : -1,
+	reportId : -1,
 	funcType : 1,//sideBar的type 即数据、项目、算法
 	proList :[],//项目list
 	dataList : [],//数据list
 	algList : {},//算法list
-	reportList : [{name : "假报告"}],//报告列表
+	reportList : [],//报告列表
 	dragContent : {},//拖过来的内容
 	menuType : {},//右键点击的内容
 	menuOp : "",//右键点击的操作

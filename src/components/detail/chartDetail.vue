@@ -1,12 +1,17 @@
 <template>
 	<div class="coeDetail">
 		<div id="coeChart" class="chart"></div>
+    <div id="treeChart" class="chart"></div>
 		<div class="close"><el-button style="width:20%" type="primary" @click="close">关闭</el-button></div>
 	</div>
 </template>
 
+<!-- <script type="text/javascript" src="./static/getOptionAll.js"></script> -->
 <script>
+
 import echarts from 'echarts'
+// import { getOptionsAll } from './../../static/getOptionsAll'
+
 export default {
   name: 'coeDetail',
   // props : {
@@ -120,6 +125,19 @@ export default {
               },
               itemStyle: {
                 emphasis: {
+                  color: {
+                    type: 'linear',
+                    x: 0,
+                    y: 0,
+                    x2: 0,
+                    y2: 1,
+                    colorStops: [{
+                        offset: 0, color: 'red' // 0% 处的颜色
+                    }, {
+                        offset: 1, color: 'blue' // 100% 处的颜色
+                    }],
+                    global: false // 缺省为 false
+                },
                   shadowBlur: 10,
                   shadowColor: 'rgba(0, 0, 0, 0.5)'
                 }
@@ -128,12 +146,14 @@ export default {
           }
           return option;
       },
-  	setChart(res, n){      
+  	setChart(res, n){ 
+    console.log(n);     
   		let chart = echarts.init(document.getElementById("coeChart"));
       chart.clear();
       let option = {};
       if( n == "3"){        
-        option = this.getCoeOption(res.data);
+        option = getOptionsAll(res, 2);
+        // option = this.getCoeOption(res.data);
       }else{
         option = this.scatterPlotData(res);
       }

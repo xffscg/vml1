@@ -13,6 +13,7 @@
 
 <script>
 import { getProject, getDataSource, addProject, goRun } from '@/api/addProject'
+import { getReport, deleteReport, updateReport, saveReport } from '@/api/reportOp'
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { Message } from 'element-ui'
 
@@ -36,6 +37,8 @@ export default {
         if(!alg.length){
           this.getAlgri();
         }
+      }else if(n == 6){
+        this.getReportList();
       }
       this.$store.commit('changeType', n);
     },
@@ -65,6 +68,16 @@ export default {
       .then(res => {
         console.log(res);
         this.$store.commit('getAlg', res.list);
+      })
+      .catch(e => {
+          Message.error(e.errors || '算法接口错误，请重试')
+        })
+    },
+    getReportList(){
+      getReport({params :{userId : this.$store.state.userId}}).then(res => res.data)
+      .then(res => {
+        console.log(res);
+        this.$store.commit('getReport', res);
       })
       .catch(e => {
           Message.error(e.errors || '算法接口错误，请重试')

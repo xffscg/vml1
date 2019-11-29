@@ -3,15 +3,24 @@
     <div class="header">
       <div class="title"><h1>可视化报告</h1></div>
       <div class="save">        
-        <el-button type="primary" plain icon="el-icon-s-operation">保存报告</el-button>
+        <el-button type="primary" plain icon="el-icon-s-operation" @click="goSave">保存报告</el-button>
         <el-button type="primary" plain icon="el-icon-s-operation" @click="reportVisible=true">下载报告</el-button>
       </div>
     </div>
 		<div class="content" id="contentList">
 		</div>
-		
+		<el-dialog
+        title="保存报告"
+        :visible.sync="titleVisible"
+        width="30%">
+        <el-input v-model="reportTitle" placeholder="请输入报告名称"></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="titleVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveReportContent">提交</el-button>
+      </span>
+    </el-dialog>
      <el-dialog
-        title="新建项目"
+        title="新建报告"
         :visible.sync="reportVisible"
         width="30%">
         <el-input v-model="reportTitle" placeholder="请输入报告名称"></el-input>
@@ -51,13 +60,15 @@
     </el-dialog>
 	</div>
 </template>
-
 <script>
 import TableReport from '../report/preProcess'
 import FreReport from '../report/freReport'
+import { getReport, deleteReport, updateReport, saveReport, getReportById } from '@/api/reportOp'
 import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne, getDataResult } from '@/api/addProject'
+import { Message } from 'element-ui'
 import Vue from 'vue'
 import echarts from 'echarts'
+// import {echartOption} from '././api/getOptionAll'
 export default {
   name: 'report',
   components : {
@@ -67,6 +78,7 @@ export default {
   data(){
     return {
       reportTitle : "",
+      titleVisible : false,
       reportVisible : false,
       txtVisible : false,
       txtConfig : {
@@ -79,11 +91,95 @@ export default {
       },
       listNode : [],
       algnChoice : ["center", "left", "right"],
+      reportContent  : {},
+      projectContent :{},
+      projectId : -1
     }
   },
   mounted(){
   },
   methods: {
+    setReport(){
+      this.reportContent = {};
+      console.log(this.reportId);
+      getReportById({params : {reportId : this.reportId}}).then(res=>res.data)
+      .then(res=>{
+        console.log(res);
+        this.reportTitle = res.title;
+        let c = JSON.parse(res.content);
+        console.log(c);
+        this.projectId = c.projectId;
+        queryProject({userId : this.$store.state.userId, projectId : c.projectId}).then(res1=>res1.data)
+        .then(res1=>{
+          console.log(res1);
+          this.setReportData(c,res1);          
+       })
+        .catch(e=>{
+            console.log(e);
+        })
+        
+      })
+    },
+    setReportData(res, res1){
+      let space = document.getElementById("contentList");
+      space.innerHTML = null;
+      this.projectContent = this.deepCopy(res1.config);
+      let nodeArr = [];
+      let contentArr = [];
+      for(let i in res1.config){
+        nodeArr.push({name :res1.config[i].type, id: "i"+i});
+      }
+      for(let i in res.list){        
+        if(res.list[i].slice(4,7) != "txt"){
+          contentArr.push({name : res1.config[res.list[i]].type, id : "ini" + res.list[i], content : ""});
+          this.createReport({id : res.list[i], content : ""})
+        }else{
+          contentArr.push({name : res.detail[res.list[i]].content.title, id : "ini" + res.list[i], content : res.detail[res.list[i]].content.txt});
+          this.createReport({id : res.list[i], content : res.detail[res.list[i]].content});
+        }
+      }
+      this.$emit("setChooseData", {na : nodeArr, ca : contentArr});
+    },
+    goSave(){
+      if(this.reportId != -1){
+        let para = {reportId : this.reportId, title : this.reportTitle, content:{}};
+        let content = {};
+        content["list"] = this.deepCopy(this.listNode);
+        content["detail"] = this.deepCopy(this.reportContent);
+        content["projectId"] = this.projectId;
+        para["content"] = JSON.stringify(content);
+        console.log(para);
+        updateReport(para).then(res=>res.data)
+        .then(res=>{
+            console.log(res);
+            Message.success("报告保存成功")
+
+          })
+          .catch(e=>{
+            console.log(e);
+          })
+        }else{
+          this.titleVisible = true;
+        }
+    },
+    saveReportContent(){
+      let para = {userId : this.$store.state.userId, title : this.reportTitle, content:{}};
+      let content = {};
+      content["list"] = this.deepCopy(this.listNode);
+      content["detail"] = this.deepCopy(this.reportContent);
+      content["projectId"] = this.$store.state.projectId;
+      para["content"] = JSON.stringify(content);
+      console.log(para);
+      saveReport(para).then(res=>res.data)
+      .then(res=>{
+          console.log(res);
+          this.titleVisible = false;
+          Message.success("报告保存成功")
+        })
+      .catch(e=>{
+        console.log(e);
+      })      
+    },
     setTxt(){
       let t = document.getElementById(this.txtConfig.txtId);
       console.log(t)
@@ -94,6 +190,9 @@ export default {
        t.style.textAlign = this.txtConfig.textAlign;
        t.innerHTML = this.txtConfig.content;
       this.txtVisible = false;
+      let title = this.reportContent[this.txtConfig.txtId.slice(6)].content.title;
+      this.reportContent[this.txtConfig.txtId.slice(6)] = {};
+      this.reportContent[this.txtConfig.txtId.slice(6)] = {content :{title : title,txt : this.txtConfig.content, fontSize :t.style.fontSize, color : t.style.color, backgroundColor : t.style.backgroundColor, textAlign : t.style.textAlign }};
     },
   	deepCopy(oldVal){
         let target = oldVal.constructor === Array?[]:{};
@@ -113,6 +212,7 @@ export default {
       let space = document.getElementById("contentList");
       let d = document.getElementById("report" + node.id);
       space.removeChild(d);
+      delete this.reportContent[node.id];
       if(this.listNode.length == 1){
         this.listNode = [];
       }else{
@@ -135,6 +235,10 @@ export default {
       }else{
         let b = document.getElementById("report" + node.before);
         space.insertBefore(d, b);
+      }
+      this.listNode = [];
+      for(let i in node.list){
+        this.listNode.push(node.list[i].id.slice(3));
       }
     },
     getCoeOption(res){
@@ -249,17 +353,18 @@ export default {
       let option = {};
       if(c.slice(9,13) == "exp2"){        
         option = this.getOption(res);
+        // option = echartOption(res, 1);
       }else if(c.slice(9,13) == "exp3"){
-        option = this.getCoeOption(res);
+        // option = this.getCoeOption(res);
+        option = echartOption(res, 2);
       }
 
       chart.setOption(option);
     },
   	createReport(node){
       console.log(node);
-  		let list = this.$store.state.runResult;
-      let config = this.$store.state.configData;
       let id = node.id;
+      this.listNode.push(node.id);
   		let space = document.getElementById("contentList");
 			if(id.slice(4,7) == "dat" || id.slice(4,8) == "exp1" || id.slice(4,7) == "pre" || id.slice(4,7) == "mln"){
 				console.log("data");
@@ -275,9 +380,14 @@ export default {
         d.setAttribute("class", "reportItem")
         d.setAttribute("id", "report" + id);
         d.style.margin = "10px 5px 10px 5px";
-        d.style.fontSize = "15px";
-        d.innerHTML = node.content;
+        d.style.color = node.content.color;
+        d.style.backgroundColor = node.content.backgroundColor;
+        d.style.textAlign = node.content.textAlign;
+        d.style.fontSize = node.content.fontSize;
+        d.innerHTML = node.content.txt;
+
         space.append(d);
+        this.reportContent[id] = {content : {title : node.content.title,txt : node.content.txt, fontSize :node.content.fontSize, color : node.content.color, backgroundColor : node.content.backgroundColor, textAlign : node.content.textAlign }};
         let that = this;
         d.addEventListener("click",function(event){
           let t = document.getElementById(event.target.id);
@@ -291,8 +401,10 @@ export default {
         })
       }
   	},
-    subComponents(id, subName, tableD){
+    subComponents(id, subName, tc){
       // 创建可复用的 Profile 组件构造函数
+      let tableD = tc.tableD;
+      let configD = tc.configD;
       console.log(tableD);
         let space = document.getElementById("contentList");
         let dOutside = document.createElement("div");
@@ -311,10 +423,9 @@ export default {
       let Profile = null;
       if(id.slice(4,8) != "exp3"){
         Profile = Vue.extend(subName);
-      }
-      
+      }      
       // 创建一个 Profile 组件的实例
-      let configD = this.setConfigData(id);
+      // let configD = this.setConfigData(id);
       let profile1 = new ProfileTable({
           data: {
             tableData : configD.configData,
@@ -403,7 +514,12 @@ export default {
       // 挂载到元素上
     },
     setConfigData(id){
-      let config = this.$store.state.configData;
+      let config = null;
+      if(this.reportId == -1){
+        config = this.$store.state.configData;
+      }else{
+        config = this.projectContent;
+      }      
       let configD = {};   
       configD["configData"] = [];
       configD["columnC"] = [];
@@ -539,6 +655,9 @@ export default {
     },
     setTableData(id, subName){
       let tableAll = [];
+      let TC = {}
+      TC["configD"] = this.setConfigData(id);      
+      
       if(id.slice(4,8) == "mln1"){
         // this.subComponents(id, subName, tableD);
       }else{
@@ -579,8 +698,9 @@ export default {
               }
               tableAll.push(tableD);
             }
-          }     
-          this.subComponents(id, subName, tableAll);
+          }
+          TC["tableD"] = tableAll;     
+          this.subComponents(id, subName, TC);
                  
         })
         .catch(e=>{
@@ -589,6 +709,19 @@ export default {
       }
     },
   },
+  computed : {
+    reportId(){
+      return this.$store.state.reportId;
+    }
+  },
+  watch : {
+    reportId(newV){
+      if(newV != -1 && newV != -2){
+        console.log(newV);
+        this.setReport();
+      }
+    }
+  }
 };
 </script>
 

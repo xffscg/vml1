@@ -42,6 +42,13 @@ const config = {
   queryResultUrl :'/model/getRunStatus',
   executeAllUrl :'/model/executeAll',
   executeFromOneUrl :'/model/executeFromOne',
-  getDataResultUrl :'/operate/getOperateResultData'
+  getDataResultUrl :'/operate/getOperateResultData',
+  //report
+  getReportUrl :'/report/getReportByUserId',
+  // getReportUrl :'/report/getAll',
+  updateReportUrl :'/report/updateOne',
+  deleteReportUrl : '/report/deleteOne',
+  saveReportUrl :'/report/save',
+  getReportByIdUrl :'/report/getOne'
 }
 export { config }
