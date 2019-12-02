@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import CloudHome from '@/components/page/CloudHome'
+import loginPage from '@/components/page/loginPage'
 
 import dataSource from '@/components/dataSource'
 import dataAnalysisView from '@/components/dataAnalysisView'
@@ -13,7 +14,11 @@ Vue.use(Router)
 
 export default new Router({
   routes: [{
-    path: '/',
+      path: '/',
+      name : 'loginPage',
+      component: loginPage
+    },{
+    path: '/CloudHome',
     name: 'CloudHome',
     component: CloudHome,
     children: [

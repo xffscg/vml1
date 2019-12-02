@@ -376,9 +376,9 @@ export default {
           profile.$mount(d1);
         }
       }else if(subName == "relation"){
-        let t1 = document.createElement("h3");
-          t1.innerHTML = "相关系数视图"  
-          dOutside.append(t1)    
+        // let t1 = document.createElement("h3");
+        //   t1.innerHTML = "相关系数视图"  
+        //   dOutside.append(t1)    
         let chart = document.createElement("div");
         chart.setAttribute("id", "chart"+id);
         chart.style.height="200px";
@@ -390,7 +390,10 @@ export default {
         chart.setAttribute("id", "chart"+id);
         chart.style.height="200px";
         chart.style.width = "100%";              
-        dOutside.append(chart);           
+        dOutside.append(chart);
+        chart.addEventListener("click", function(e){
+          console.log(e.currentTarget)
+        });           
         let d1 = document.createElement("div");
         d1.style.margin = "10px 5px 10px 5px";                        
         dOutside.append(d1);         

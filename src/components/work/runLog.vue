@@ -128,7 +128,8 @@ export default {
         content.append(p);
       }else if(this.log.modelExecuteStatus == "error"){
         let p = document.createElement("p");
-        p.innerHTML = time + "   项目运行失败。"
+        p.innerHTML = time + "   项目运行失败。";
+        p.style.color = "red";
         content.append(p);
       }
       for(let i in this.log.operatorStatus){ 
@@ -150,6 +151,7 @@ export default {
             this.successList.push(i);
           }else if(s.status == "error"){
             let p = document.createElement("p");
+            p.style.color = "red";
             p.innerHTML = time + "   节点"  + config[i].type + "   运行失败。\n 失败原因 ： " + s.log;
             content.append(p);
           }

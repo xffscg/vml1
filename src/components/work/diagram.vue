@@ -202,6 +202,36 @@ export default {
         $("#" + currentNode).css("border","solid 1px #C0C4CC");
       }
     },
+    createCoverProject(id){
+        queryProject({userId : this.$store.state.userId, projectId : id}).then(res=>res.data)
+        .then(res=>{
+          console.log(res);
+          let r = this.deepCopy(res);
+          this.setDiagram(r.config);
+          for(let i in r.config){
+            this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
+            this.$store.commit("changeConfig", {type : "addConfig", detail:{name : i, config : r.config[i].config}});
+          }//配置数据
+          for(let i in r.startNode){
+            this.$store.commit("changeStart", {type:"add", detail:r.startNode[i]});
+          }//节点名称数据
+          this.$store.commit("changeConfigOrder", {type:"copy", config:r.config_order});
+          // this.$store.commit("changeRelation", r.relationship);
+          for(let i in r.relationship){
+            let item = r.relationship[i];
+            // if(item[0])
+            this.plumb.connect({
+              source : item[0].slice(5),
+              target : item[1].slice(2),
+              uuids : [item[0], item[1]],
+            },this.defaultConfig);
+          }//连接线
+          // this.$store.commit("changeRelation", r.relationship);
+       })
+        .catch(e=>{
+            console.log(e);
+        })
+    },
   	drop(e){
       let nameAll = this.dragContent.firstChild.innerHTML;
   		let space = document.getElementById('diagram');
@@ -253,6 +283,7 @@ export default {
         this.dragContent.style.position = "absolute";
         this.dragContent.style.width = "150px";
         this.dragContent.style.height = "30px";
+         this.dragContent.style.textAlign = "center";
         this.dragContent.style.border = "solid 1px #C0C4CC";
         this.dragContent.style.backgroundColor = "#F2F6FC";
         this.dragContent.style.borderRadius = "2px";         
@@ -298,6 +329,7 @@ export default {
         d.style.height = "30px";
         d.style.border = "solid 1px #C0C4CC";
         d.style.backgroundColor = "#F2F6FC";
+        d.style.textAlign = "center";
         // d.style.display = "flex";
         d.style.borderRadius = "2px";   
         let s = document.createElement("span");

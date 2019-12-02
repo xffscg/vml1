@@ -101,7 +101,10 @@ function getRelationOption(res){
         calculable: true,
         orient: 'horizontal',
         left: 'center',
-        bottom: '15%'
+        bottom: '15%',
+        inRange: {
+            color: ['#238BCA','#49A2D9','#8FC7E8', '#C6DEED', '#E1E9EE', '#EDE5DA', '#F1DAB7', '#EDC890', '#E3A951', '#CA8824']
+        }
       },
       series: [{
         name: '相关系数',

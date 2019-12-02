@@ -1,7 +1,7 @@
 <template>
     <div class="cloud-container">
         <!-- <slot></slot> -->
-        <div v-show="funcType == 1">home page</div>        
+        <div v-show="funcType == 1" class="homePart"><CoverPage @createCoverPro="createCoverPro"></CoverPage></div>        
         <div class="funcPart"  v-show="funcType != 1">
         	<div class="funcGuid">
 	        	<projectList v-show = "funcType == 3" ref="projectList" @save="saveProject"></projectList>
@@ -66,6 +66,7 @@ import Report from '../work/report'
 import ChartDetail from '../detail/chartDetail'
 import TableChartDetail from '../detail/tableChartDetail'
 import ChooseList from '../report/chooseList'
+import CoverPage from '../work/coverPage'
 export default {
 	components: {
 	    projectList,
@@ -79,7 +80,8 @@ export default {
 	    reportList,
 	    ChartDetail,
 	    TableChartDetail,
-	    ChooseList
+	    ChooseList,
+	    CoverPage
 	},
 	data(){
 		return {
@@ -103,6 +105,16 @@ export default {
 		this.clear();
 	},
 	methods:{
+		createCoverPro(id){
+			console.log(id)
+			if(id == -1){
+				this.$store.commit('changeType', 4);
+				this.newProVisible = true;
+			}else{
+				this.$store.commit('changeType', 4);
+				this.$refs.diagram.createCoverProject(id);
+			}
+		},
 		setChooseData(data){
 			this.$refs.ChooseList.setChooseData(data);
 		},
@@ -386,6 +398,10 @@ export default {
     position:relative;
     background-color: #FCFCF2;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+    .homePart {
+    	width : 99%;
+    	height : 700px;
+    }
     .funcPart {
 		width: 100%;
 	    display :flex;

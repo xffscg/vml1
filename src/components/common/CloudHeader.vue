@@ -67,8 +67,8 @@ export default {
     handleCommand (command) {
       if (command === 'loginout') {
         // localStorage.removeItem("ms_username");
-        // this.$router.push("/login");
-        alert('退出登录')
+        this.$router.push("/");
+        Message.warning('退出登录')
       }
       if (command === 'usercenter') {
         alert('用户中心')

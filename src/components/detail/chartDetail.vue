@@ -87,8 +87,9 @@ export default {
 .chart {
 	display: flex;
 	justify-content: center;
-	height: 450px;
-	width: 800px;
+	height: 80%px;
+	width: 80%px;
+  padding-top: 15px;
 }
 .close {
   display: flex;

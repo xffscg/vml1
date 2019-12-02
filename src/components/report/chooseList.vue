@@ -17,7 +17,7 @@
 	    <el-menu background-color="#F9F9F5" text-color="#000" active-text-color router>	    	
         <draggable v-model="contentArr" v-bind="{group:{name:'report', pull:'clone', put:false }}" @start="isDragging=true" @end="update($event)">
             <template v-for="(item,i) in contentArr">
-	        	<div class="dragItem" :id="item.id" @click="delNode(i, item.id)" dra>
+	        	<div class="dragItem" :id="item.id" @click="delNode(i, item.id)">
 	                <span>{{item.name}}</span>
                   <div class="addStyle"><i style="color:#409EFF" class="el-icon-minus"></i></div>
 	            </div>
