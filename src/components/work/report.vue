@@ -63,6 +63,7 @@
 <script>
 import TableReport from '../report/preProcess'
 import FreReport from '../report/freReport'
+import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { getReport, deleteReport, updateReport, saveReport, getReportById } from '@/api/reportOp'
 import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne, getDataResult } from '@/api/addProject'
 import { getOptionsAll } from '@/api/getOptionsAll'
@@ -369,8 +370,8 @@ export default {
           dOutside.append(d1);  
           let profile = new Profile({
             data: {
-              configData : configD.configData,
-              columnC : configD.columnC,
+              tableData : tableD[0].tableData,
+              columnD : tableD[0].columnD,
             }  
           })
           profile.$mount(d1);
@@ -425,37 +426,42 @@ export default {
       configD["configData"] = [];
       configD["columnC"] = [];
       configD["title"] = config[id].type;
-      if(JSON.stringify(config[id].config) != "{}"){
-        let para = config[id].config.parameter;
-        if(para["parameter"]){
-          for (let key in para["parameter"][0]) {
-            let k = this.transferKey(key);
-            configD["configData"].push({ prop: k });
-          }
-          for(let i in para["parameter"]){
+      if(id.slice(4,7) == "dat"){
+          configD["columnC"].push({prop : "文件id"});
+          configD["columnC"].push({prop : "文件路径"});
+          configD["configData"].push({文件id : config[id].config.fileId, 文件路径: config[id].config.fileUrl[0][id]});
+      }else{
+        if(JSON.stringify(config[id].config) != "{}"){
+          let para = config[id].config.parameter;
+          if(para["parameter"]){
+            for (let key in para["parameter"][0]) {
+              let k = this.transferKey(key);
+              configD["configData"].push({ prop: k });
+            }
+            for(let i in para["parameter"]){
+              let obj = {};
+              for(let item in para["parameter"][i]){
+                let k = this.transferKey(item);
+                obj[k] = para["parameter"][i][item];
+              }
+              configD["configData"].push(obj);
+            }
+          }else{
             let obj = {};
-            for(let item in para["parameter"][i]){
-              let k = this.transferKey(item);
-              obj[k] = para["parameter"][i][item];
+            for(let item in para){
+              if(item != "userId" && item != "projectId"){
+                let k = this.transferKey(item);
+                configD["columnC"].push({ prop: k });
+                console.log(item);
+                if(item == "columnNames" || item == "newColumnNames" || item == "features"){
+                  obj[k] = para[item].join(",");
+                }else{
+                  obj[k] = para[item];
+                }
+              }
             }
             configD["configData"].push(obj);
           }
-        }else{
-
-          let obj = {};
-          for(let item in para){
-            if(item != "userId" && item != "projectId"){
-              let k = this.transferKey(item);
-              configD["columnC"].push({ prop: k });
-              console.log(item);
-              if(item == "columnNames" || item == "newColumnNames" || item == "features"){
-                obj[k] = para[item].join(",");
-              }else{
-                obj[k] = para[item];
-              }
-            }
-          }
-          configD["configData"].push(obj);
         }
       }
       return configD;
@@ -561,6 +567,28 @@ export default {
       
       if(id.slice(4,8) == "mln1"){
         // this.subComponents(id, subName, tableD);
+      }else if(id.slice(4,7) == "dat"){
+        // this.subComponents(id, subName, tableD);
+        console.log(TC.configD);
+        let url = TC.configD.configData[0]["文件路径"];
+        console.log(url);
+        let para = { start: 1, end: 5, userId: this.$store.state.userId, fileId : Number(id.slice(7,-13)), fileUrl : url};
+        rawDataPreview(para).then(res => res.data)
+          .then(res => {
+            console.log(res);
+               let tableD = {};
+              tableD["columnD"] = [];
+              tableD["tableData"] = res.data;
+              for (var key in res.data[0]) {
+                tableD["columnD"].push({ prop: key })
+              }
+              tableAll.push(tableD);
+              TC["tableD"] = tableAll;     
+              this.subComponents(id, subName, TC);
+          })
+          .catch(e => {
+            Message.error(e.errors || 'rawDataPreview接口错误，请重试')
+          })
       }else{
         getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : id, start : 0, end : 5})
         .then(res=>res.data).then(res=>{

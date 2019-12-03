@@ -263,7 +263,7 @@ export default {
 	          console.log(this.tableData.column);
 	        })
 	        .catch(e => {
-	          // Message.error(e.errors || 'rawDataPreview接口错误，请重试')
+	          Message.error(e.errors || 'rawDataPreview接口错误，请重试')
 	        })
 	    },
 		deepCopy(oldVal){
