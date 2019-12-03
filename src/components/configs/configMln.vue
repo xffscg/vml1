@@ -50,6 +50,41 @@
 				<el-input v-model="svm.convergenceTol"></el-input>
 			</div>
 		</div>
+		<div class="mlnFunc" v-show="mlnType==2">
+			<h5>GBDT</h5>
+			<div class="selectHigh">
+				<h5>字段名</h5>			
+			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
+		          </el-checkbox-group>
+			</div>
+			<div class="select">
+				<el-select v-model="gbdt.label">
+					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
+				</el-select>
+			</div>
+			<div class="select">
+				<label>迭代次数</label>
+				<el-input v-model="gbdt.iterations"></el-input>
+			</div>	
+			<div class="select">
+				<label>步长</label>
+				<el-input v-model="gbdt.step"></el-input>
+			</div>
+			<div class="select">
+				<label>最大深度</label>
+				<el-input v-model="gbdt.maxDepth"></el-input>
+			</div>		
+			<div class="select">
+				<label>叶子节点最少样本</label>
+				<el-input v-model="gbdt.minInstancesPerNode"></el-input>
+			</div>	
+			<div class="select">
+				<label>随机数种子</label>
+				<el-input v-model="gbdt.seed"></el-input>
+			</div>
+		</div>
 		<div class="mlnFunc" v-show="mlnType==9">
 			<h5>评估</h5>
 			<div class="selectHigh">
@@ -115,6 +150,15 @@ export default {
 				regParam : 0,
 				regType : 0,
 			},//支持向量机
+			gbdt : {
+				features : [],
+				label : "",
+				step : 1.0,
+				iterations : 0,
+				maxDepth : 0,//收敛系数
+				minInstancesPerNode : 1,
+				seed : 0,
+			},
 			predict : {
 				features : [],
 				label : ""
@@ -185,6 +229,21 @@ export default {
 	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
 	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+	  		}if(this.mlnType == 2){ 
+		    	this.gbdt.features = [];
+	  			for(let i in this.columnsValue){
+	  				this.gbdt.features.push(this.columnsValue[i]);
+	  			}
+			    for(let i in this.gbdt){
+			    	if(typeof this.gbdt[i] === "object"){
+	  					para.parameter[i] = this.deepCopy(this.gbdt[i]);
+	  				}else{
+	  					para.parameter[i] = this.gbdt[i];
+	  				}
+			    }	
+	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
 	  		}else if(this.mlnType == 0){
 	  			this.predict.features = [];
 	  			for(let i in this.columnsValue){
@@ -221,6 +280,15 @@ export default {
 				regParam : 0,
 				regType : 0,
 			};
+			this.gbdt = {
+				features : [],
+				label : "",
+				step : 1.0,
+				iterations : 0,
+				maxDepth : 0,//收敛系数
+				minInstancesPerNode : 1,
+				seed : 0,
+			};
 			this.predict = {
 				features : [],
 				label : ""
@@ -240,6 +308,20 @@ export default {
 		          this.svm.convergenceTol = para.config.parameter.convergenceTol;
 		          this.svm.regParam = para.config.parameter.regParam;
 		          this.svm.regType = para.config.parameter.regType;
+	          }else if(n == 2){
+	          	for(let i in para.config.parameter.features){
+		              if(this.column.indexOf(para.config.parameter.features[i]) != -1){
+		                this.columnsValue.push(para.config.parameter.features[i]);
+		              }
+		          } 
+		          if(this.column.indexOf(para.config.parameter.label) != -1){
+		          	this.gbdt.label = para.config.parameter.label;
+		          }
+		          this.gbdt.step = para.config.parameter.step;
+		          this.gbdt.iterations = para.config.parameter.iterations;
+		          this.gbdt.minInstancesPerNode = para.config.parameter.minInstancesPerNode;
+		          this.gbdt.maxDepth = para.config.parameter.maxDepth;
+		          this.gbdt.seed = para.config.parameter.seed;
 	          }else if(n == 0){
 	              for(let i in para.config.parameter.features){
 		              if(this.column.indexOf(para.config.parameter.features[i]) != -1){

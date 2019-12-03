@@ -9,7 +9,6 @@
 	            </template>
 	            <template v-for="subItem in item.list">
 	            	<div class="dragItem" :id="changeId(subItem.id)" :key="subItem.id" draggable="true" @dragstart="drag($event)">
-
 		                <span>{{subItem.name}}</span>
 		            </div>
 	            </template>
