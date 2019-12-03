@@ -28,6 +28,7 @@ const state = {
 	proList :[],//项目list
 	dataList : [],//数据list
 	algList : {},//算法list
+	modelList : [],
 	reportList : [],//报告列表
 	dragContent : {},//拖过来的内容
 	menuType : {},//右键点击的内容

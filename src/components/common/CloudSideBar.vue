@@ -5,13 +5,14 @@
       <div class="funcItem"  @click="changeType(2)"><span><i class="el-icon-document"></i><br>数据源</span></div>
       <div class="funcItem"  @click="changeType(3)"><span><i class="el-icon-folder"></i><br>项目</span></div>
       <div class="funcItem" @click="changeType(4)"><span><i class="el-icon-data-analysis"></i><br>算法</span></div>
-      <div class="funcItem"><span><i class="el-icon-magic-stick"></i><br>模型</span></div>
+      <div class="funcItem" @click="changeType(7)"><span><i class="el-icon-magic-stick"></i><br>模型</span></div>
       <div class="funcItem" @click="changeType(6)"><span><i class="el-icon-s-order"></i><br>报告</span></div>
     </div>    
   </div>
 </template>
 
 <script>
+import { getModel, saveModel, deleteModel } from '@/api/model'
 import { getProject, getDataSource, addProject, goRun } from '@/api/addProject'
 import { getReport, deleteReport, updateReport, saveReport } from '@/api/reportOp'
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
@@ -39,6 +40,8 @@ export default {
         }
       }else if(n == 6){
         this.getReportList();
+      }else if(n == 7){
+        this.getModelList();
       }
       this.$store.commit('changeType', n);
     },
@@ -73,6 +76,16 @@ export default {
           Message.error(e.errors || '算法接口错误，请重试')
         })
     },
+    getModelList(){
+      getModel({params : {userId : this.$store.state.userId}}).then(res => res.data)
+      .then(res => {
+        console.log(res);
+        this.$store.commit('getModel', res);
+      })
+      .catch(e => {
+          Message.error(e.errors || '算法接口错误，请重试')
+        })
+    },
     getReportList(){
       getReport({params :{userId : this.$store.state.userId}}).then(res => res.data)
       .then(res => {
@@ -97,6 +110,10 @@ export default {
   },
   mounted () {
     this.getAlgri();
+    this.getDataSource();
+    this.getModelList();
+    this.getReportList();
+    this.getProject();
   }
 };
 </script>

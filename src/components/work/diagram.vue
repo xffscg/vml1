@@ -315,6 +315,12 @@ export default {
           this.$store.commit("changeConfig", {type : "addConfig", detail:{name : this.dragContent.id, config : {fileId : info.fileId, fileUrl : fileUrl}}});
       }else if(type == "alg"){
           this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : name, nameAll : Number(typeAlg)}});
+      }else if(type == "mod"){
+        let m = this.$store.state.modelList;
+        let index = Number(this.dragContent.id.slice(7,-13));
+        this.$store.commit("changeStart", {type:"add", detail:this.dragContent.id});
+        this.$store.commit("changeConfig", {type : "addNode", detail:{name : this.dragContent.id, type : name, nameAll : 8000}});
+        this.$store.commit("changeConfig", {type : "addConfig", detail:{name : this.dragContent.id, config : {parameter : {userId: this.$store.state.userId, projectId : this.$store.state.projectId, MLModelId : m[index].MLModelId, modelTypeId : m[index].operatorTypeId}, fileUrl : []}}});
       }
     },
     setDiagram(config){
@@ -441,7 +447,7 @@ export default {
       this.$store.commit("changeResult", {type : "del",name: ele});
       // this.$store.commit("changeLoc", {type : "del", config:{ name: ele}});
       this.plumb.remove(ele);
-      if(ele.slice(4,7) == "dat"){
+      if(ele.slice(4,7) == "dat" || ele.slice(4,7) == "mod"){
         this.$store.commit("changeStart", {type:"del", detail:ele});
       }
       let c = this.plumb.getAllConnections();
@@ -517,6 +523,10 @@ export default {
           break;
         case "res":
           this.showDetail(newV.slice(3,4));
+          break;
+        case "mod":
+          console.log("mod")
+          this.showDetail(9);
           break;
         default:
           break;

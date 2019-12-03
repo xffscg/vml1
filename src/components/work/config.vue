@@ -59,7 +59,7 @@ export default {
       this.isIndeterminate = true;
       let type = newV.slice(4,7);
       let run = this.$store.state.runList;
-      if(run[newV] && type!= "dat"){
+      if(run[newV] && type!= "dat" && type!= "mod"){
         this.getColumns(newV);
       }
       this.$nextTick(()=>{
@@ -81,6 +81,9 @@ export default {
           this.configType = 3;
         }else if(type == "dat"){
           this.$refs.ConfigData.getDetail(newV);
+          this.configType = 4;
+        }else if(type == "mod"){
+          this.$refs.ConfigData.getModelDetail(newV);
           this.configType = 4;
         }else if(type == "mln" || type == "eva"){
           this.$refs.ConfigMln.setConfig(newV);
@@ -150,17 +153,20 @@ export default {
         this.dataColumnsNumber = [];
         for(let i in pre){
           console.log(pre[i]);
-          for(let j in order[pre[i]].column){
-            if(this.dataColumns.indexOf(order[pre[i]].column[j]) == -1){
-              this.dataColumns.push(order[pre[i]].column[j]);
+          if(pre[i].slice(4,7) != "mod"){
+            for(let j in order[pre[i]].column){
+              if(this.dataColumns.indexOf(order[pre[i]].column[j]) == -1){
+                this.dataColumns.push(order[pre[i]].column[j]);
+              }
+              
             }
-            
-          }
-          for(let j in order[pre[i]].columnNumber){
-            if(this.dataColumnsNumber.indexOf(order[pre[i]].columnNumber[j]) == -1){
-              this.dataColumnsNumber.push(order[pre[i]].columnNumber[j]);
+            for(let j in order[pre[i]].columnNumber){
+              if(this.dataColumnsNumber.indexOf(order[pre[i]].columnNumber[j]) == -1){
+                this.dataColumnsNumber.push(order[pre[i]].columnNumber[j]);
+              }
             }
           }
+          
         }
       }
       if((id.slice(7,8) == 1 || id.slice(7,8) == 2) && id.slice(4,7) == "exp"){

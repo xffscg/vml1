@@ -8,6 +8,7 @@
 	        	<algList v-show = "funcType == 4"></algList>
 	        	<dataList v-show = "funcType == 2"></dataList>
 	        	<reportList v-show = "funcType == 6" @delR="yesDialog"></reportList>
+	        	<modelList v-show = "funcType == 7"></modelList>
 	        	<ChooseList v-show = "funcType == 5" ref="ChooseList" @addContent="addContent" @delContent="delContent"  @reflow="reflowContent"></ChooseList>
 	        </div>
 	        <div class="work" v-show = "funcType != 5">
@@ -17,7 +18,6 @@
 	        				<el-button type="success" plain icon="el-icon-document-checked" @click="saveProject">保存项目</el-button>
 	        				<el-button type="primary" plain icon="el-icon-video-play" @click="goRun">运行</el-button>
 	        				<el-button type="danger" plain icon="el-icon-video-pause" @click="stopRun">停止运行</el-button>
-	        				<el-button type="success" plain icon="el-icon-s-operation" >保存模型</el-button>
 	        				<el-button type="warning" plain icon="el-icon-delete" @click="clear">清空画布</el-button>
 	        				<el-button type="primary" plain icon="el-icon-document" @click="getCreateReport">生成报告</el-button>
 	        			</div>
@@ -43,12 +43,23 @@
 		    <el-button @click="newProVisible = false">取 消</el-button>
 		    <el-button type="primary" @click="createProject">提交</el-button>
 		  </span>
-		</el-dialog>   
+		</el-dialog>  
+		<el-dialog
+  			title="保存模型"
+  			:visible.sync="modelVisible"
+  			width="30%">
+  			<el-input v-model="modelName" placeholder="请输入模型名称"></el-input>
+		  <span slot="footer" class="dialog-footer">
+		    <el-button @click="modelVisible = false">取 消</el-button>
+		    <el-button type="primary" @click="saveModel">提交</el-button>
+		  </span>
+		</el-dialog> 
     </div>
 </template>
 
 <script>
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
+import { getModel, saveModel, deleteModel } from '@/api/model'
 import { fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
 import { filter, fillNullValue, columnMap, columnSplit, columnsMerge, sort, replace } from '@/api/dataProcess'
 import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne, getDataResult } from '@/api/addProject'
@@ -58,6 +69,7 @@ import projectList from '../function/projectList'
 import algList from '../function/algList'
 import dataList from '../function/dataList'
 import reportList from '../function/reportList'
+import modelList from '../function/modelList'
 import diagram from '../work/diagram'
 import Config from '../work/config'
 import RunLog from '../work/runLog'
@@ -72,6 +84,7 @@ export default {
 	    projectList,
 	    algList,
 	    dataList,
+	    modelList,
 	    diagram,
 	    Config,
 	    RunLog,
@@ -98,15 +111,28 @@ export default {
 			times : 0,
 			interval : 1000,
 			newProVisible : false,
+			modelVisible : false,
 			projectName : "",
+			modelName : ""
 		}
 	},
 	mounted(){
 		this.clear();
 	},
 	methods:{
+		saveModel(){
+			let id = this.$store.state.menuType.type;
+			let para = {userId : this.$store.state.userId, name : this.modelName, operatorId : id};
+			this.modelVisible = false;
+			saveModel(para).then(res=>res.data)
+	          .then(res=>{
+	          	console.log(res);
+	          })
+		      .catch(e => {
+		          Message.error(e.errors || '保存模型错误')
+		        })
+		},
 		createCoverPro(id){
-			console.log(id)
 			if(id == -1){
 				this.$store.commit('changeType', 4);
 				this.newProVisible = true;
@@ -385,6 +411,9 @@ export default {
 				.catch(e=>{
 					Message.error("请求结果错误")
 				})
+			}else if(newV == 9){
+				console.log(newV);
+				this.modelVisible = true;
 			}
 		},
 	},

@@ -49,6 +49,10 @@ const config = {
   updateReportUrl :'/report/updateOne',
   deleteReportUrl : '/report/deleteOne',
   saveReportUrl :'/report/save',
-  getReportByIdUrl :'/report/getOne'
+  getReportByIdUrl :'/report/getOne',
+  // model Api
+  getModelUrl : '/operate/getOperateModel',
+  saveModelUrl : '/operate/saveOperateModel',
+  deleteModelUrl : '/operate/deleteOperateModel'
 }
 export { config }

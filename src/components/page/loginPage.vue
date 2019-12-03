@@ -11,11 +11,11 @@
           <el-form-item label="用户名" label-width="150px">
             <el-input v-model="registerInfo.userName" placeholder="请输入20位字符以内的用户名" required></el-input>
           </el-form-item>
-          <el-form-item label="密码" label-width="150px">
-            <el-input v-model="registerInfo.password" placeholder="请输入20位字符以内的密码" required></el-input>
+          <el-form-item label="密码" label-width="150px" >
+            <el-input v-model="registerInfo.password" placeholder="请输入20位字符以内的密码" required show-password></el-input>
           </el-form-item>
           <el-form-item label="确认密码" label-width="150px" >
-            <el-input v-model="registerInfo.passwordAgain" placeholder="请重复输入密码" required></el-input>
+            <el-input v-model="registerInfo.passwordAgain" placeholder="请重复输入密码" required show-password></el-input>
           </el-form-item>          
         </el-form>
         <p style="color: red" id="registerError"></p>
@@ -30,7 +30,7 @@
             <el-input v-model="loginInfo.userName" placeholder="请输入用户名" required></el-input>
           </el-form-item>
           <el-form-item label="密码" label-width="150px">
-            <el-input v-model="loginInfo.password" placeholder="请输入密码" required></el-input>
+            <el-input v-model="loginInfo.password" placeholder="请输入密码" required show-password></el-input>
           </el-form-item>      
         </el-form>
         <p style="color: red" id="loginError"></p>

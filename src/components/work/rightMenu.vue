@@ -6,6 +6,7 @@
 
 <script>
 import $ from 'jquery'
+import { getModel, saveModel, deleteModel } from '@/api/model'
 export default {
   name: 'rightMenu',
   data(){
@@ -28,6 +29,9 @@ export default {
       },{
         id : 5,
         name : "查看数据2"
+      },{
+        id : 6,
+        name : "保存模型"
       }],
   		menuArr : {
   			alg:[0,1,3],
@@ -36,9 +40,10 @@ export default {
         exp:[0,1,3],
         fea:[0,1,3],
         ana:[0,1,3],
-        mln:[0,1,3],
+        mln:[0,1,3,6],
         pre9:[0,1,4,5],
-        eva:[0,1,3]
+        eva:[0,1,3],
+        mod:[0]
   		},
   		mType : "",
   		mId : ""
@@ -63,6 +68,7 @@ export default {
   },
   methods:{
   	menuFunc(e){
+        console.log(e.target.id);
   		if(e.target.id == 0){
   			this.$store.commit('changeOp', "del"+this.mId);
   		}else if(e.target.id == 2){
@@ -99,6 +105,12 @@ export default {
           this.$store.commit('changeShow', 1);
         }else{          
           this.$store.commit('changeOp', "dat2"+this.mId);
+        }//保证可以多次查看
+      }else if(e.target.id == 6){
+        if(this.$store.state.menuOp == "mode"+this.mId){
+          this.$store.commit('changeShow', 9);
+        }else{          
+          this.$store.commit('changeOp', "mode"+this.mId);
         }//保证可以多次查看
       }
   	},

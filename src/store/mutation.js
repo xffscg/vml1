@@ -23,6 +23,9 @@ export const getData = (state, dataN) => {
 export const getAlg = (state, alg) => {
 	state.algList = deepCopy(alg);
 }
+export const getModel = (state, mol) => {
+  state.modelList = deepCopy(mol);
+}
 export const getReport = (state, content) => {
   state.reportList = deepCopy(content);
 }
