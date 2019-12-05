@@ -68,6 +68,7 @@ export default {
           this.dataInfo["id"] = data.config.fileId;
           this.dataInfo["column"] = col.column.join(",");
           this.dataInfo["columnNumber"] = col.columnNumber.join(",");
+          this.model = false;
           this.data = true;
           console.log(this.dataInfo);
 		},
@@ -78,6 +79,7 @@ export default {
 				oriName : ""
 			};
 		  let data = this.$store.state.configData[newV];
+		  console.log(data);
 		  let alg = this.$store.state.algList;
 		  console.log(alg);
 		  let oriName = "";
@@ -93,6 +95,7 @@ export default {
 		  this.modelInfo["id"] = data.config.parameter.MLModelId;		
 		  this.modelInfo["name"] = data.type;	
 		  this.modelInfo["oriName"] = oriName;
+		  this.data = false;
 		  this.model = true;
 		},
 	},

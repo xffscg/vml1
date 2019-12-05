@@ -3,7 +3,6 @@
 	    <el-menu background-color="#F9F9F5" text-color="#000" active-text-color router>	    	
             <template v-for="(item,i) in modelArr">
 	        	<div class="dragItem" :id="'mod'+i" draggable="true" @dragstart="drag($event)">
-	        		<i class="el-icon-magic-stick"></i>
 	                <span>{{item.name}}</span>
 	            </div>
 	        </template>

@@ -3,7 +3,7 @@ const config = {
   addData : '/dataSource/upload',
   addProjectUrl: '/project/create',
   getProjectUrl: '/project/getAll',
-  getDataSourceUrl: '/dataSource/getFiles?userId=1',
+  getDataSourceUrl: '/dataSource/getFiles',
   getAlgriListUrl: '/operateType/getAll',
   rawDataPreviewUrl: '/dataSource/dataPreview',
   currentDataPreviewUrl: '/currentDataPreview',

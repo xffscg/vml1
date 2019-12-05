@@ -2,7 +2,7 @@
 	<div class="tcDetail">
     <div class="ttable">
       <h3>频率表格统计</h3>
-        <el-table border :data="tableData">
+        <el-table stripe border :data="tableData">
           <el-table-column prop="columnName" v-bind:label="freName+'取值'">
           </el-table-column>
           <el-table-column prop="rate" label="频率">

@@ -1,7 +1,7 @@
 <template>
 	<div class="detail">
 		<div class="content">
-			<el-table :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)" style="width: 100%" height="600">
+			<el-table stripe :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)" style="width: 100%" height="600">
         <el-table-column v-for="col in column" :fixed="col.fixed" :prop="col.prop" :label="col.prop" :key="col.prop">
         </el-table-column>
       </el-table>			

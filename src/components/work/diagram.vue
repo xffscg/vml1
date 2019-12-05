@@ -234,6 +234,7 @@ export default {
     },
   	drop(e){
       let nameAll = this.dragContent.firstChild.innerHTML;
+      console.log(nameAll);
   		let space = document.getElementById('diagram');
   		e.preventDefault();
       let isType = this.dragContent.id.slice(0,3);

@@ -1,6 +1,6 @@
 <template>
 	<div class="table">		
-    <el-table :data="tableData" style="width: 100%" min-height="200">
+    <el-table stripe :data="tableData" style="width: 100%" min-height="200">
           <el-table-column v-for="col in columnD" :prop="col.prop" :label="col.prop" :key="col.prop">
           </el-table-column>
     </el-table> 

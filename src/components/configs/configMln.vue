@@ -85,6 +85,82 @@
 				<el-input v-model="gbdt.seed"></el-input>
 			</div>
 		</div>
+		<div class="mlnFunc" v-show="mlnType==3">
+			<h5>逻辑回归二分类</h5>
+			<div class="selectHigh">
+				<h5>字段名</h5>			
+			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
+		          </el-checkbox-group>
+			</div>
+			<div class="select">
+				<label>标签字段</label>
+				<el-select v-model="logic.label">
+					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
+				</el-select>
+			</div>
+			<div class="select">
+				<label>迭代次数</label>
+				<el-input v-model="logic.iterations"></el-input>
+			</div>	
+			<div class="select">
+				<label>回归系数</label>
+				<el-input v-model="logic.regParam"></el-input>
+			</div>
+			<div class="select">
+				<label>弹性网络系数</label>
+				<el-input v-model="logic.elasticNetParam"></el-input>
+			</div>
+			<div class="select">
+				<label>收敛容限</label>
+				<el-input v-model="logic.tol"></el-input>
+			</div>		
+			<div class="select">
+				<label>截距训练</label>
+				<el-input v-model="logic.fitIntercept"></el-input>
+			</div>
+			<div class="select">
+				<label>阈值</label>
+				<el-input v-model="logic.threshold"></el-input>
+			</div>	
+		</div>
+		<div class="mlnFunc" v-show="mlnType==4">
+			<h5>逻辑回归二分类</h5>
+			<div class="selectHigh">
+				<h5>字段名</h5>			
+			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
+		          </el-checkbox-group>
+			</div>
+			<div class="select">
+				<label>标签字段</label>
+				<el-select v-model="logicMul.label">
+					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
+				</el-select>
+			</div>
+			<div class="select">
+				<label>迭代次数</label>
+				<el-input v-model="logicMul.iterations"></el-input>
+			</div>	
+			<div class="select">
+				<label>回归系数</label>
+				<el-input v-model="logicMul.regParam"></el-input>
+			</div>
+			<div class="select">
+				<label>弹性网络系数</label>
+				<el-input v-model="logicMul.elasticNetParam"></el-input>
+			</div>
+			<div class="select">
+				<label>收敛容限</label>
+				<el-input v-model="logicMul.tol"></el-input>
+			</div>		
+			<div class="select">
+				<label>截距训练</label>
+				<el-input v-model="logicMul.fitIntercept"></el-input>
+			</div>
+		</div>
 		<div class="mlnFunc" v-show="mlnType==9">
 			<h5>评估</h5>
 			<div class="selectHigh">
@@ -150,6 +226,25 @@ export default {
 				regParam : 0,
 				regType : 0,
 			},//支持向量机
+			logic : {
+				features : [],
+				label : "",
+				threshold : 0,
+				iterations : 0,
+				tol : 0,//收敛系数
+				regParam : 0,
+				elasticNetParam : 0,
+				fitIntercept :"True"
+			},
+			logicMul : {
+				features : [],
+				label : "",
+				iterations : 0,
+				tol : 0,//收敛系数
+				regParam : 0,
+				elasticNetParam : 0,
+				fitIntercept :"True"
+			},
 			gbdt : {
 				features : [],
 				label : "",
@@ -229,7 +324,37 @@ export default {
 	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
 	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
-	  		}if(this.mlnType == 2){ 
+	  		}else if(this.mlnType == 3){ 
+		    	this.logic.features = [];
+	  			for(let i in this.columnsValue){
+	  				this.logic.features.push(this.columnsValue[i]);
+	  			}
+			    for(let i in this.logic){
+			    	if(typeof this.logic[i] === "object"){
+	  					para.parameter[i] = this.deepCopy(this.logic[i]);
+	  				}else{
+	  					para.parameter[i] = this.logic[i];
+	  				}
+			    }	
+	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+	  		}else if(this.mlnType == 4){ 
+		    	this.logicMul.features = [];
+	  			for(let i in this.columnsValue){
+	  				this.logicMul.features.push(this.columnsValue[i]);
+	  			}
+			    for(let i in this.logicMul){
+			    	if(typeof this.logicMul[i] === "object"){
+	  					para.parameter[i] = this.deepCopy(this.logicMul[i]);
+	  				}else{
+	  					para.parameter[i] = this.logicMul[i];
+	  				}
+			    }	
+	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+	  		}else if(this.mlnType == 2){ 
 		    	this.gbdt.features = [];
 	  			for(let i in this.columnsValue){
 	  				this.gbdt.features.push(this.columnsValue[i]);
@@ -238,7 +363,13 @@ export default {
 			    	if(typeof this.gbdt[i] === "object"){
 	  					para.parameter[i] = this.deepCopy(this.gbdt[i]);
 	  				}else{
-	  					para.parameter[i] = this.gbdt[i];
+	  					if(i == "step"){
+	  						para.parameter[i] = parseFloat(this.gbdt[i]);
+	  					}else if(i == "label"){
+	  						para.parameter[i] = this.gbdt[i];
+	  					}else{
+	  						para.parameter[i] = Number(this.gbdt[i]);
+	  					}
 	  				}
 			    }	
 	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
@@ -289,6 +420,25 @@ export default {
 				minInstancesPerNode : 1,
 				seed : 0,
 			};
+			this.logic = {
+				features : [],
+				label : "",
+				threshold : 0,
+				iterations : 0,
+				tol : 0,//收敛系数
+				regParam : 0,
+				elasticNetParam : 0,
+				fitIntercept :"True"
+			};
+			this.logicMul = {
+				features : [],
+				label : "",
+				iterations : 0,
+				tol : 0,//收敛系数
+				regParam : 0,
+				elasticNetParam : 0,
+				fitIntercept :"True"
+			};
 			this.predict = {
 				features : [],
 				label : ""
@@ -322,6 +472,36 @@ export default {
 		          this.gbdt.minInstancesPerNode = para.config.parameter.minInstancesPerNode;
 		          this.gbdt.maxDepth = para.config.parameter.maxDepth;
 		          this.gbdt.seed = para.config.parameter.seed;
+	          }else if(n == 3){
+	          	for(let i in para.config.parameter.features){
+		              if(this.column.indexOf(para.config.parameter.features[i]) != -1){
+		                this.columnsValue.push(para.config.parameter.features[i]);
+		              }
+		          } 
+		          if(this.column.indexOf(para.config.parameter.label) != -1){
+		          	this.logic.label = para.config.parameter.label;
+		          }
+		          this.logic.regParam = para.config.parameter.regParam;
+		          this.logic.iterations = para.config.parameter.iterations;
+		          this.logic.elasticNetParam = para.config.parameter.elasticNetParam;
+		          this.logic.tol = para.config.parameter.tol;
+		          this.logic.fitIntercept = para.config.parameter.fitIntercept;
+		          this.logic.threshold = para.config.parameter.threshold;
+	          }else if(n == 4){
+	          	for(let i in para.config.parameter.features){
+		              if(this.column.indexOf(para.config.parameter.features[i]) != -1){
+		                this.columnsValue.push(para.config.parameter.features[i]);
+		              }
+		          } 
+		          if(this.column.indexOf(para.config.parameter.label) != -1){
+		          	this.logicMul.label = para.config.parameter.label;
+		          }
+		          this.logicMul.regParam = para.config.parameter.regParam;
+		          this.logicMul.iterations = para.config.parameter.iterations;
+		          this.logicMul.elasticNetParam = para.config.parameter.elasticNetParam;
+		          this.logicMul.tol = para.config.parameter.tol;
+		          this.logicMul.fitIntercept = para.config.parameter.fitIntercept;
+		          this.logicMul.threshold = para.config.parameter.threshold;
 	          }else if(n == 0){
 	              for(let i in para.config.parameter.features){
 		              if(this.column.indexOf(para.config.parameter.features[i]) != -1){

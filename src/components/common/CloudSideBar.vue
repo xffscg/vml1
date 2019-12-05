@@ -13,7 +13,7 @@
 
 <script>
 import { getModel, saveModel, deleteModel } from '@/api/model'
-import { getProject, getDataSource, addProject, goRun } from '@/api/addProject'
+import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne, getDataResult } from '@/api/addProject'
 import { getReport, deleteReport, updateReport, saveReport } from '@/api/reportOp'
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { Message } from 'element-ui'
@@ -98,7 +98,7 @@ export default {
     },
     getDataSource () {
       this.dataSourceList = []
-      getDataSource().then(res => res.data)
+      getDataSource({parameter : {userId : this.$store.state.userId}}).then(res => res.data)
         .then(res => {
           console.log(res);
           this.$store.commit('getData', res);
@@ -110,10 +110,10 @@ export default {
   },
   mounted () {
     this.getAlgri();
-    this.getDataSource();
-    this.getModelList();
-    this.getReportList();
-    this.getProject();
+    // this.getDataSource();
+    // this.getModelList();
+    // this.getReportList();
+    // this.getProject();
   }
 };
 </script>

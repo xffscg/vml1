@@ -1,7 +1,7 @@
 <template>
 	<div class="freReport">
     <div class="ttable">
-        <el-table border :data="tableData">
+        <el-table stripe border :data="tableData">
           <el-table-column prop="columnName" v-bind:label="freName+'取值'">
           </el-table-column>
           <el-table-column prop="rate" label="频率">
