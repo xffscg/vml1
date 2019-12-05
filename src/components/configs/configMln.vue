@@ -126,7 +126,7 @@
 			</div>	
 		</div>
 		<div class="mlnFunc" v-show="mlnType==4">
-			<h5>逻辑回归二分类</h5>
+			<h5>逻辑回归多分类</h5>
 			<div class="selectHigh">
 				<h5>字段名</h5>			
 			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
@@ -145,7 +145,7 @@
 				<el-input v-model="logicMul.iterations"></el-input>
 			</div>	
 			<div class="select">
-				<label>回归系数</label>
+				<label>正则系数</label>
 				<el-input v-model="logicMul.regParam"></el-input>
 			</div>
 			<div class="select">
@@ -159,6 +159,52 @@
 			<div class="select">
 				<label>截距训练</label>
 				<el-input v-model="logicMul.fitIntercept"></el-input>
+			</div>
+		</div>
+		<div class="mlnFunc" v-show="mlnType==5">
+			<h5>多层感知机多分类</h5>
+			<div class="selectHigh">
+				<h5>字段名</h5>			
+			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
+		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
+		          </el-checkbox-group>
+			</div>
+			<div class="select">
+				<label>标签字段</label>
+				<el-select v-model="mpc.label">
+					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
+				</el-select>
+			</div>
+			<div class="select">
+				<label>迭代次数</label>
+				<el-input v-model="mpc.iterations"></el-input>
+			</div>	
+			<div class="select">
+				<label>随机数种子</label>
+				<el-input v-model="mpc.seed"></el-input>
+			</div>
+			<div class="select">
+				<label>步长</label>
+				<el-input v-model="mpc.stepSize"></el-input>
+			</div>
+			<div class="select">
+				<label>每层节点数</label>
+				<el-input v-model="mpcLayers"></el-input>
+			</div>
+			<div class="select">
+				<label>收敛容限</label>
+				<el-input v-model="mpc.tol"></el-input>
+			</div>	
+			<div class="select">
+				<label>块大小</label>
+				<el-input v-model="mpc.blockSize"></el-input>
+			</div>	
+			<div class="select">
+				<label>截距训练</label>
+				<el-select v-model="mpc.solver">
+					<el-option v-for="(value, i) in mpcOption" :label="value" :key="i" :value="value"></el-option>
+				</el-select>
 			</div>
 		</div>
 		<div class="mlnFunc" v-show="mlnType==9">
@@ -245,6 +291,19 @@ export default {
 				elasticNetParam : 0,
 				fitIntercept :"True"
 			},
+			mpc : {
+				features : [],
+				label : "",
+				iterations : 0,
+				tol : 0,//收敛系数
+				seed : 0,
+				stepSize : 0,
+				solver :"",
+				layers : [],
+				blockSize : 128,
+			},
+			mpcOption : ["l-bfgs","gd"],
+			mpcLayers : "",
 			gbdt : {
 				features : [],
 				label : "",
@@ -349,6 +408,26 @@ export default {
 	  					para.parameter[i] = this.deepCopy(this.logicMul[i]);
 	  				}else{
 	  					para.parameter[i] = this.logicMul[i];
+	  				}
+			    }	
+	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+	  		}else if(this.mlnType == 5){ 
+		    	this.mpc.features = [];
+	  			for(let i in this.columnsValue){
+	  				this.mpc.features.push(this.columnsValue[i]);
+	  			}
+	  			let f = this.mpcLayers.split(",");
+	  			for(let i in f){
+	  				this.mpc.layers.push(f[i]);
+	  			}
+	  			console.log(this.mpc.layers);
+			    for(let i in this.mpc){
+			    	if(typeof this.mpc[i] === "object"){
+	  					para.parameter[i] = this.deepCopy(this.mpc[i]);
+	  				}else{
+	  					para.parameter[i] = this.mpc[i];
 	  				}
 			    }	
 	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
@@ -502,6 +581,23 @@ export default {
 		          this.logicMul.tol = para.config.parameter.tol;
 		          this.logicMul.fitIntercept = para.config.parameter.fitIntercept;
 		          this.logicMul.threshold = para.config.parameter.threshold;
+	          }else if(n == 5){
+	          	for(let i in para.config.parameter.features){
+		              if(this.column.indexOf(para.config.parameter.features[i]) != -1){
+		                this.columnsValue.push(para.config.parameter.features[i]);
+		              }
+		          } 
+
+		          if(this.column.indexOf(para.config.parameter.label) != -1){
+		          	this.mpc.label = para.config.parameter.label;
+		          }
+		          this.mpcLayers = para.config.parameter.layers.join(",")
+		          this.mpc.seed = para.config.parameter.seed;
+		          this.mpc.iterations = para.config.parameter.iterations;
+		          this.mpc.stepSize = para.config.parameter.stepSize;
+		          this.mpc.tol = para.config.parameter.tol;
+		          this.mpc.solver = para.config.parameter.solver;
+		          this.mpc.blockSize = para.config.parameter.blockSize;
 	          }else if(n == 0){
 	              for(let i in para.config.parameter.features){
 		              if(this.column.indexOf(para.config.parameter.features[i]) != -1){
