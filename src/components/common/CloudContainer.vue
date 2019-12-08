@@ -61,7 +61,6 @@
 import { rawDataPreview, currentDataPreview, getAlgriList } from '@/api/dataSource'
 import { getModel, saveModel, deleteModel } from '@/api/model'
 import { fullTableStatistics, frequencyStatistics, correlationCoefficient, scatterPlot } from '@/api/dataExploration'
-import { filter, fillNullValue, columnMap, columnSplit, columnsMerge, sort, replace } from '@/api/dataProcess'
 import { getProject, getDataSource, addProject, goRun, queryProject, queryResult, executeAll, executeFromOne, getDataResult } from '@/api/addProject'
 import { getReport, deleteReport, updateReport, saveReport } from '@/api/reportOp'
 import { Message } from 'element-ui'

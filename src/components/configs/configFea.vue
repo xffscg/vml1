@@ -129,7 +129,6 @@
 </template>
 
 <script>
-import { filter, fillNullValue, columnMap, columnSplit, columnsMerge, sort, replace } from '@/api/dataProcess'
 import { Message } from 'element-ui'
 export default {
   name: 'configFea',
