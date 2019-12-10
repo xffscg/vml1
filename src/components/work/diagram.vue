@@ -202,7 +202,7 @@ export default {
         // $("#" + currentNode).css("background","linear-gradient(to bottom, #34538b, #cd0000)");
         // $("#" + currentNode).css("background-origin","border-box");
       }else if(state == "initial"){
-        $("#" + currentNode).css("border","solid 1px #C0C4CC");
+        $("#" + currentNode).css("border","solid 1px #96D0F7");
       }
     },
     createCoverProject(id){
@@ -339,7 +339,7 @@ export default {
         d.style.position = "absolute";
         d.style.width = "130px";
         d.style.height = "25px";
-        d.style.border = "solid 1px #C0C4CC";
+        d.style.border = "solid 1px #96D0F7";
         d.style.backgroundColor = "#F2F6FC";
         d.style.textAlign = "center";
         d.style.borderRadius = "30px";   

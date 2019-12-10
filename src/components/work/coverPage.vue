@@ -41,7 +41,7 @@
 				},{
 					id : 37,
 					name : "逻辑回归多分类",
-					imgSrc : require("../../assets/img/randforest.png")
+					imgSrc : require("../../assets/img/logic.jpg")
 				}]
 			}
 		},
