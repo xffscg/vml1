@@ -1,11 +1,11 @@
 <template>
-	<div class="runLog" >
+	<div class="runLog">
 		<div class="title">
       <h3>日志</h3>
       <el-button type="primary" icon="el-icon-delete" @click="clearLogBoard"></el-button>
       <!-- <el-button type="primary" plain icon="el-icon-delete" @click="clearLogBoard"></el-button> -->
-    </div>
-    <div class="logContent" id="log"></div>
+    </div>      
+      <div id = "forRoll"><div class="logContent" id="log"></div></div>
 	</div>
 </template>
 
@@ -19,6 +19,7 @@ export default {
       log : {},
       successList : [],
       start : null,
+      lastHeight : 0,
   	}
   },
   mounted(){
@@ -71,6 +72,7 @@ export default {
     },
     clearSuccess(id){
       let index = this.successList.indexOf(id);
+
       if(this.successList.length == 1){
         this.successList = [];
       }else{   
@@ -107,6 +109,20 @@ export default {
       	    console.log(e);
         })
   	},
+    autoRoll(){
+      let roll = document.getElementById("forRoll");
+      let space = document.getElementById("log");
+      console.log(space);
+      console.log(roll.scrollTop);
+      console.log(space.scrollHeight);
+      if (roll.scrollTop >= space.scrollHeight) {
+       roll.scrollTop = 0;
+      } else {
+       roll.scrollTop += (space.scrollHeight - roll.scrollTop);
+      }
+        
+        
+    },
     setLog(){
       let config = this.$store.state.configData;
       console.log(config);
@@ -158,6 +174,7 @@ export default {
         }
       }
       space.append(content);
+      this.autoRoll();
 
     },
   }
@@ -167,9 +184,15 @@ export default {
 <style>
 .runLog {
 	width: 100%;
-	min-height: 250px; 
+	height: 350px;
+  overflow-x: hidden; 
   background-color: #F9F9F5;
   box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+}
+#forRoll {
+  height: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .logContent{
   width: 100%;

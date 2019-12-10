@@ -1,8 +1,9 @@
 <template>
-	<div class="detail">
+	<div class="tDetail">
+    <div class="title"><h3>{{title}}</h3></div>
 		<div class="content">
-			<el-table stripe :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)" style="width: 100%" height="600">
-        <el-table-column v-for="col in column" :fixed="col.fixed" :prop="col.prop" :label="col.prop" :key="col.prop">
+			<el-table stripe :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)">
+        <el-table-column v-for="col in column" :prop="col.prop" :label="col.prop" :key="col.prop">
         </el-table-column>
       </el-table>			
 		</div>
@@ -58,27 +59,34 @@ export default {
 </script>
 
 <style scoped>
-.detail {
-	width:100%;
-	height: 100%;
-	position: absolute;
-	background-color: white;
-	overflow-y: auto; 
+.tDetail {
+  width:100%;
+  height: 100%;
+  position: absolute;
+  background-color: white;
+  overflow-y: auto;
+  overflow-x: hidden;
 
 }
 .title {
-	text-align: center;
-	margin: 10px 0 5px 0;
-	height: 10%;
+  height: 30px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  background-color: white;
 }
 .content {
-	flex: 1;
+  height: 380px;
+  width: 100%;
+  overflow-y: auto;
 }
 .block {
-	height: 10%;
-	display: flex;
-	justify-content: flex-end;
-	margin-top: 30px;
+  height: 30px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
 }
 .close {
   display: flex;
@@ -86,4 +94,22 @@ export default {
   margin-top: 10px;
   margin-bottom: 20px;
 }
+/*.title {
+	text-align: center;
+	margin: 10px 0 5px 0;
+	height: 50px;
+}*/
+/*.block {
+	height: 50px;
+	display: flex;
+	justify-content: center;
+	margin-top: 30px;
+}*/
+/*.close {
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}*/
 </style>

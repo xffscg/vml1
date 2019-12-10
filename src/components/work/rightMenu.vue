@@ -129,18 +129,18 @@ export default {
 	/*border: solid 1px black;*/
 }
 .menuItem {
-	height: 35px;
+	height: 30px;
 	width: 100%;
 	border-bottom: solid 1px   #FFFFF0;
-	text-align: center;
-	line-height: 35px;
-	font-weight: bold;
-	background-color: #EEEEE4;
+	line-height: 30px;
+  font-size: 12px;
+	background-color: #F9F9F4;
+  padding-left: 5px;
 }
 .menuItem:last-child {
 	border-bottom: none;
 }
 .menuItem:hover{
-	background-color: #F9F9F4;
+	background-color: #EEEEE4;
 }
 </style>

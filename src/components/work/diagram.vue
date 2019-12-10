@@ -1,9 +1,12 @@
 <template>
 	<div id="diagram" @drop="drop($event)" @dragover.prevent="dragover($event)">
-   <RightMenu v-show="showMenu" style="z-index : 3;" @runFrom="runFrom"></RightMenu>
-   <div class="hover" v-show="showHover">
+     <transition name="el-fade-in-linear">
+       
+        <RightMenu v-show="showMenu" style="z-index : 3;" @runFrom="runFrom"></RightMenu>
+     </transition>
+   <!-- <div class="hover" v-show="showHover">
      <div class="hoverItem" v-for="item in hoverDetail">{{item}}</div>
-   </div> 
+   </div>  -->
   </div>
 </template>
 
@@ -43,7 +46,7 @@ export default {
           outlineStroke: 'lightblue'
         },
         connectorStyle: {
-          outlineStroke: 'gray',
+          outlineStroke: '#909399',
           strokeWidth: 1
         },
         connectorHoverStyle: {
@@ -66,7 +69,7 @@ export default {
           outlineStroke: 'lightblue'
         },
         connectorStyle: {
-          outlineStroke: 'gray',
+          outlineStroke: '#909399',
           strokeWidth: 1
         },
         connectorHoverStyle: {
@@ -78,7 +81,7 @@ export default {
         endpointStyle: { fill: '#EBF5FA', outlineStroke: 'darkblue', outlineWidth: 1, radius: 6},
         connector: 'Flowchart',
         connectorStyle: {
-          outlineStroke: 'gray',
+          outlineStroke: '#909399',
           strokeWidth: 1
         },
         connectorHoverStyle: {
@@ -207,8 +210,10 @@ export default {
         .then(res=>{
           console.log(res);
           let r = this.deepCopy(res);
+          let newId = {};
           this.setDiagram(r.config);
           for(let i in r.config){
+            let timestamp = new Date().getTime(); 
             this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
             this.$store.commit("changeConfig", {type : "addConfig", detail:{name : i, config : r.config[i].config}});
           }//配置数据
@@ -283,11 +288,11 @@ export default {
         console.log(this.dragContent.id)
         this.dragContent.style.position = "absolute";
         this.dragContent.style.width = "150px";
-        this.dragContent.style.height = "30px";
+        this.dragContent.style.height = "25px";
          this.dragContent.style.textAlign = "center";
-        this.dragContent.style.border = "solid 1px #C0C4CC";
+        this.dragContent.style.border = "solid 1px #96D0F7";
         this.dragContent.style.backgroundColor = "#F2F6FC";
-        this.dragContent.style.borderRadius = "2px";         
+        this.dragContent.style.borderRadius = "30px";         
         this.dragContent.style.left = e.offsetX+"px";
         this.dragContent.style.top = e.offsetY+"px"; 
         // this.dragContent.style.display = "flex";
@@ -333,12 +338,11 @@ export default {
         d.style.top = config[i].location.y;
         d.style.position = "absolute";
         d.style.width = "130px";
-        d.style.height = "30px";
+        d.style.height = "25px";
         d.style.border = "solid 1px #C0C4CC";
         d.style.backgroundColor = "#F2F6FC";
         d.style.textAlign = "center";
-        // d.style.display = "flex";
-        d.style.borderRadius = "2px";   
+        d.style.borderRadius = "30px";   
         let s = document.createElement("span");
         s.innerHTML = config[i].type;
         this.$store.commit("changeLoc", {name : i, x : config[i].location.x, y : config[i].location.y});

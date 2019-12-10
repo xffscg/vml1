@@ -1,5 +1,6 @@
 <template>
 	<div class="tcDetail">
+    <div class="title"><h3>频率统计</h3></div>
     <div class="ttable">
       <h3>频率表格统计</h3>
         <el-table stripe border :data="tableData">
@@ -80,6 +81,14 @@ export default {
 	background-color: white;
   overflow-y: auto;
 
+}
+.title {
+  height: 30px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  background-color: white;
 }
 .ttable {
   min-height: 300px;

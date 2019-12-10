@@ -1,20 +1,20 @@
 <template>
 	<div class="alg">
-	    <el-menu background-color="#F9F9F5" text-color="#000" active-text-color router>
-	        <template v-for="(item,i) in algArr">
-	          <el-submenu :index="i.toString()" :key="i">
-	            <template slot="title">
-	              <!-- <i :class="item.icon"></i> -->
-	              <span slot="title">{{ item.name }}</span>
-	            </template>
-	            <template v-for="subItem in item.list">
-	            	<div class="dragItem" :id="changeId(subItem.id)" :key="subItem.id" draggable="true" @dragstart="drag($event)">
-		                <span>{{subItem.name}}</span>
-		            </div>
-	            </template>
-	          </el-submenu>
-	        </template>
-	    </el-menu>
+				    <el-menu background-color="#F9F9F5" text-color="#000" active-text-color router>
+			        <template v-for="(item,i) in algArr">
+			          <el-submenu :index="i.toString()" :key="i">
+			            <template slot="title">
+			              <!-- <i :class="item.icon"></i> -->
+			              <span slot="title">{{ item.name }}</span>
+			            </template>
+			            <template v-for="subItem in item.list">
+			            	<div class="dragItem" :id="changeId(subItem.id)" :key="subItem.id" draggable="true" @dragstart="drag($event)">
+				                <span>{{subItem.name}}</span>
+				            </div>
+			            </template>
+			          </el-submenu>
+			        </template>
+		    </el-menu>
 	</div>
 </template>
 

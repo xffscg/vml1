@@ -284,7 +284,7 @@ export default {
 	          for (var key in res.data[0]) {
 	            this.tableData.column.push({ prop: key })
 	          }
-	          this.tableData.column[0].fixed = 'left';
+	          this.tableData.title = "数据详情";
 	          console.log(this.tableData.column);
 	        })
 	        .catch(e => {
@@ -316,13 +316,30 @@ export default {
 			getDataResult({userId : this.$store.state.userId, projectId : this.$store.state.projectId, operatorId : this.menuType.type, start : 0, end : 50})
 			.then(res=>res.data).then(res=>{
 				console.log(res);
-				this.tableData.data = res[n].data;
-				this.tableData.length = res[n].length;
-				for(let item in res[n].data[0]){
-					console.log(item);
-					this.tableData.column.push({prop : item});
+				if(this.menuType.type.slice(4,7) == "eva"){
+					this.tableData.column.push({prop : "评估指标"});
+					this.tableData.column.push({prop : "评估结果"});
+					for(let i in res[n].data){
+						let obj = {};
+						obj["评估指标"] = res[n].data[i]["指标"];
+						obj["评估结果"] = res[n].data[i]["值"];
+						this.tableData.data.push(obj);
+					}
+					this.tableData.title = "评估结果";
+
+					this.tableData.length = res[n].length;
+				}else{
+					this.tableData.data = res[n].data;
+					for(let item in res[n].data[0]){
+						console.log(item);
+						this.tableData.column.push({prop : item});
+					}
+
+					this.tableData.title = "当前节点结果";
+					this.tableData.length = res[n].length;
 				}
-				this.$store.commit("changeResult", {type : "add",name : this.menuType.type, config: this.tableData})
+				console.log(this.tableData);
+
 			})
 			.catch(e=>{
 				Message.error("请求结果错误")
