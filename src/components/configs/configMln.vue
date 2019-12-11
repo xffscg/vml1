@@ -10,6 +10,7 @@
 		          </el-checkbox-group>
 			</div>
 			<div class="select">
+				<label>标签字段</label>
 				<el-select v-model="predict.label">
 					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
 				</el-select>
@@ -25,6 +26,7 @@
 		          </el-checkbox-group>
 			</div>
 			<div class="select">
+				<label>标签字段</label>
 				<el-select v-model="svm.label">
 					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
 				</el-select>
@@ -60,6 +62,7 @@
 		          </el-checkbox-group>
 			</div>
 			<div class="select">
+				<label>标签字段</label>
 				<el-select v-model="gbdt.label">
 					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
 				</el-select>
@@ -209,37 +212,10 @@
 		</div>
 		<div class="mlnFunc" v-show="mlnType==9">
 			<h5>评估</h5>
-			<div class="selectHigh">
-				<h5>列名</h5>			
-			     <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
-		          <el-checkbox-group v-model="columnsValue" @change="handleCheckedOptionsChange">
-		              <el-checkbox v-for="(value,i) in columnsOption" :label="value" :key="i">{{value}}</el-checkbox>
-		          </el-checkbox-group>
-			</div>
 			<div class="select">
-				<el-select v-model="svm.label">
+				<el-select v-model="evaLabel">
 					<el-option v-for="(value, i) in column" :label="value" :key="i" :value="value"></el-option>
 				</el-select>
-			</div>
-			<div class="select">
-				<label>迭代次数</label>
-				<el-input v-model="svm.iterations"></el-input>
-			</div>	
-			<div class="select">
-				<label>步长</label>
-				<el-input v-model="svm.step"></el-input>
-			</div>
-			<div class="select">
-				<label>正则化</label>
-				<el-input v-model="svm.regType"></el-input>
-			</div>		
-			<div class="select">
-				<label>正则化系数</label>
-				<el-input v-model="svm.regParam"></el-input>
-			</div>	
-			<div class="select">
-				<label>收敛系数</label>
-				<el-input v-model="svm.convergenceTol"></el-input>
 			</div>
 		</div>
 		<div class="save" @click="save"><el-button icon="el-icon-plus" style="width:90%" type="primary">保存</el-button></div>	
@@ -247,6 +223,7 @@
 </template>
 
 <script>
+import { Message } from 'element-ui'
 export default {
 	name : "configMln",
 	props : {
@@ -270,8 +247,9 @@ export default {
 				iterations : 0,
 				convergenceTol : 0.001,//收敛系数
 				regParam : 0,
-				regType : 0,
+				regType : "l2",
 			},//支持向量机
+			evaLabel : "",
 			logic : {
 				features : [],
 				label : "",
@@ -368,7 +346,7 @@ export default {
 		    para["fileUrl"] = fileUrl;
 		    para.parameter["userId"] = this.$store.state.userId;
 		    para.parameter["projectId"] = this.$store.state.projectId;
-		    if(this.mlnType == 1 || this.mlnType == 9){ 
+		    if(this.mlnType == 1){ 
 		    	this.svm.features = [];
 	  			for(let i in this.columnsValue){
 	  				this.svm.features.push(this.columnsValue[i]);
@@ -398,6 +376,11 @@ export default {
 	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
 	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
+	  		}else if(this.mlnType == 9){ 
+	  			para.parameter["label"] = this.evaLabel;
+	  			this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
+	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
+		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
 	  		}else if(this.mlnType == 4){ 
 		    	this.logicMul.features = [];
 	  			for(let i in this.columnsValue){
@@ -415,6 +398,7 @@ export default {
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
 	  		}else if(this.mlnType == 5){ 
 		    	this.mpc.features = [];
+		    	this.mpc.layers = [];
 	  			for(let i in this.columnsValue){
 	  				this.mpc.features.push(this.columnsValue[i]);
 	  			}
@@ -470,6 +454,7 @@ export default {
 	  			this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : this.column}});
 		  		this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
 	  		}
+	  		Message.success("配置保存成功")
 		},
 		setConfig(newV){
 	      this.configT = newV;
@@ -522,6 +507,7 @@ export default {
 				features : [],
 				label : ""
 			};
+			this.evaLabel = "";
 	        if(JSON.stringify(para.config) != "{}"){  
 	          if(n == 1){
 	              for(let i in para.config.parameter.features){
@@ -566,6 +552,10 @@ export default {
 		          this.logic.tol = para.config.parameter.tol;
 		          this.logic.fitIntercept = para.config.parameter.fitIntercept;
 		          this.logic.threshold = para.config.parameter.threshold;
+	          }else if(n == 9){
+	              if(this.column.indexOf(para.config.parameter.label) != -1){
+	                this.evaLabel = para.config.parameter.label;
+	              }		       
 	          }else if(n == 4){
 	          	for(let i in para.config.parameter.features){
 		              if(this.column.indexOf(para.config.parameter.features[i]) != -1){

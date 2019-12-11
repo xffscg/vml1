@@ -33,7 +33,7 @@ export default {
   		endConfig : {
         isSource: false,
         isTarget: true,
-        connector: 'Flowchart',
+        connector: [ "Bezier", { curviness: 30 } ],
         endpoint: 'Blank',
         maxConnections: -1,
         paintStyle: {
@@ -56,7 +56,7 @@ export default {
       startConfig : {
         isSource: true,
         isTarget: false,
-        connector: 'Flowchart',
+        connector: [ "Bezier", { curviness: 30 } ],
         endpoint: 'Dot',
         maxConnections: -1,
         endpointStyle: { fill: '#EBF5FA', outlineStroke: 'darkblue', outlineWidth: 1, radius: 6},
@@ -79,7 +79,7 @@ export default {
       defaultConfig :{
         endpoint : "Dot",
         endpointStyle: { fill: '#EBF5FA', outlineStroke: 'darkblue', outlineWidth: 1, radius: 6},
-        connector: 'Flowchart',
+        connector: [ "Bezier", { curviness: 30 } ],
         connectorStyle: {
           outlineStroke: '#909399',
           strokeWidth: 1
@@ -211,24 +211,52 @@ export default {
           console.log(res);
           let r = this.deepCopy(res);
           let newId = {};
-          this.setDiagram(r.config);
+
+          let timestamp = new Date().getTime(); 
           for(let i in r.config){
-            let timestamp = new Date().getTime(); 
-            this.$store.commit("changeConfig", {type : "addNode", detail:{name : i, type : r.config[i].type, nameAll : r.config[i].name}});
-            this.$store.commit("changeConfig", {type : "addConfig", detail:{name : i, config : r.config[i].config}});
+            timestamp = timestamp + 1;
+            console.log(timestamp);
+            newId[i] = i.slice(0,-13) + timestamp;
+            this.$store.commit("changeConfig", {type : "addNode", detail:{name : newId[i], type : r.config[i].type, nameAll : r.config[i].name}});
+          }//配置数据
+          console.log(newId);
+          for(let i in r.config){
+            let newconfig = this.deepCopy(r.config[i].config);
+            newconfig.fileUrl = [];
+            for(let j in r.config[i].config.fileUrl){
+              for(let item in r.config[i].config.fileUrl[j]){
+                let obj = {};
+                obj[newId[item]] = r.config[i].config.fileUrl[j][item];
+                newconfig.fileUrl.push(obj);
+              }
+            }
+            this.$store.commit("changeConfig", {type : "addConfig", detail:{name : newId[i], config : newconfig}});
           }//配置数据
           for(let i in r.startNode){
-            this.$store.commit("changeStart", {type:"add", detail:r.startNode[i]});
+            this.$store.commit("changeStart", {type:"add", detail:newId[r.startNode[i]]});
           }//节点名称数据
-          this.$store.commit("changeConfigOrder", {type:"copy", config:r.config_order});
+          let newOrder = {};
+          for(let item in r.config_order){
+            newOrder[newId[item]] = this.deepCopy(r.config_order[item]);
+          }
+          this.$store.commit("changeConfigOrder", {type:"copy", config:newOrder});
+          
+          this.setDiagramCover(r.config, newId);
           // this.$store.commit("changeRelation", r.relationship);
           for(let i in r.relationship){
             let item = r.relationship[i];
+            let from = newId[item[0].slice(5)];
+            console.log(from);
+
+            let fromUU = item[0].slice(0,5) + from;
+            let to = newId[item[1].slice(2)];
+            console.log(to);
+            let toUU = "to"+to; 
             // if(item[0])
             this.plumb.connect({
-              source : item[0].slice(5),
-              target : item[1].slice(2),
-              uuids : [item[0], item[1]],
+              source : from,
+              target : to,
+              uuids : [fromUU, toUU],
             },this.defaultConfig);
           }//连接线
           // this.$store.commit("changeRelation", r.relationship);
@@ -355,7 +383,34 @@ export default {
         this.addElement(d);
         this.addJsPlumb(d);
       }
-    },    
+    }, 
+    setDiagramCover(config, newId){
+      let space = document.getElementById("diagram");
+      for(let i in config){
+        let d = document.createElement("div");
+        d.id = newId[i];
+        d.style.left = config[i].location.x;
+        d.style.top = config[i].location.y;
+        d.style.position = "absolute";
+        d.style.width = "130px";
+        d.style.height = "25px";
+        d.style.border = "solid 1px #96D0F7";
+        d.style.backgroundColor = "#F2F6FC";
+        d.style.textAlign = "center";
+        d.style.borderRadius = "30px";   
+        let s = document.createElement("span");
+        s.innerHTML = config[i].type;
+        this.$store.commit("changeLoc", {name : newId[i], x : config[i].location.x, y : config[i].location.y});
+        // let icon = document.createElement("i");
+        // icon.setAttribute("class", "el-icon-circle-check");
+        // icon.style.flo
+        // s.append(icon);
+        d.append(s);
+        space.append(d);
+        this.addElement(d);
+        this.addJsPlumb(d);
+      }
+    },   
     getColumns(name, id, url){
       getColumnNames({ params: { userId: 1, fileId : id, fileUrl : url } })
       .then(res => res.data)

@@ -45,7 +45,13 @@ export default {
 			.then(res=>{
 				console.log(res);
 				this.$store.commit("changeProId", res[res.length-1].id);
-				this.$store.commit('getPro', res);
+				let newPro = [];
+		          for(let i in res){
+		            if(res[i].id != 41 && res[i].id != 40 && res[i].id != 39 && res[i].id != 37){
+		              newPro.push(res[i]);
+		            }
+		          }
+		          this.$store.commit('getPro', newPro);
 				this.newProVisible = false;
 			})
 			.catch(e=>{

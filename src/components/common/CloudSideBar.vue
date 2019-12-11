@@ -60,7 +60,13 @@ export default {
       getProject().then(res => res.data)
         .then(res => {
           console.log(res);
-          this.$store.commit('getPro', res);
+          let newPro = [];
+          for(let i in res){
+            if(res[i].id != 41 && res[i].id != 40 && res[i].id != 39 && res[i].id != 37){
+              newPro.push(res[i]);
+            }
+          }
+          this.$store.commit('getPro', newPro);
         })
         .catch(e => {
           Message.error(e.errors || '接口错误，请重试')

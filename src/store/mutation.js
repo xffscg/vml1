@@ -111,17 +111,14 @@ export const changeLoc = (state, result) => {
     if(state.location[result.name]){
       delete state.location[result.name];
     }
-    console.log(result);
     state.location[result.name] = {x : result.x, y : result.y};
   }
-  console.log(state.location);
 }
 export const changeRun = (state, result) => {
   state.runList = {};
   state.runList = deepCopy(result);
 }
 export const changeConfigOrder = (state, node) => {
-  console.log(node);
   // if()
   if(node.type == "addColumn"){
     if(!state.configOrder[node["config"]["name"]]){
@@ -144,7 +141,6 @@ export const changeConfigOrder = (state, node) => {
   }else if(node.type == "copy"){
     state.configOrder = deepCopy(node.config);
   }
-  console.log(state.configOrder);
 }
 export const changeReportContent = (state, node)=>{
   if(node.type == "add"){

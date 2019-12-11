@@ -2,6 +2,7 @@
 	<div class="configPart">
 		<div v-show="configType == 1" style="padding-top:15px;">
 			<h3>请选择字段</h3>
+      <p id="tips"></p>
 			<div class="choose">
 			     <el-checkbox v-show="showAll" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
           <el-checkbox-group v-model="expValue" @change="handleCheckedOptionsChange" :min="min" :max="max">
@@ -173,18 +174,23 @@ export default {
         if(id.slice(7,8) == 2){
           this.max = 1;
           this.showAll = false;
+          $('#tips').text("只能选择两个字段");
         }else{
           this.showAll = true;
+          $('#tips').text("")
           this.max = this.dataColumns.length;
         }
         this.expOption = this.dataColumns;
       }else if((id.slice(7,8) == 3 || id.slice(7,8) == 4) && id.slice(4,7) == "exp"){
         if(id.slice(7,8) == 4){
           this.max = 2;
+          $('#tips').text("只能选择两个字段");
           // this.min = 2;
           this.showAll = false;
         }else{
+          $('#tips').text("")
           this.max = this.dataColumnsNumber.length;
+
         }
         this.expOption = this.dataColumnsNumber;
       }

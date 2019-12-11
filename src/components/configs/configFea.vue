@@ -355,9 +355,10 @@ export default {
             }
           	this.$store.commit("changeConfig", {type :"addConfig", detail:{name : this.configT, config : para}});
             let orderPara = this.column.concat([this.indexer.newColumnName]);
+            let orderParaNumber = this.columnNumberType.concat([this.indexer.newColumnName]);
             this.$store.commit("changeConfigOrder", {type :"addColumn", config:{name : this.configT, column : orderPara}});
-            this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : this.columnNumberType}});
-            this.nextVaild(this.$store.state.runList[this.configT].next,orderPara, this.columnNumberType);
+            this.$store.commit("changeConfigOrder", {type :"addColumnN", config:{name : this.configT, columnNumber : orderParaNumber}});
+            this.nextVaild(this.$store.state.runList[this.configT].next,orderPara, orderParaNumber);
           }
 	    }else if(this.feaType == 6){
         if(this.oneHot.columnName != "" && this.oneHot.newColumnName != ""){

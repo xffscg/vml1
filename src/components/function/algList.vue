@@ -69,6 +69,7 @@ export default {
 .alg {
 	width: 100%;
 	height: 100%;
+	overflow-y: auto;
 	background-color: #F9F9F5;
 }
 .dragItem {
